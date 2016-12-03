@@ -8,7 +8,7 @@ import (
 //which be used to control asset or indicate the smart contract address
 type Address common.Uint160
 
-//Contract is the prgram script with parameters which can be executed on specific evnrioment
+//Contract include the program codes with parameters which can be executed on specific evnrioment
 type Contract struct {
 
 	//the contract program code,which will be run on VM or specific envrionment
