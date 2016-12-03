@@ -10,7 +10,7 @@ type Signer interface {
 	//get signer's private key
 	PrivKey() []byte
 
-	//get signer's public key
+	//get signer's public key.
 	PubKey() common.ECPoint
 
 }
