@@ -4,7 +4,7 @@ import (
 	"GoOnchain/common"
 )
 
-//Contract address is the hash of contract program.
+//Contract address is the hash of contract program .
 //which be used to control asset or indicate the smart contract address 。:
 
 type Address common.Uint160

@@ -1,6 +1,6 @@
 package contract
 
-//parameter defined type .
+//parameter defined type.
 type ContractParameterType byte
 
 const (
