@@ -4,7 +4,7 @@ import (
 	"GoOnchain/common"
 )
 
-//SignableData describe the data need be signed
+//SignableData describe the data need be signed.
 type SignableData interface {
 
 	//Get the the SignableData's program hashes

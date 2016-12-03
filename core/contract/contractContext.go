@@ -6,7 +6,7 @@ import (
 )
 
 type ContractContext struct {
-	//TODO: define ContractContext
+	//TODO: define ContractContext。
 	Data sig.SignableData
 	ProgramHashes []common.Uint160
 	Programs [][]byte
