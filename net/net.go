@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 	"os"
+	"bytes"
 	"GoOnchain/common"
 	"GoOnchain/config"
 )
@@ -13,8 +14,8 @@ const (
 	MAXHELLORETYR	 = 3
 	MAXBUFLEN	 = 1024
 	MAXCHANBUF	 = 512
-	OFFICIALNETMAGIC = 0x00746e41
-	TESTINGNETMAGIC  = 0x74746e41
+	NETMAGIC	 = 0x74746e41 // Keep the same as antshares only for testing
+	PROTOCOLVERSION  = 0
 
 	NODETESTPORT	= 20333	// TODO get from config file
 )
@@ -96,7 +97,7 @@ func handleModuleMsg() {
  * |-----------------------------------------------------------------------|
  * | verack   |                 | ESTABLISH |            |                 |
  * |          |   No Action     |           | No Action  | No Action       |
- * |-----------------------------------------------------------------------
+ * |------------------------------------------------------------------------
  *
  * The node state switch table after TX message, there is time limitation for each action
  *  ____________________________________________________________
@@ -115,15 +116,16 @@ func rxVersion(node *node, msg *Msg) {
 	s := node.getState()
 	if (s == HANDSHAKEING) {
 		node.setState(HANDSHAKED)
-		m := newVerackMsg()
-		go node.tx(m)
+		buf := newVerackBuf()
+		go node.tx(buf)
 	} else if (s != ESTABLISH) {
 		node.setHandshakeTime(t)
 		node.setState(HANDSHAKEING)
-		m := newVersionMsg()
-		go node.tx(m)
+		buf, _ := newVersionBuf()
+		go node.tx(buf)
 	}
 
+	log.Printf("Node %s state is %d", node.getID(), s)
 	node.updateTime(t)
 }
 
@@ -139,8 +141,8 @@ func rxVerack(node *node, msg *Msg) {
 	if (tDelta.Seconds() < HELLOTIMEOUT) {
 		if (s == HANDSHAKEING) {
 			node.setState(ESTABLISH)
-			msg := newVerackMsg()
-			go node.tx(msg)
+			buf := newVerackBuf()
+			go node.tx(buf)
 		} else if (s == HANDSHAKED) {
 			node.setState(ESTABLISH)
 		}
@@ -244,10 +246,12 @@ func rxReject(node *node, msg *Msg) {
 
 func handleNodeMsg(node *node, msg *Msg) {
 	// TODO Init parse and check
-	handle, ok := funcMap.handles[string(msg.cmd[:MSGCMDLEN])]
+	var cmd []byte = msg.CMD[:]
+	n := bytes.IndexByte(cmd, 0)
+	handle, ok := funcMap.handles[string(cmd[:n])]
 
 	if ok == false {
-		log.Printf("Unknow node message recevied %s", msg.cmd)
+		log.Printf("Unknow node message recevied %s", msg.CMD)
 		return
 	}
 	handle(node, msg)
@@ -256,8 +260,8 @@ func handleNodeMsg(node *node, msg *Msg) {
 // Trigger handshake
 func handshake(node *node) error {
 	node.setHandshakeTime(time.Now())
-	msg := newVersionMsg()
-	go node.tx(msg)
+	buf, _ := newVersionBuf()
+	go node.tx(buf)
 
 	timer := time.NewTimer(time.Second * HELLOTIMEOUT)
 	go func() {
@@ -282,8 +286,8 @@ func txBlockHeadersReq(node *node) {
 		return
 	}
 
-	msg := newHeadersReqMsg()
-	go node.tx(msg)
+	buf := newHeadersReqBuf()
+	go node.tx(buf)
 }
 
 func txInventory(node *node) {

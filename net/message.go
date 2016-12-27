@@ -4,7 +4,12 @@ import (
 	"log"
 	"bytes"
 	"errors"
+	"time"
+	"unsafe"
+	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
+	"GoOnchain/common"
 )
 
 const (
@@ -13,11 +18,11 @@ const (
 
 // The network and module communication message buffer
 type Msg struct {
-	magic	 uint32
-	cmd	 [MSGCMDLEN]byte 	// the message command (message type)
-	length   uint32
-	checksum uint32
-	payloader interface{}
+	Magic	 uint32
+	CMD	 [MSGCMDLEN]byte 	// the message command (message type)
+	Length   uint32
+	Checksum uint32
+	//payloader interface{}
 }
 
 type varStr struct {
@@ -35,8 +40,11 @@ type version struct {
 	timeStamp	uint32
 	port		uint16
 	nonce		uint32
-	userAgent	varStr
+	// TODO remove tempory to get serilization function passed
+	userAgent	uint8
 	startHeight	uint32
+	// FIXME check with the specify relay type length
+	relay		uint8
 }
 
 type headersReq struct {
@@ -63,28 +71,153 @@ func newMsg(p interface{}) (*Msg, error) {
 		return nil, errors.New("Unknown message type")
 	}
 
-	msg.payloader = p
+	//msg.payloader = p
 	return msg, nil
 }
 
-func newVersionMsg() *Msg {
-	var ver version
+func newVersionMsg() (*Msg, error) {
+	var v version
+
+	// TODO Need Node read lock or channel
+	v.version = nodes.node.version
+	v.services = nodes.node.services
+	v.timeStamp = uint32(time.Now().UTC().UnixNano())
+	v.port = nodes.node.port
+	v.nonce = nodes.node.nonce
+	//v.userAgent =
+	// Fixme Get the block height from ledger
+	v.startHeight = 0
+	if nodes.node.relay {
+		v.relay = 1
+	} else {
+		v.relay = 0
+	}
+
 	msg := new(Msg)
-	msg.payloader = &ver
-	return msg
+	msg.Magic = NETMAGIC
+	ver := "version"
+	copy(msg.CMD[0:7], ver)
+	msg.Length = uint32(unsafe.Sizeof(v))
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.LittleEndian, &v)
+	if err != nil {
+		log.Println("Binary Write failed at new Msg")
+		return nil, err
+	}
+
+	//msg.Checksum = rc32.ChecksumIEEE(buf.Bytes())
+	//msg.payloader = &ver
+
+	s := sha256.Sum256(buf.Bytes())
+	buf = bytes.NewBuffer(s[:4])
+	binary.Read(buf, binary.LittleEndian, &(msg.Checksum))
+
+	return msg, nil
+}
+
+func newVersionBuf() ([]byte, error) {
+	common.Trace()
+	var v version
+
+	// TODO Need Node read lock or channel
+	v.version = nodes.node.version
+	v.services = nodes.node.services
+	v.timeStamp = uint32(time.Now().UTC().UnixNano())
+	v.port = nodes.node.port
+	v.nonce = nodes.node.nonce
+	log.Printf("The nonce is 0x%x", v.nonce)
+	v.userAgent = 0x00
+	// Fixme Get the block height from ledger
+	v.startHeight = 1
+	if nodes.node.relay {
+		v.relay = 1
+	} else {
+		v.relay = 0
+	}
+
+	msg := new(Msg)
+	msg.Magic = NETMAGIC
+	ver := "version"
+	copy(msg.CMD[0:7], ver)
+	p := new(bytes.Buffer)
+	err := binary.Write(p, binary.LittleEndian, &v)
+	if err != nil {
+		log.Println("Binary Write failed at new Msg")
+		return nil, err
+	}
+	s := sha256.Sum256(p.Bytes())
+	s2 := s[:]
+	s = sha256.Sum256(s2)
+	buf := bytes.NewBuffer(s[:4])
+	binary.Read(buf, binary.LittleEndian, &(msg.Checksum))
+	msg.Length = uint32(len(p.Bytes()))
+	log.Printf("The message payload length is %d", msg.Length)
+	log.Printf("The message header len is %d", uint32(unsafe.Sizeof(*msg)))
+
+	m, err := msg.serialization()
+	if (err != nil) {
+		log.Println("Error Convert net message ", err.Error())
+		return nil, err
+	}
+
+	m = append(m, p.Bytes()...)
+
+	str := hex.EncodeToString(m)
+	log.Printf("The message length is %d, %s", len(m), str)
+	return m, nil
+}
+
+func newVerackBuf() []byte {
+	//var verACK verACK
+	msg := new(Msg)
+
+	msg.Magic = NETMAGIC
+	v := "verack"
+	copy(msg.CMD[0:6], v)
+	msg.Length = 0
+	msg.Checksum = 0
+	//msg.payloader = &verACK
+
+	buf, err := msg.serialization()
+	if (err != nil) {
+		log.Println("Error Convert net message ", err.Error())
+		return nil
+	}
+
+	return buf
+}
+
+func newHeadersReqBuf() []byte {
+	//var headersReq headersReq
+	msg := new(Msg)
+	//msg.payloader = &headersReq
+
+	buf, err := msg.serialization()
+	if (err != nil) {
+		log.Println("Error Convert net message ", err.Error())
+		return nil
+	}
+
+	return buf
 }
 
 func newVerackMsg() *Msg {
-	var verACK verACK
+	//var verACK verACK
 	msg := new(Msg)
-	msg.payloader = &verACK
+
+	msg.Magic = NETMAGIC
+	v := "verack"
+	copy(msg.CMD[0:6], v)
+	msg.Length = 0
+	msg.Checksum = 0
+	//msg.payloader = &verACK
 	return msg
 }
 
 func newHeadersReqMsg() *Msg {
-	var headersReq headersReq
+	//var headersReq headersReq
 	msg := new(Msg)
-	msg.payloader = &headersReq
+	//msg.payloader = &headersReq
 	return msg
 }
 
@@ -95,11 +228,7 @@ func (msg Msg) serialization() ([]byte, error) {
 }
 
 func (msg *Msg) deserialization(p []byte) error {
-	var buf bytes.Buffer
-	_, err := buf.Read(p)
-	if (err != nil) {
-		return err
-	}
-	err = binary.Read(&buf, binary.LittleEndian, msg)
+	buf := bytes.NewBuffer(p)
+	err := binary.Read(buf, binary.LittleEndian, msg)
 	return err
 }

@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 	"runtime"
+	"unsafe"
+	"math/rand"
 	"sync/atomic"
 	"GoOnchain/common"
 )
@@ -24,6 +26,7 @@ const (
 const (
 	RELAY  = 0x01
 	SERVER = 0x02
+	NODESERVICES = 0x01
 )
 
 type node struct {
@@ -31,7 +34,12 @@ type node struct {
 	id		string		// The nodes's id, MAC or IP?
 	addr		string 		// The address of the node
 	conn		net.Conn	// Connect socket with the peer node
+	nonce		uint32		// Random number to identify different entity from the same IP
 	cap		uint32  	// The node capability set
+	version		uint32		// The network protocol the node used
+	services	uint64		// The services the node supplied
+	port		uint16		// The server port of the node
+	relay		bool		// The relay capability of the node (merge into capbility flag)
 	handshakeRetry  uint32		// Handshake retry times
 	handshakeTime	time.Time	// Last Handshake trigger time
 	height		uint64		// The node latest block height
@@ -55,6 +63,7 @@ func newNode() (*node) {
 		chF: make(chan func()),
 	}
 
+	// Update nonce
 	runtime.SetFinalizer(&node, rmNode)
 	go node.backend()
 	return &node
@@ -116,7 +125,8 @@ func (node *node) rx() {
 		}
 
 		msg := new(Msg)
-		err = msg.deserialization(buf)
+		log.Printf("Message len %d", unsafe.Sizeof(*msg))
+		err = msg.deserialization(buf[0:len])
 		if err != nil {
 			log.Println("Deserilization buf to message failure")
 			return
@@ -178,14 +188,10 @@ func (node *node) connect(nodeAddr string)  {
 	}
 }
 
-func (node node) tx(msg *Msg) {
+func (node node) tx(buf []byte) {
 	node.chF <- func() {
-		buf, err := msg.serialization()
-		if (err != nil) {
-			log.Println("Error Convert net message ", err.Error())
-			return
-		}
-		_, err = node.conn.Write(buf)
+		common.Trace()
+		_, err := node.conn.Write(buf)
 		if err != nil {
 			log.Println("Error sending messge to peer node", err.Error())
 		}
@@ -193,12 +199,12 @@ func (node node) tx(msg *Msg) {
 	}
 }
 
-func (nodes *nodeMap) broadcast(msg *Msg) {
+func (nodes *nodeMap) broadcast(buf []byte) {
 	// TODO lock the map
 	// TODO Check whether the node existed or not
 	for _, node := range nodes.list {
 		if node.state == ESTABLISH {
-			go node.tx(msg)
+			go node.tx(buf)
 		}
 	}
 }
@@ -218,6 +224,16 @@ func (nodes *nodeMap) delNode(node *node) {
 }
 
 func InitNodes() {
-	nodes.node = newNode()
+	// TODO write lock
+	n := newNode()
+
+	n.version = PROTOCOLVERSION
+	n.services = NODESERVICES
+	n.port = NODETESTPORT
+	n.relay = true
+	rand.Seed(time.Now().UTC().UnixNano())
+	n.nonce = rand.Uint32()
+
+	nodes.node = n
 	nodes.list = make(map[string]*node)
 }
