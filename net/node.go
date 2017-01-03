@@ -149,12 +149,14 @@ func (node *node) rx() error {
 			//log.Println("Reading EOF of network conn")
 			break
 		default:
+			log.Printf("read error", err)
 			goto DISCONNECT
 		}
 	}
 
 DISCONNECT:
 	err := conn.Close()
+	node.setState(INACTIVITY)
 	log.Printf("Close connection", from)
 	return err
 }
@@ -201,6 +203,8 @@ func (node *node) connect(nodeAddr string)  {
 		node.conn = conn
 		node.id = conn.RemoteAddr().String()
 		node.addr = conn.RemoteAddr().String()
+		// FixMe Only for testing
+		node.height = 1000
 
 		log.Printf("Connect node %s connect with %s with %s",
 			conn.LocalAddr().String(), conn.RemoteAddr().String(),

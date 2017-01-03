@@ -13,7 +13,7 @@ import (
 const (
 	HELLOTIMEOUT	 = 3	// Seconds
 	MAXHELLORETYR	 = 3
-	MAXBUFLEN	 = 1024 // Fixme The maximum buffer to receive message
+	MAXBUFLEN	 = 1024 * 300 // Fixme The maximum buffer to receive message
 	MAXCHANBUF	 = 512
 	//NETMAGIC	 = 0x74746e41 // Keep the same as antshares only for testing
 	NETMAGIC	 = 0x414d5446 // Keep the same as antshares only for testing
@@ -316,13 +316,15 @@ func keepAlive(from *node, dst *node) {
 func periodUpdate() {
 	ticker := time.NewTicker(time.Second * PERIODUPDATETIME)
 	quit := make(chan struct{})
-	go func() {
+
+	for {
 		select {
 		case <- ticker.C:
+			common.Trace()
 			for _, node := range nodes.list {
 				h1 := node.getHeight()
 				h2 := nodes.node.getHeight()
-				if  h1 > h2 {
+				if (node.getState() == ESTABLISH) && (h1 > h2) {
 					buf, _ := newMsg("getheaders")
 					go node.tx(buf)
 				}
@@ -331,8 +333,7 @@ func periodUpdate() {
 			ticker.Stop()
 			return
 		}
-	} ()
-
+	}
 	// TODO when to close the timer
 	//close(quit)
 }
@@ -349,6 +350,8 @@ func StartProtocol() {
 	for _, nodeAddr := range seedNodes {
 		nodes.node.connect(nodeAddr)
 	}
+
+	log.Println("Run after go through seed nodes")
 	// TODO Housekeeping routine to keep node status update
 	periodUpdate()
 }

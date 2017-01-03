@@ -20,9 +20,8 @@ const (
 // The network and module communication message buffer
 type Msg struct {
 	Magic	 uint32
-	CMD	 [MSGCMDLEN]byte 	// the message command (message type)
+	CMD	 [MSGCMDLEN]byte 	// The message type
 	Length   uint32
-	//Checksum uint32
 	Checksum [CHECKSUMLEN]byte
 	//payloader interface{}
 }
@@ -196,7 +195,7 @@ func newHeadersReq() ([]byte, error) {
 	}
 
 	s := checkSum(p.Bytes())
-	m, err := newMsgHeader("headersReq", s, uint32(len(p.Bytes())))
+	m, err := newMsgHeader("getheaders", s, uint32(len(p.Bytes())))
 	m = append(m, p.Bytes()...)
 
 	str := hex.EncodeToString(m)
