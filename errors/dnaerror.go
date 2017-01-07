@@ -3,7 +3,6 @@ package errors
 type dnaError struct {
 	errmsg string
 	callstack *CallStack
-	stackLen int
 	root error
 	code ErrCode
 }
