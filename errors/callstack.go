@@ -6,14 +6,17 @@ import (
 	"runtime"
 )
 
+type CallStacker interface {
+	GetCallStack() *CallStack
+}
+
 type CallStack struct {
 	Stacks []uintptr
-	Len int
 }
 
 func GetCallStacks(err error) *CallStack {
-	if dnaerr, ok := err.(dnaError); ok {
-		return dnaerr.callstack
+	if err, ok := err.(CallStacker); ok {
+		return err.GetCallStack()
 	}
 	return nil
 }
@@ -25,11 +28,21 @@ func CallStacksString(call *CallStack) string  {
 		return fmt.Sprintf("No call stack available")
 	}
 
-	for i := 0; i < call.Len; i++ {
-		f := runtime.FuncForPC(call.Stacks[i])
-		file, line := f.FileLine(call.Stacks[i])
+	for _,stack := range call.Stacks{
+		f := runtime.FuncForPC(stack)
+		file, line := f.FileLine(stack)
 		buf.WriteString(fmt.Sprintf("%s:%d - %s\n", file, line, f.Name()))
 	}
 
 	return fmt.Sprintf("%s", buf.Bytes())
+}
+
+
+func getCallStack(skip int, depth int) (*CallStack){
+	stacks := make([]uintptr, depth)
+	stacklen := runtime.Callers(skip, stacks)
+
+	return &CallStack{
+		Stacks: stacks[:stacklen],
+	}
 }
