@@ -47,7 +47,7 @@ func WriteDataList(w io.Writer, list []SerializableData) error {
  *      first byte = 0xfd, read the next 2 bytes as uint16
  *      first byte = 0xfe, read the next 4 bytes as uint32
  *      first byte = 0xff, read the next 8 bytes as uint64
- *      other else,        this byte as uint8
+ *      other else,        read this byte as uint8
  * 3. WriteVarBytes func, this func will output two item as serialization.
  *      length of bytes (uint8/uint16/uint32/uint64)  +  bytes
  * 4. WriteVarString func, this func will output two item as serialization.
@@ -55,7 +55,7 @@ func WriteDataList(w io.Writer, list []SerializableData) error {
  * 5. ReadVarBytes func, this func will first read a uint to identity the 
  *    length of bytes, and use it to get the next bytes as a bytes.
  * 6. ReadVarString func, this func will first read a uint to identity the 
- *    length of string, and use it to get the next bytes as a bytes.
+ *    length of string, and use it to get the next bytes as a string.
  ******************************************************************************
  */
 func WriteVarUint(writer io.Writer, value uint64) error {
