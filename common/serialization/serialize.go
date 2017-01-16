@@ -8,10 +8,10 @@ import (
 	"math"
 )
 
-//SerializableData describe the data need be serialized.
 var ErrRange = errors.New("value out of range")
 var ErrEof = errors.New("got EOF, can not get the next byte")
 
+//SerializableData describe the data need be serialized.
 type SerializableData interface {
 
 	//Write data to writer
@@ -40,9 +40,9 @@ func WriteDataList(w io.Writer, list []SerializableData) error {
  *    serialize to bytes.
  *      uint8  =>  (LittleEndian)num in 1 byte                 = 1bytes
  *      uint16 =>  0xfd(1 byte) + (LittleEndian)num in 2 bytes = 3bytes
- *      uint32 =>  0xfe(1 byte) + (LittleEndian)num in 4 bytes = 5bytes      
- *      uint64 =>  0xff(1 byte) + (LittleEndian)num in 8 bytes = 9bytes    
- * 2. ReadVarUint  func, this func will read the first byte to determined 
+ *      uint32 =>  0xfe(1 byte) + (LittleEndian)num in 4 bytes = 5bytes
+ *      uint64 =>  0xff(1 byte) + (LittleEndian)num in 8 bytes = 9bytes
+ * 2. ReadVarUint  func, this func will read the first byte to determined
  *    the num length to read.and retrun the uint64
  *      first byte = 0xfd, read the next 2 bytes as uint16
  *      first byte = 0xfe, read the next 4 bytes as uint32
@@ -52,10 +52,12 @@ func WriteDataList(w io.Writer, list []SerializableData) error {
  *      length of bytes (uint8/uint16/uint32/uint64)  +  bytes
  * 4. WriteVarString func, this func will output two item as serialization.
  *      length of string(uint8/uint16/uint32/uint64)  +  bytes(string)
- * 5. ReadVarBytes func, this func will first read a uint to identity the 
+ * 5. ReadVarBytes func, this func will first read a uint to identify the
  *    length of bytes, and use it to get the next bytes as a bytes.
- * 6. ReadVarString func, this func will first read a uint to identity the 
+ * 6. ReadVarString func, this func will first read a uint to identify the
  *    length of string, and use it to get the next bytes as a string.
+ * 7. GetVarUintSize func, this func will return the length of a uint when it 
+ *    serialized by the WriteVarUint func.
  ******************************************************************************
  */
 func WriteVarUint(writer io.Writer, value uint64) error {
@@ -192,6 +194,18 @@ func ReadVarString(reader io.Reader) (string, error) {
 		return "", err
 	}
 	return string(val), nil
+}
+
+func GetVarUintSize(value uint64) int {
+	if value < 0xfd {
+		return binary.Size(uint8(0xff))
+	} else if value <= 0xffff {
+		return binary.Size(uint16(0xffff)) + binary.Size(uint8(0xff))
+	} else if value <= 0xFFFFFFFF {
+		return binary.Size(uint32(0xffffffff)) + binary.Size(uint8(0xff))
+	} else {
+		return binary.Size(uint64(0xffffffffffffffff)) + binary.Size(uint8(0xff))
+	}
 }
 
 //**************************************************************************
