@@ -12,22 +12,22 @@ type TxAttribute struct {
 	Size  uint32
 }
 
+//to initial a TxAttribute entity with Size calculation and set.
 func NewTxAttribute(u TransactionAttributeUsage, d []byte) TxAttribute {
 	tx := TxAttribute{u, d, 0}
-	tx.Size = uint32(tx.GetSize())
+	tx.Size = tx.GetSize()
 	return tx
 }
 
-func (u *TxAttribute) GetSize() uint64 {
-	//TODO: DescriptionUrl only,other TransactionAttributeUsage type need to be impelment
+//get the TxAttribute entity's size
+func (u *TxAttribute) GetSize() uint32 {
 	if u.Usage == DescriptionUrl {
-		return uint64(len([]byte{(byte(0xff))}) + len([]byte{(byte(0xff))}) + len(u.Date))
+		return uint32(len([]byte{(byte(0xff))}) + len([]byte{(byte(0xff))}) + len(u.Date))
 	}
 	return 0
 }
 
 func (tx *TxAttribute) Serialize(w io.Writer) {
-	//TODO: DescriptionUrl only,other TransactionAttributeUsage type need to be impelment
 	serialization.WriteVarBytes(w, []byte{byte(tx.Usage)})
 	if tx.Usage == DescriptionUrl {
 		serialization.WriteVarBytes(w, tx.Date)
@@ -35,7 +35,6 @@ func (tx *TxAttribute) Serialize(w io.Writer) {
 }
 
 func (tx *TxAttribute) Deserialize(r io.Reader) error {
-	//TODO: DescriptionUrl only,other TransactionAttributeUsage type need to be impelment
 	val, _ := serialization.ReadVarBytes(r)
 	tx.Usage = TransactionAttributeUsage(val[0])
 	if tx.Usage == DescriptionUrl {
