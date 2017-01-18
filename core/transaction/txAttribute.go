@@ -3,7 +3,6 @@ package transaction
 import (
 	"GoOnchain/common/serialization"
 	. "GoOnchain/errors"
-	"errors"
 	"io"
 )
 
@@ -32,12 +31,12 @@ func (u *TxAttribute) GetSize() uint32 {
 func (tx *TxAttribute) Serialize(w io.Writer) error {
 	err := serialization.WriteVarBytes(w, []byte{byte(tx.Usage)})
 	if err != nil {
-		return NewDetailErr(errors.New("txAttribute serialize Usage error."), ErrNoCode, "")
+		return NewDetailErr(err, ErrNoCode, "txAttribute serialize Usage error.")
 	}
 	if tx.Usage == DescriptionUrl {
 		err := serialization.WriteVarBytes(w, tx.Date)
 		if err != nil {
-			return NewDetailErr(errors.New("txAttribute serialize Date error."), ErrNoCode, "")
+			return NewDetailErr(err, ErrNoCode, "txAttribute serialize Date error.")
 		}
 	}
 	return nil
@@ -46,14 +45,14 @@ func (tx *TxAttribute) Serialize(w io.Writer) error {
 func (tx *TxAttribute) Deserialize(r io.Reader) error {
 	val, err := serialization.ReadVarBytes(r)
 	if err != nil {
-		return NewDetailErr(errors.New("txAttribute Deserialize Usage error."), ErrNoCode, "")
+		return NewDetailErr(err, ErrNoCode, "txAttribute Deserialize Usage error.")
 	}
 	tx.Usage = TransactionAttributeUsage(val[0])
 	if tx.Usage == DescriptionUrl {
 		tx.Date, err = serialization.ReadVarBytes(r)
-		return NewDetailErr(errors.New("txAttribute Deserialize Date error."), ErrNoCode, "")
+		return NewDetailErr(err, ErrNoCode, "txAttribute Deserialize Date error.")
 	} else {
-		return NewDetailErr(errors.New("txAttribute Deserialize format error."), ErrNoCode, "")
+		return NewDetailErr(err, ErrNoCode, "txAttribute Deserialize format error.")
 	}
 	return nil
 }
