@@ -1,14 +1,14 @@
-package net
+package node
 
 import (
-	"log"
+	"fmt"
 	"strconv"
 	"net"
 	"io"
 	"sync"
 	"time"
+	"errors"
 	"runtime"
-	"unsafe"
 	"math/rand"
 	"sync/atomic"
 	"GoOnchain/common"
@@ -47,6 +47,10 @@ type node struct {
 	time		time.Time	// The latest time the node activity
 	// TODO does this channel should be a buffer channel
 	chF		chan func()	// Channel used to operate the node without lock
+	rxBuf struct {			// The RX buffer of this node to solve mutliple packets problem
+		p   []byte
+		len int
+	}
 	private		*uint		// Reserver for future using
 }
 
@@ -71,7 +75,7 @@ func newNode() (*node) {
 }
 
 func rmNode(node *node) {
-	log.Printf("Remove node %s", node.addr)
+	fmt.Printf("Remove node %s\n", node.addr)
 }
 
 // TODO pass pointer to method only need modify it
@@ -123,33 +127,65 @@ func (node *node) updateTime(t time.Time) {
 	node.time = t
 }
 
+// Shrinking the buf to the exactly reading in byte length
+//@Return @1 the start header of next message, the left length of the next message
+func unpackNodeBuf(node *node, buf []byte) {
+	var msgLen int
+	var msgBuf []byte
+
+	if (node.rxBuf.p == nil) {
+		if (len(buf) < MSGHDRLEN) {
+			fmt.Println("Unexpected size of received message")
+			errors.New("Unexpected size of received message")
+			return
+		}
+		// FIXME Check the payload < 0 error case
+		fmt.Printf("The msg payload is %d\n", payloadLen(buf))
+		msgLen = payloadLen(buf) + MSGHDRLEN
+	} else {
+		msgLen = node.rxBuf.len
+	}
+
+	fmt.Printf("The msg length is %d, buf len is %d\n", msgLen, len(buf))
+	if len(buf) == msgLen {
+		msgBuf = append(node.rxBuf.p, buf[:]...)
+		go handleNodeMsg(node, msgBuf, len(msgBuf))
+		node.rxBuf.p = nil
+		node.rxBuf.len = 0
+	} else if len(buf) < msgLen {
+		node.rxBuf.p = append(node.rxBuf.p, buf[:]...)
+		node.rxBuf.len = msgLen - len(buf)
+	} else {
+		msgBuf = append(node.rxBuf.p, buf[0 : msgLen]...)
+		go handleNodeMsg(node, msgBuf, len(msgBuf))
+		node.rxBuf.p = nil
+		node.rxBuf.len = 0
+
+		unpackNodeBuf(node, buf[msgLen : ])
+	}
+
+	// TODO we need reset the node.rxBuf.p pointer and length if CheckSUM error happened?
+}
+
 func (node *node) rx() error {
 	conn := node.getConn()
 	from := conn.RemoteAddr().String()
-	// TODO using select instead of for loop
+
 	for {
 		buf := make([]byte, MAXBUFLEN)
 		len, err := conn.Read(buf[0:(MAXBUFLEN - 1)])
 		buf[MAXBUFLEN - 1] = 0 //Prevent overflow
-
+		fmt.Printf("Read message length is %d\n", len)
 		switch err {
 		case nil:
-			msg := new(Msg)
-			log.Printf("Message len %d", unsafe.Sizeof(*msg))
-			err = msg.deserialization(buf[0:len])
-			if err != nil {
-				log.Println("Deserilization buf to message failure")
-				return err
-			}
-
-			log.Printf("Received data: %v", string(buf[:len]))
-			go handleNodeMsg(node, msg)
+			unpackNodeBuf(node, buf[0 : len])
+			//go handleNodeMsg(node, buf, len)
 			break
 		case io.EOF:
-			//log.Println("Reading EOF of network conn")
+			//fmt.Println("Reading EOF of network conn")
 			break
 		default:
-			log.Printf("read error", err)
+			fmt.Printf("read error\n", err)
 			goto DISCONNECT
 		}
 	}
@@ -157,7 +193,7 @@ func (node *node) rx() error {
 DISCONNECT:
 	err := conn.Close()
 	node.setState(INACTIVITY)
-	log.Printf("Close connection", from)
+	fmt.Printf("Close connection\n", from)
 	return err
 }
 
@@ -165,21 +201,21 @@ DISCONNECT:
 func (node *node) initRx () {
 	listener, err := net.Listen("tcp", "localhost:" + strconv.Itoa(NODETESTPORT))
 	if err != nil {
-		log.Println("Error listening", err.Error())
+		fmt.Println("Error listening\n", err.Error())
 		return
 	}
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Println("Error accepting", err.Error())
+			fmt.Println("Error accepting\n", err.Error())
 			return
 		}
 		node := newNode()
 		// Currently we use the address as the ID
 		node.id = conn.RemoteAddr().String()
 		node.addr = conn.RemoteAddr().String()
-		log.Println("Remote node %s connect with %s",
+		fmt.Println("Remote node %s connect with %s\n",
 			conn.RemoteAddr(), conn.LocalAddr())
 		node.conn = conn
 		// TOOD close the conn when erro happened
@@ -195,7 +231,7 @@ func (node *node) connect(nodeAddr string)  {
 		common.Trace()
 		conn, err := net.Dial("tcp", nodeAddr)
 		if err != nil {
-			log.Println("Error dialing", err.Error())
+			fmt.Println("Error dialing\n", err.Error())
 			return
 		}
 
@@ -206,7 +242,7 @@ func (node *node) connect(nodeAddr string)  {
 		// FixMe Only for testing
 		node.height = 1000
 
-		log.Printf("Connect node %s connect with %s with %s",
+		fmt.Printf("Connect node %s connect with %s with %s\n",
 			conn.LocalAddr().String(), conn.RemoteAddr().String(),
 			conn.RemoteAddr().Network())
 		// TODO Need lock
@@ -215,12 +251,13 @@ func (node *node) connect(nodeAddr string)  {
 	}
 }
 
+// TODO construct a TX channel and other application just drop the message to the channel
 func (node node) tx(buf []byte) {
 	node.chF <- func() {
 		common.Trace()
 		_, err := node.conn.Write(buf)
 		if err != nil {
-			log.Println("Error sending messge to peer node", err.Error())
+			fmt.Println("Error sending messge to peer node\n", err.Error())
 		}
 		return
 	}
@@ -263,4 +300,9 @@ func InitNodes() {
 
 	nodes.node = n
 	nodes.list = make(map[string]*node)
+}
+
+func Relay(msgType string, msg interface{}) {
+	// TODO Unicast or broadcast the message based on the type
+	//node.tx()
 }
