@@ -22,9 +22,9 @@ const (
 
 // The Inventory type
 const (
-	TX	= 0x01
-	BLOCK	= 0x02
-	CONSENSUS = 0xe0
+	TXN		= 0x01	// Transaction
+	BLOCK		= 0x02
+	CONSENSUS	= 0xe0
 )
 
 type messager interface {
@@ -195,8 +195,8 @@ func (hdr *msgHdr) init(cmd string, checksum []byte, length uint32) {
 	copy(hdr.Checksum[:], checksum[:CHECKSUMLEN])
 	hdr.Length = length
 
-	fmt.Printf("The message payload length is %d", hdr.Length)
-	fmt.Printf("The message header length is %d", uint32(unsafe.Sizeof(*hdr)))
+	fmt.Printf("The message payload length is %d\n", hdr.Length)
+	fmt.Printf("The message header length is %d\n", uint32(unsafe.Sizeof(*hdr)))
 }
 
 
@@ -487,8 +487,6 @@ func (msg *blkHeader) deserialization(p []byte) error {
 
 	err := msg.hdr.deserialization(p)
 	msg.blkHdr = p[MSGHDRLEN : ]
-	//buf := bytes.NewBuffer(p)
-	//err := binary.Read(buf, binary.LittleEndian, msg)
 	return err
 }
 
@@ -519,6 +517,7 @@ func (msg inv) serialization() ([]byte, error) {
 
 	fmt.Printf("The size of messge is %d in serialization\n",
 		uint32(unsafe.Sizeof(msg)))
+
 	err := binary.Write(&buf, binary.LittleEndian, msg)
 	if err != nil {
 		return nil, err
@@ -531,8 +530,7 @@ func (msg *inv) deserialization(p []byte) error {
 	fmt.Printf("The size of messge is %d in deserialization\n",
 		uint32(unsafe.Sizeof(*msg)))
 
-	buf := bytes.NewBuffer(p[0 : MSGHDRLEN])
-	err := binary.Read(buf, binary.LittleEndian, msg.hdr)
+	err := msg.hdr.deserialization(p)
 
 	msg.p.invType = p[MSGHDRLEN]
 	msg.p.blk = p[MSGHDRLEN + 1 :]
