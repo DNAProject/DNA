@@ -1,4 +1,4 @@
-package node
+package message
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"GoOnchain/common"
+	"GoOnchain/node"
 )
 
 const (
@@ -98,12 +99,14 @@ type addr struct {
 	// TBD
 }
 
+type invPayload struct {
+	invType uint8
+	blk     []byte
+}
+
 type inv struct {
 	hdr msgHdr
-	p struct {
-		invType uint8
-		blk     []byte
-	}
+	p  invPayload
 }
 
 type dataReq struct {
@@ -116,7 +119,8 @@ type block struct {
 	// TBD
 }
 
-type transaction struct {
+// Transaction message
+type trn struct {
 	msgHdr
 	// TBD
 }
@@ -164,7 +168,7 @@ func allocMsg(t string, length int) (messager, error) {
 		var msg block
 		return &msg, nil
 	case "tx":
-		var msg transaction
+		var msg trn
 		return &msg, nil
 	default:
 		return nil, errors.New("Unknown message type")

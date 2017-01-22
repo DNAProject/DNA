@@ -9,7 +9,7 @@ import (
 	"GoOnchain/common"
 	"GoOnchain/config"
 	"GoOnchain/events"
-	TXN "GoOnchain/core/transaction"
+	"GoOnchain/core/transaction"
 )
 
 var cnt int = 0
@@ -29,9 +29,9 @@ const (
 
 type protocoler interface {
 	init()
-	GetMemoryPool() map[Uint256]*TXN.Transaction{}
+	GetMemoryPool() map[common.Uint256]*transaction.Transaction
 	SynchronizeMemoryPool()
-	Relay(inventory pl.Inventory) error
+	Relay(inv invPayload) error
 }
 
 type protocol struct {
@@ -213,7 +213,7 @@ func (msg inv) handle(node *node) error {
 		fmt.Printf("RX unknown inventory message\n")
 		// Warning:
 	}
-	notice_event_inventory
+	// notice event inventory
 	return nil
 }
 

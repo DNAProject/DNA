@@ -9,7 +9,7 @@ import (
 	"errors"
 	"io"
 	sig "GoOnchain/core/signature"
-	pl "GoOnchain/net/payload"
+	msg "GoOnchain/node/message"
 )
 
 //for different transaction types with different payload format
@@ -241,8 +241,8 @@ func  (tx *Transaction) Hash() Uint256{
 	return Uint256{}
 }
 
-func (tx *Transaction) InvertoryType() pl.InventoryType{
-	return pl.Transaction
+func (tx *Transaction) InvertoryType() msg.InventoryType{
+	return msg.Transaction
 }
 func (tx *Transaction) Verify() error{
 	//TODO: Verify()
