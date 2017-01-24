@@ -6,6 +6,11 @@ import (
 
 type Uint256 [32]uint8
 
+func NewUint256(value []byte) *Uint256{
+	//TODO: NewUint256
+	return nil
+}
+
 func (u *Uint256) Serialize(w io.Writer) {
 	//TODO: implement Uint256.serialize
 }
