@@ -9,7 +9,7 @@ import (
 	"errors"
 	"io"
 	sig "GoOnchain/core/signature"
-	msg "GoOnchain/node/message"
+	msg "GoOnchain/net/message"
 )
 
 //for different transaction types with different payload format
