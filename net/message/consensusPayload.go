@@ -1,4 +1,4 @@
-package payload
+package message
 
 import (
 	. "GoOnchain/common"
@@ -34,7 +34,6 @@ func (cp *ConsensusPayload) GetProgramHashes() ([]Uint160, error){
 }
 
 func (cp *ConsensusPayload) SetPrograms([]*program.Program){
-
 }
 
 func (cp *ConsensusPayload) GetPrograms()  []*program.Program{
