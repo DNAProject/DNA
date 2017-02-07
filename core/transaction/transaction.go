@@ -7,7 +7,6 @@ import (
 	sig "GoOnchain/core/signature"
 	"GoOnchain/core/transaction/payload"
 	. "GoOnchain/errors"
-	pl "GoOnchain/net/payload"
 	"crypto/sha256"
 	"errors"
 	"io"
