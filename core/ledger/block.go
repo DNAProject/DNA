@@ -7,7 +7,6 @@ import (
 	tx "GoOnchain/core/transaction"
 	"GoOnchain/crypto"
 	. "GoOnchain/errors"
-	msg "GoOnchain/net/message"
 	"io"
 )
 
@@ -91,15 +90,16 @@ func (b *Block) Verify() error {
 	return nil
 }
 
-func (b *Block) InvertoryType() msg.InventoryType {
-	return msg.BLOCK
+func (b *Block) InvertoryType() InventoryType{
+	return BLOCK
 }
 
 func (bc *Blockchain) GetBlock(height uint32) (*Block, error) {
-	temp := DefaultLedger.Store.GetBlockHash(height)
-	bk, err := DefaultLedger.Store.GetBlock(temp.ToArray())
-	if err != nil {
-		return nil, err
-	}
-	return bk, nil
+	//temp := DefaultLedger.Store.GetBlockHash(height)
+	// bk, err := DefaultLedger.Store.GetBlock(temp.ToArray())
+	// if err != nil {
+	// 	return nil, err
+	// }
+	return nil, nil
 }
+

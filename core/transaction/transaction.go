@@ -10,8 +10,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"io"
-	msg "GoOnchain/net/message"
-
 )
 
 //for different transaction types with different payload format
@@ -283,8 +281,8 @@ func (tx *Transaction) SetHash(hash Uint256) {
 	tx.hash = &hash
 }
 
-func (tx *Transaction) InvertoryType() msg.InventoryType{
-	return msg.Transaction
+func (tx *Transaction) InvertoryType() InventoryType{
+	return TRANSACTION
 }
 
 func (tx *Transaction) Verify() error {

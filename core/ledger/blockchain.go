@@ -63,7 +63,7 @@ func (bc *Blockchain) SaveBlock(block *Block) error {
 	if err != nil {
 		return err
 	}
-	bc.BCEvents.Notify(events.EventBlockPersistCompleted, block)
+	//bc.BCEvents.Notify(events.EventBlockPersistCompleted, block)
 
 	return nil
 }
