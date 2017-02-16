@@ -3,9 +3,10 @@ package crypto
 import (
 	"io"
 	"errors"
-	//"math/big"
+	"math/big"
 	"crypto/rand"
 	"crypto/ecdsa"
+	"fmt"
 )
 
 type PubKey ECPoint
@@ -19,10 +20,74 @@ func (e *PubKey) DeSerialize(r io.Reader) error {
 	return nil
 }
 
-func (ep *PubKey) EncodePoint(commpressed bool) []byte{
-	//TODO: EncodePoint
-	return nil
+
+func Reverse(data []byte) {
+
+	len1 := len(data)
+
+	for i := 0; i < len1/2; i++ {
+		Tmp := data[i]
+		data[i] = data[len1-1-i]
+		data[len1-1-i] = Tmp
+	}
 }
+
+func IsEven(k *big.Int) bool {
+	z := big.NewInt(0)
+	z.Mod(k, big.NewInt(2))
+	if z.Int64() == 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
+func (ep *PubKey) EncodePoint(commpressed bool) []byte {
+
+	if ep.X == nil && ep.Y == nil {
+		infinity := make([]byte, 1)
+		fmt.Println("IsInfinity")
+		return infinity
+	}
+
+	var data []byte
+
+	if commpressed {
+		data = make([]byte, 33)
+	} else {
+		data = make([]byte, 65)
+
+		yBytes := ep.Y.Bytes()
+		//ep.Y.value.Bytes()
+
+		tmp := make([]byte, len(yBytes))
+		copy(tmp, yBytes)
+		Reverse(tmp)
+
+		copy(data[65-len(yBytes):], tmp)
+	}
+
+	xBytes := ep.X.Bytes()
+
+	tmp := make([]byte, len(xBytes))
+	copy(tmp, xBytes)
+	Reverse(tmp)
+
+	copy(data[33-len(tmp):], tmp)
+
+	if !commpressed {
+		data[0] = 0x04
+	} else {
+		if IsEven(ep.Y) {
+			data[0] = 0x02
+		} else {
+			data[0] = 0x03
+		}
+	}
+
+	return data
+}
+
 
 func NewPubKey(prikey []byte) *PubKey{
        //TODO: NewPubKey
