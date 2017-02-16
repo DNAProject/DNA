@@ -283,7 +283,7 @@ func (tx *Transaction) SetHash(hash Uint256) {
 	tx.hash = &hash
 }
 
-func (tx *Transaction) InvertoryType() msg.InventoryType{
+func (tx *Transaction) Type() msg.InventoryType{
 	return msg.Transaction
 }
 
