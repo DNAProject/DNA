@@ -93,7 +93,7 @@ disconnect:
 }
 
 // Init the server port, should be run in another thread
-func (n *node) initRx() {
+func (n *node) initConnection() {
 	listener, err := net.Listen("tcp", "localhost:"+strconv.Itoa(NODETESTPORT))
 	if err != nil {
 		fmt.Println("Error listening\n", err.Error())
