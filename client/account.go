@@ -3,7 +3,8 @@ package client
 import (
 	"GoOnchain/crypto"
 	. "GoOnchain/common"
-	"errors"
+	. "GoOnchain/errors"
+	_ "errors"
 )
 
 type Account struct {
@@ -13,23 +14,27 @@ type Account struct {
 }
 
 func NewAccount(privateKey []byte) (*Account, error){
-	privKeyLen := len(privateKey)
-
-	if privKeyLen != 32 && privKeyLen != 96 && privKeyLen != 104 {
-		return nil,errors.New("Invalid private Key.")
-	}
-
-	priKey := make([]byte,32)
-	pubKey := &crypto.PubKey{}
+	//privKeyLen := len(privateKey)
+	//
+	//if privKeyLen != 32 && privKeyLen != 96 && privKeyLen != 104 {
+	//	return nil,errors.New("Invalid private Key.")
+	//}
+	//
+	//priKey := make([]byte,32)
+	//pubKey := &crypto.PubKey{}
 
 	//TODO: copy private Key
 
 	//TODO: set public key
-
+	priKey,pubKey,_ := crypto.GenKeyPair()
+	temp,err := pubKey.EncodePoint(true)
+	if err !=nil{
+		return nil,NewDetailErr(err, ErrNoCode, "[Contract],CreateSignatureContract failed.")
+	}
 	return &Account{
 		PrivateKey: priKey,
-		PublicKey: pubKey,
-		PublicKeyHash: ToCodeHash(pubKey.EncodePoint(true)),
+		PublicKey: &pubKey,
+		PublicKeyHash: ToCodeHash(temp),
 	},nil
 }
 

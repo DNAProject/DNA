@@ -6,6 +6,7 @@ import (
 	. "GoOnchain/common"
 	"sync"
 	sig "GoOnchain/core/signature"
+	. "GoOnchain/errors"
 	"GoOnchain/core/ledger"
 	"time"
 )
@@ -77,8 +78,12 @@ func NewClient(path string,passwordKey []byte,store ClientStore,create bool) *Cl
 	return newClient
 }
 
-func (cl *Client) GetAccount(pubKey *crypto.PubKey) *Account{
-	return cl.GetAccountByKeyHash(ToCodeHash(pubKey.EncodePoint(true)))
+func (cl *Client) GetAccount(pubKey *crypto.PubKey) (*Account,error){
+	temp,err := pubKey.EncodePoint(true)
+	if err !=nil{
+		return nil,NewDetailErr(err, ErrNoCode, "[Contract],CreateSignatureContract failed.")
+	}
+	return cl.GetAccountByKeyHash(ToCodeHash(temp)),nil
 }
 
 func (cl *Client) GetAccountByKeyHash(publicKeyHash Uint160) *Account{
@@ -156,7 +161,7 @@ func (cl *Client) ProcessBlocks() {
 
 			cl.mu.Lock()
 
-			block := ledger.DefaultLedger.Blockchain.GetBlock(cl.currentHeight)
+			block ,_:= ledger.DefaultLedger.Blockchain.GetBlockWithHeight(cl.currentHeight)
 			if block != nil{
 				cl.ProcessNewBlock(block)
 			}

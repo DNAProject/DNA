@@ -17,7 +17,7 @@ import (
 type TransactionType byte
 
 const (
-	Miner         TransactionType = 0x00
+	BookKeeping   TransactionType = 0x00
 	RegisterAsset TransactionType = 0x40
 	IssueAsset    TransactionType = 0x01
 	TransferAsset TransactionType = 0x10
@@ -235,7 +235,9 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 }
 
 func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
-
+	if tx == nil {
+		return []Uint160{}, errors.New("[Transaction],GetProgramHashes transaction is nil.")
+	}
 	//Set Utxo Inputs' hashes
 	programHashes := []Uint160{}
 	outputHashes, _ := tx.GetOutputHashes() //check error
@@ -289,3 +291,13 @@ func (tx *Transaction) Verify() error {
 	//TODO: Verify()
 	return nil
 }
+
+//func (tx *Transaction) GetReference() error {
+//	reference := make(map[UTXOTxInput]TxOutput)
+//	for k, v := range tx.UTXOInputs {
+//		k,err := ledger.DefaultLedger.Store.GetTransaction(k)
+//
+//	}
+//
+//
+//}
