@@ -63,8 +63,8 @@ func (u *Uint256) Deserialize(r io.Reader) error {
 	return nil
 }
 
-func (u *Uint256) ToString() string {		 +func Uint256ParseFromBytes(f []byte) (Uint256,error){
- 	return string(u.ToArray())
+func (u *Uint256) ToString() string {
+	return string(u.ToArray())
 }
 				     
 func Uint256ParseFromBytes(f []byte) (Uint256,error){
