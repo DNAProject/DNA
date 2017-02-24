@@ -1,12 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"time"
 	"runtime"
 	"GoOnchain/net"
-	"GoOnchain/net/node"
 	"GoOnchain/net/httpjsonrpc"
 	"GoOnchain/common/log"
+	"GoOnchain/core/ledger"
+	"GoOnchain/core/transaction"
+	"GoOnchain/core/store"
+	"GoOnchain/crypto"
+	"GoOnchain/client"
 )
 
 const (
@@ -18,15 +23,43 @@ func init() {
 	runtime.GOMAXPROCS(NCPU)
 	var path string = "./Log/"
 	log.CreatePrintLog(path)
-	go httpjsonrpc.StartServer()
 }
 
 
 func main() {
-	time.Sleep(2 * time.Second)
+	fmt.Println("//**************************************************************************")
+	fmt.Println("//*** 0. Client Set                                                      ***")
+	fmt.Println("//**************************************************************************")
+	ledger.DefaultLedger = new(ledger.Ledger)
+	ledger.DefaultLedger.Store = store.NewLedgerStore()
+	ledger.DefaultLedger.Store.InitLedgerStore(ledger.DefaultLedger)
+	transaction.TxStore =ledger.DefaultLedger.Store
+	crypto.Init()
+	fmt.Println("  Client set completed. Test Start...")
 
-	node.InitNodes()
+	fmt.Println("//**************************************************************************")
+	fmt.Println("//*** 1. BlockChain init                                                 ***")
+	fmt.Println("//**************************************************************************")
+	//blockchain :=
+	fmt.Println("  BlockChain generate completed. Func test Start...")
+	ledger.DefaultLedger.Blockchain = ledger.NewBlockchainWithGenesisBlock()
+
+	fmt.Println("//**************************************************************************")
+	fmt.Println("//*** 2. Generate Account                                                ***")
+	fmt.Println("//**************************************************************************")
+	user, _:= client.NewAccount([]byte{})
+	admin, _:= client.NewAccount([]byte{})
+	userpubkey, _:= user.PublicKey.EncodePoint(true)
+	fmt.Printf( "user.PrivateKey: %x user.PrivateKey Len: %d\n", user.PrivateKey, len(user.PrivateKey) )
+	fmt.Printf( "user.PublicKey: %x user.PublicKey Len: %d\n", userpubkey, len(userpubkey) )
+	fmt.Printf( "admin.PrivateKey: %x admin.PrivateKey Len: %d\n", admin.PrivateKey, len(admin.PrivateKey) )
+
+	time.Sleep(2 * time.Second)
 	net.StartProtocol()
+
+	go httpjsonrpc.StartServer()
+
+	time.Sleep(2 * time.Second)
 	httpjsonrpc.StartClient()
 
 	// Modules start sample
