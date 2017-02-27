@@ -1,21 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"time"
-	"runtime"
-	"GoOnchain/net"
-	"GoOnchain/net/httpjsonrpc"
+	"GoOnchain/client"
 	"GoOnchain/common/log"
 	"GoOnchain/core/ledger"
-	"GoOnchain/core/transaction"
 	"GoOnchain/core/store"
-	"GoOnchain/client"
+	"GoOnchain/core/transaction"
+	"GoOnchain/crypto"
+	"GoOnchain/net"
+	"GoOnchain/net/httpjsonrpc"
+	"fmt"
+	"runtime"
+	"time"
 )
 
 const (
 	// The number of the CPU cores for parallel optimization,TODO set from config file
-	NCPU	 = 4
+	NCPU = 4
 )
 
 func init() {
@@ -24,7 +25,6 @@ func init() {
 	log.CreatePrintLog(path)
 }
 
-
 func main() {
 	fmt.Println("//**************************************************************************")
 	fmt.Println("//*** 0. Client Set                                                      ***")
@@ -32,7 +32,8 @@ func main() {
 	ledger.DefaultLedger = new(ledger.Ledger)
 	ledger.DefaultLedger.Store = store.NewLedgerStore()
 	ledger.DefaultLedger.Store.InitLedgerStore(ledger.DefaultLedger)
-	transaction.TxStore =ledger.DefaultLedger.Store
+	transaction.TxStore = ledger.DefaultLedger.Store
+	crypto.SetAlg(crypto.P256R1)
 	fmt.Println("  Client set completed. Test Start...")
 
 	fmt.Println("//**************************************************************************")
@@ -40,17 +41,17 @@ func main() {
 	fmt.Println("//**************************************************************************")
 	//blockchain :=
 	fmt.Println("  BlockChain generate completed. Func test Start...")
-	ledger.DefaultLedger.Blockchain = ledger.NewBlockchainWithGenesisBlock()
+	ledger.DefaultLedger.Blockchain, _ = ledger.NewBlockchainWithGenesisBlock()
 
 	fmt.Println("//**************************************************************************")
 	fmt.Println("//*** 2. Generate Account                                                ***")
 	fmt.Println("//**************************************************************************")
-	user, _:= client.NewAccount([]byte{})
-	admin, _:= client.NewAccount([]byte{})
-	userpubkey, _:= user.PublicKey.EncodePoint(true)
-	fmt.Printf( "user.PrivateKey: %x user.PrivateKey Len: %d\n", user.PrivateKey, len(user.PrivateKey) )
-	fmt.Printf( "user.PublicKey: %x user.PublicKey Len: %d\n", userpubkey, len(userpubkey) )
-	fmt.Printf( "admin.PrivateKey: %x admin.PrivateKey Len: %d\n", admin.PrivateKey, len(admin.PrivateKey) )
+	user, _ := client.NewAccount([]byte{})
+	admin, _ := client.NewAccount([]byte{})
+	userpubkey, _ := user.PublicKey.EncodePoint(true)
+	fmt.Printf("user.PrivateKey: %x user.PrivateKey Len: %d\n", user.PrivateKey, len(user.PrivateKey))
+	fmt.Printf("user.PublicKey: %x user.PublicKey Len: %d\n", userpubkey, len(userpubkey))
+	fmt.Printf("admin.PrivateKey: %x admin.PrivateKey Len: %d\n", admin.PrivateKey, len(admin.PrivateKey))
 
 	time.Sleep(2 * time.Second)
 	net.StartProtocol()
