@@ -11,6 +11,7 @@ import (
 	"GoOnchain/core/transaction"
 	"GoOnchain/core/store"
 	"GoOnchain/client"
+	//"GoOnchain/consensus/dbft"
 )
 
 const (
@@ -40,7 +41,7 @@ func main() {
 	fmt.Println("//**************************************************************************")
 	//blockchain :=
 	fmt.Println("  BlockChain generate completed. Func test Start...")
-	ledger.DefaultLedger.Blockchain = ledger.NewBlockchainWithGenesisBlock()
+	ledger.DefaultLedger.Blockchain, _ = ledger.NewBlockchainWithGenesisBlock()
 
 	fmt.Println("//**************************************************************************")
 	fmt.Println("//*** 2. Generate Account                                                ***")
@@ -58,11 +59,12 @@ func main() {
 	go httpjsonrpc.StartServer()
 
 	time.Sleep(2 * time.Second)
-	httpjsonrpc.StartClient()
+	//httpjsonrpc.StartClient()
 
 	// Modules start sample
 	//ledger.Start(net.NetToLedgerCh <-chan *Msg, net.LedgerToNetCh chan<- *Msg)
 	//consensus.Start(net.NetToConsensusCh <-chan *Msg, net.ConsensusToNetCh chan<- *Msg)
+	//consensus := new(dbft.DbftService)
 
 	for {
 		time.Sleep(2 * time.Second)
