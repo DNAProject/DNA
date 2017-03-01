@@ -26,7 +26,7 @@ func newVerack() ([]byte, error) {
 	}
 
 	str := hex.EncodeToString(buf)
-	fmt.Printf("The message tx verack length is %d, %s", len(buf), str)
+	fmt.Printf("The message tx verack length is %d, %s\n", len(buf), str)
 
 	return buf, err
 }
@@ -80,11 +80,9 @@ func (msg verACK) Handle(node Noder) error {
 			node.SetState(ESTABLISH)
 		}
 	}
-
-	fmt.Printf("Node %s state is %d\n", node.GetID(), node.GetState())
 	// TODO update other node info
 	node.UpdateTime(t)
-
+	node.DumpInfo()
 	if node.GetState() == ESTABLISH {
 		node.ReqNeighborList()
 	}

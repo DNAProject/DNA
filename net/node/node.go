@@ -2,17 +2,21 @@ package node
 
 import (
 	"GoOnchain/common"
-	"GoOnchain/core/transaction"
+	. "GoOnchain/config"
 	"GoOnchain/core/ledger"
-	"math/rand"
+	"GoOnchain/core/transaction"
 	. "GoOnchain/net/message"
 	. "GoOnchain/net/protocol"
+	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
+	"errors"
 	"fmt"
+	"math/rand"
 	"net"
 	"runtime"
 	"sync/atomic"
 	"time"
-	"errors"
 )
 
 // The node capability flag
@@ -47,14 +51,14 @@ type node struct {
 	local  *node   // The pointer to local node
 	neighb nodeMap // The neighbor node connect with currently node except itself
 	//neighborNodes	*nodeMAP	// The node connect with it except the local node
-	eventQueue // The event queue to notice notice other modules
-	TXNPool    // Unconfirmed transaction pool
-	idCache    // The buffer to store the id of the items which already be processed
-	ledger  *ledger.Ledger	// The Local ledger 
-	private *uint // Reserver for future using
+	eventQueue                // The event queue to notice notice other modules
+	TXNPool                   // Unconfirmed transaction pool
+	idCache                   // The buffer to store the id of the items which already be processed
+	ledger     *ledger.Ledger // The Local ledger
+	private    *uint          // Reserver for future using
 }
 
-func (node node) dumpInfo() {
+func (node node) DumpInfo() {
 	fmt.Printf("Node info:\n")
 	fmt.Printf("\t state = %d\n", node.state)
 	fmt.Printf("\t id = %s\n", node.id)
@@ -66,6 +70,23 @@ func (node node) dumpInfo() {
 	fmt.Printf("\t services = %d\n", node.services)
 	fmt.Printf("\t port = %d\n", node.port)
 	fmt.Printf("\t relay = %v\n", node.relay)
+	fmt.Printf("\t height = %v\n", node.height)
+}
+
+func (node *node) UpdateInfo(t time.Time, version uint32, services uint64,
+	port uint16, nonce uint32, relay uint8, height uint32) {
+	// TODO need lock
+	node.UpdateTime(t)
+	node.nonce = nonce
+	node.version = version
+	node.services = services
+	node.port = port
+	if relay == 0 {
+		node.relay = false
+	} else {
+		node.relay = true
+	}
+	node.height = uint64(height)
 }
 
 func NewNode() *node {
@@ -85,20 +106,20 @@ func InitNode() Tmper {
 
 	n.version = PROTOCOLVERSION
 	n.services = NODESERVICES
-	n.port = NODETESTPORT
+	n.port = uint16(Parameters.NodePort)
 	n.relay = true
 	rand.Seed(time.Now().UTC().UnixNano())
 	// Fixme replace with the real random number
 	n.nonce = rand.Uint32()
-
+	fmt.Printf("Init node ID to %d \n", n.nonce)
 	n.neighb.init()
 	n.local = n
 	n.TXNPool.init()
 	n.eventQueue.init()
 	n.ledger, err = ledger.GetDefaultLedger()
 	if err != nil {
+		fmt.Printf("Get Default Ledger error\n")
 		errors.New("Get Default Ledger error")
-		// FIXME report the error
 	}
 
 	go n.initConnection()
@@ -112,7 +133,6 @@ func rmNode(node *node) {
 
 // TODO pass pointer to method only need modify it
 func (node *node) backend() {
-	common.Trace()
 	for f := range node.chF {
 		f()
 	}
@@ -202,17 +222,54 @@ func (node node) SynchronizeMemoryPool() {
 }
 
 func (node node) Xmit(inv common.Inventory) error {
+
 	// Fixme here we only consider 1 inventory case
 	var msg Inv
+	msg.Hdr.Magic = NETMAGIC
 	t := "inv"
 	copy(msg.Hdr.CMD[0:len(t)], t)
 	msg.P.InvType = uint8(inv.Type())
-	// FIXME filling the inventory header
-	hash := inv.Hash()
-	msg.P.Blk = hash[:]
-	buf, _ := msg.Serialization()
-	node.neighb.Broadcast(buf)
-	// FIXME currenly we have no error check
+	tmpBuffer := bytes.NewBuffer([]byte{})
+	if inv.Type() == common.TRANSACTION {
+		fmt.Printf("TX transaction message\n")
+		transaction, isTransaction := inv.(*transaction.Transaction)
+		if isTransaction {
+			transaction.Serialize(tmpBuffer)
+		}
+		msg.P.Blk = tmpBuffer.Bytes()
+	} else if inv.Type() == common.BLOCK {
+		fmt.Printf("TX block message\n")
+		block, isBlock := inv.(*ledger.Block)
+		if isBlock {
+			block.Serialize(tmpBuffer)
+		}
+		msg.P.Blk = tmpBuffer.Bytes()
+	} else if inv.Type() == common.CONSENSUS {
+		fmt.Printf("TX consensus message\n")
+		payload, isConsensusPayload := inv.(*ConsensusPayload)
+		if isConsensusPayload {
+			payload.Serialize(tmpBuffer)
+		}
+		msg.P.Blk = tmpBuffer.Bytes()
+	}
+
+	b := new(bytes.Buffer)
+	err := binary.Write(b, binary.LittleEndian, &(msg.P))
+	if err != nil {
+		fmt.Println("Binary Write failed at new Msg")
+		return nil
+	}
+	s := sha256.Sum256(b.Bytes())
+	s2 := s[:]
+	s = sha256.Sum256(s2)
+	buf := bytes.NewBuffer(s[:4])
+	binary.Read(buf, binary.LittleEndian, &(msg.Hdr.Checksum))
+	msg.Hdr.Length = uint32(len(buf.Bytes()))
+	fmt.Printf("The message payload length is %d\n", msg.Hdr.Length)
+
+	buffer, _ := msg.Serialization()
+	go node.LocalNode().Tx(buffer)
+
 	return nil
 }
 
@@ -220,16 +277,52 @@ func (node node) GetAddr() string {
 	return node.addr
 }
 
-func (node *node) GetAddrs() ([]string, uint) {
-	var addrstr []string
-	var i uint = 0
-	// TODO write lock
-	for _, node := range node.neighb.List {
-		s := node.GetState()
-		if s == ESTABLISH {
-			addrstr[i] = node.addr
+func (node node) GetAddr16() ([16]byte, error) {
+	var result [16]byte
+	ip := net.ParseIP(node.addr).To16()
+	if ip == nil {
+		fmt.Printf("Parse IP address error\n")
+		return result, errors.New("Parse IP address error")
+	}
+
+	copy(result[:], ip[:16])
+	return result, nil
+}
+
+func (node node) GetTime() int64 {
+	t := time.Now()
+	return t.UnixNano()
+}
+
+func (node node) getNbrNum() uint {
+	var i uint
+	for _, n := range node.local.neighb.List {
+		if n.GetState() == ESTABLISH {
+			fmt.Printf("The establish node address is %s\n", n.GetAddr())
 			i++
 		}
 	}
-	return addrstr, i
+	return i
+}
+
+func (node node) GetNeighborAddrs() ([]NodeAddr, uint64) {
+	var i uint64
+	var addrs []NodeAddr
+	// TODO read lock
+	for _, n := range node.local.neighb.List {
+		if n.GetState() != ESTABLISH {
+			continue
+		}
+		var addr NodeAddr
+		addr.IpAddr, _ = n.GetAddr16()
+		addr.Time = n.GetTime()
+		addr.Services = n.Services()
+		addr.Port = n.GetPort()
+		addr.Uid = n.GetNonce()
+		addrs = append(addrs, addr)
+
+		i++
+	}
+
+	return addrs, i
 }

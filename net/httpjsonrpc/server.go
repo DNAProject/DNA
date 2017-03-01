@@ -4,7 +4,8 @@ import (
 	. "GoOnchain/common"
 	"GoOnchain/core/ledger"
 	tx "GoOnchain/core/transaction"
-	"GoOnchain/net/protocol"
+	. "GoOnchain/net/protocol"
+	. "GoOnchain/config"
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 //multiplexer that keeps track of every function to be called on specific rpc call
@@ -26,7 +28,7 @@ type BlockInfo struct {
 }
 
 type NoderInfo struct {
-	Noder protocol.JsonNoder
+	Noder JsonNoder
 }
 
 type TxInfo struct {
@@ -54,7 +56,7 @@ func SetDefaultFunc(def func(http.ResponseWriter, *http.Request)) {
 	mainMux.defaultFunction = def
 }
 
-func InitNoderInfo(jsonNode protocol.JsonNoder) {
+func InitNoderInfo(jsonNode JsonNoder) {
 	//TODO
 	//return NodeInfo
 	if nodeInfo.Noder == nil {
@@ -323,7 +325,7 @@ func StartServer() {
 	HandleFunc("getrawtransaction", getRawTransaction)
 	HandleFunc("submitblock", submitBlock)
 
-	err := http.ListenAndServe("localhost:20332", nil)
+	err := http.ListenAndServe(":" + strconv.Itoa(Parameters.HttpJsonPort), nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err.Error())
 	}

@@ -2,10 +2,12 @@ package message
 
 import (
 	"GoOnchain/common"
+	"GoOnchain/common/serialization"
 	"GoOnchain/core/contract/program"
 	"GoOnchain/events"
 	. "GoOnchain/net/protocol"
 	"fmt"
+	"io"
 )
 
 type ConsensusPayload struct {
@@ -76,4 +78,27 @@ func reqConsensusData(node Noder, hash common.Uint256) error {
 	go node.Tx(buf)
 
 	return nil
+}
+func (cp *ConsensusPayload) Type() common.InventoryType {
+	/*
+	* TODO:Temporary add for Interface signature.SignableData use.
+	* 2017/2/27 luodanwg
+	* */
+	return common.CONSENSUS
+}
+
+func (cp *ConsensusPayload) SerializeUnsigned(w io.Writer) error {
+	serialization.WriteUint32(w, cp.Version)
+	cp.PrevHash.Serialize(w)
+	serialization.WriteUint32(w, cp.Height)
+	serialization.WriteUint16(w, cp.MinerIndex)
+	serialization.WriteUint32(w, cp.Timestamp)
+	return nil
+
+}
+
+func (cp *ConsensusPayload) Serialize(w io.Writer) {
+	cp.SerializeUnsigned(w)
+	serialization.WriteVarBytes(w, cp.Data)
+	cp.Program.Serialize(w)
 }

@@ -4,11 +4,14 @@ import (
 	"GoOnchain/common"
 	. "GoOnchain/net/message"
 	. "GoOnchain/net/protocol"
+	. "GoOnchain/config"
 	"errors"
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -92,9 +95,20 @@ disconnect:
 	return err
 }
 
+func printIPAddr() {
+	host, _ := os.Hostname()
+	addrs, _ := net.LookupIP(host)
+	for _, addr := range addrs {
+		if ipv4 := addr.To4(); ipv4 != nil {
+			fmt.Println("IPv4: ", ipv4)
+		}
+	}
+}
+
 // Init the server port, should be run in another thread
 func (n *node) initConnection() {
-	listener, err := net.Listen("tcp", "localhost:"+strconv.Itoa(NODETESTPORT))
+	common.Trace()
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(Parameters.NodePort))
 	if err != nil {
 		fmt.Println("Error listening\n", err.Error())
 		return
@@ -107,12 +121,11 @@ func (n *node) initConnection() {
 			return
 		}
 		node := NewNode()
-		// Currently we use the address as the ID
-		node.id = conn.RemoteAddr().String()
-		node.addr = conn.RemoteAddr().String()
+		id, _ := parseIPaddr(conn.RemoteAddr().String())
+		node.id = id
+		node.addr = id
 		node.local = n
-		fmt.Println("Remote node %s connect with %s\n",
-			conn.RemoteAddr(), conn.LocalAddr())
+		fmt.Println("Remote node connect with ", conn.RemoteAddr(), conn.LocalAddr())
 		node.conn = conn
 		// TOOD close the conn when erro happened
 		// TODO lock the node and assign the connection to Node.
@@ -123,6 +136,16 @@ func (n *node) initConnection() {
 		go node.Tx(buf)
 	}
 	//TODO When to free the net listen resouce?
+}
+
+
+func parseIPaddr(s string) (string, error) {
+	i := strings.Index(s, ":")
+	if (i < 0) {
+		fmt.Printf("Split IP address&port  error\n")
+		return s, errors.New("Split IP address&port error")
+	}
+	return s[:i], nil
 }
 
 func (node *node) Connect(nodeAddr string) {
@@ -136,8 +159,10 @@ func (node *node) Connect(nodeAddr string) {
 
 		n := NewNode()
 		n.conn = conn
-		n.id = conn.RemoteAddr().String()
-		n.addr = conn.RemoteAddr().String()
+
+		id, _ := parseIPaddr(conn.RemoteAddr().String())
+		n.id = id
+		n.addr = id
 		// FixMe Only for testing
 		n.height = 1000
 		n.local = node

@@ -1,8 +1,6 @@
 package node
 
 import (
-	"fmt"
-	"GoOnchain/common"
 	. "GoOnchain/net/message"
 	. "GoOnchain/net/protocol"
 	"time"
@@ -16,7 +14,7 @@ func (node node) GetBlkHdrs() {
 	for _, n := range node.local.neighb.List {
 		h1 := n.GetHeight()
 		h2:= node.local.GetLedger().GetLocalBlockChainHeight()
-		fmt.Printf("The neighbor height is %d, local height is %d\n", h1, h2)
+		//fmt.Printf("The neighbor height is %d, local height is %d\n", h1, h2)
 		if (node.GetState() == ESTABLISH) && (h1 > uint64(h2)) {
 			buf, _ := NewMsg("getheaders", node.local)
 			go node.Tx(buf)
@@ -37,7 +35,7 @@ func (node node) updateNodeInfo() {
 	for {
 		select {
 		case <-ticker.C:
-			common.Trace()
+			//common.Trace()
 			node.GetBlkHdrs()
 		case <-quit:
 			ticker.Stop()
