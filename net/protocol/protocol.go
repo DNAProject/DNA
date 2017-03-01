@@ -17,6 +17,7 @@ type NodeAddr struct {
 	Services uint64
 	IpAddr   [16]byte
 	Port     uint16
+	Uid	 uint32		// Unique ID
 }
 
 const (
@@ -35,8 +36,6 @@ const (
 	//NETMAGIC	 = 0x414d5446 // Keep the same as antshares only for testing
 	PROTOCOLVERSION = 0
 
-	NODETESTPORT     = 20338 // TODO get from config file
-	HTTPJSONPORT     = 20337
 	PERIODUPDATETIME = 3 // Time to update and sync information with other nodes
 )
 
@@ -79,8 +78,8 @@ type Noder interface {
 	Connect(nodeAddr string)
 	//Xmit(inv Inventory) error // The transmit interface
 	Tx(buf []byte)
-	GetAddress() ([16]byte, error)
 	GetTime() int64
+	NodeEstablished(uid uint32) bool
 	GetNeighborAddrs() ([]NodeAddr, uint64)
 }
 

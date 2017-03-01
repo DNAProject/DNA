@@ -4,6 +4,7 @@ import (
 	"GoOnchain/common"
 	. "GoOnchain/net/message"
 	. "GoOnchain/net/protocol"
+	. "GoOnchain/config"
 	"errors"
 	"fmt"
 	"io"
@@ -107,7 +108,7 @@ func printIPAddr() {
 // Init the server port, should be run in another thread
 func (n *node) initConnection() {
 	common.Trace()
-	listener, err := net.Listen("tcp", ":"+strconv.Itoa(NODETESTPORT))
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(Parameters.NodePort))
 	if err != nil {
 		fmt.Println("Error listening\n", err.Error())
 		return
@@ -124,8 +125,7 @@ func (n *node) initConnection() {
 		node.id = id
 		node.addr = id
 		node.local = n
-		fmt.Println("Remote node %s connect with %s\n",
-			conn.RemoteAddr(), conn.LocalAddr())
+		fmt.Println("Remote node connect with ", conn.RemoteAddr(), conn.LocalAddr())
 		node.conn = conn
 		// TOOD close the conn when erro happened
 		// TODO lock the node and assign the connection to Node.

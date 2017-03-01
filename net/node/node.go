@@ -2,10 +2,14 @@ package node
 
 import (
 	"GoOnchain/common"
+	. "GoOnchain/config"
 	"GoOnchain/core/ledger"
 	"GoOnchain/core/transaction"
 	. "GoOnchain/net/message"
 	. "GoOnchain/net/protocol"
+	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -102,20 +106,20 @@ func InitNode() Tmper {
 
 	n.version = PROTOCOLVERSION
 	n.services = NODESERVICES
-	n.port = NODETESTPORT
+	n.port = uint16(Parameters.NodePort)
 	n.relay = true
 	rand.Seed(time.Now().UTC().UnixNano())
 	// Fixme replace with the real random number
 	n.nonce = rand.Uint32()
-
+	fmt.Printf("Init node ID to %d \n", n.nonce)
 	n.neighb.init()
 	n.local = n
 	n.TXNPool.init()
 	n.eventQueue.init()
 	n.ledger, err = ledger.GetDefaultLedger()
 	if err != nil {
+		fmt.Printf("Get Default Ledger error\n")
 		errors.New("Get Default Ledger error")
-		// FIXME report the error
 	}
 
 	go n.initConnection()
@@ -129,7 +133,6 @@ func rmNode(node *node) {
 
 // TODO pass pointer to method only need modify it
 func (node *node) backend() {
-	common.Trace()
 	for f := range node.chF {
 		f()
 	}
@@ -219,17 +222,54 @@ func (node node) SynchronizeMemoryPool() {
 }
 
 func (node node) Xmit(inv common.Inventory) error {
+
 	// Fixme here we only consider 1 inventory case
 	var msg Inv
+	msg.Hdr.Magic = NETMAGIC
 	t := "inv"
 	copy(msg.Hdr.CMD[0:len(t)], t)
 	msg.P.InvType = uint8(inv.Type())
-	// FIXME filling the inventory header
-	hash := inv.Hash()
-	msg.P.Blk = hash[:]
-	buf, _ := msg.Serialization()
-	node.neighb.Broadcast(buf)
-	// FIXME currenly we have no error check
+	tmpBuffer := bytes.NewBuffer([]byte{})
+	if inv.Type() == common.TRANSACTION {
+		fmt.Printf("TX transaction message\n")
+		transaction, isTransaction := inv.(*transaction.Transaction)
+		if isTransaction {
+			transaction.Serialize(tmpBuffer)
+		}
+		msg.P.Blk = tmpBuffer.Bytes()
+	} else if inv.Type() == common.BLOCK {
+		fmt.Printf("TX block message\n")
+		block, isBlock := inv.(*ledger.Block)
+		if isBlock {
+			block.Serialize(tmpBuffer)
+		}
+		msg.P.Blk = tmpBuffer.Bytes()
+	} else if inv.Type() == common.CONSENSUS {
+		fmt.Printf("TX consensus message\n")
+		payload, isConsensusPayload := inv.(*ConsensusPayload)
+		if isConsensusPayload {
+			payload.Serialize(tmpBuffer)
+		}
+		msg.P.Blk = tmpBuffer.Bytes()
+	}
+
+	b := new(bytes.Buffer)
+	err := binary.Write(b, binary.LittleEndian, &(msg.P))
+	if err != nil {
+		fmt.Println("Binary Write failed at new Msg")
+		return nil
+	}
+	s := sha256.Sum256(b.Bytes())
+	s2 := s[:]
+	s = sha256.Sum256(s2)
+	buf := bytes.NewBuffer(s[:4])
+	binary.Read(buf, binary.LittleEndian, &(msg.Hdr.Checksum))
+	msg.Hdr.Length = uint32(len(buf.Bytes()))
+	fmt.Printf("The message payload length is %d\n", msg.Hdr.Length)
+
+	buffer, _ := msg.Serialization()
+	go node.LocalNode().Tx(buffer)
+
 	return nil
 }
 
@@ -237,11 +277,10 @@ func (node node) GetAddr() string {
 	return node.addr
 }
 
-func (node node) GetAddress() ([16]byte, error) {
-	common.Trace()
+func (node node) GetAddr16() ([16]byte, error) {
 	var result [16]byte
 	ip := net.ParseIP(node.addr).To16()
-	if (ip == nil) {
+	if ip == nil {
 		fmt.Printf("Parse IP address error\n")
 		return result, errors.New("Parse IP address error")
 	}
@@ -259,6 +298,7 @@ func (node node) getNbrNum() uint {
 	var i uint
 	for _, n := range node.local.neighb.List {
 		if n.GetState() == ESTABLISH {
+			fmt.Printf("The establish node address is %s\n", n.GetAddr())
 			i++
 		}
 	}
@@ -267,19 +307,22 @@ func (node node) getNbrNum() uint {
 
 func (node node) GetNeighborAddrs() ([]NodeAddr, uint64) {
 	var i uint64
-
-	cnt := node.getNbrNum()
-	addrs := make([]NodeAddr, cnt)
+	var addrs []NodeAddr
 	// TODO read lock
 	for _, n := range node.local.neighb.List {
-		if n.GetState() == ESTABLISH {
-			addrs[i].IpAddr, _ = n.GetAddress()
-			addrs[i].Time = n.GetTime()
-			addrs[i].Services = n.Services()
-			addrs[i].Port = n.GetPort()
-
-			i++
+		if n.GetState() != ESTABLISH {
+			continue
 		}
+		var addr NodeAddr
+		addr.IpAddr, _ = n.GetAddr16()
+		addr.Time = n.GetTime()
+		addr.Services = n.Services()
+		addr.Port = n.GetPort()
+		addr.Uid = n.GetNonce()
+		addrs = append(addrs, addr)
+
+		i++
 	}
+
 	return addrs, i
 }
