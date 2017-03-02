@@ -227,7 +227,6 @@ func (node node) Xmit(inv common.Inventory) error {
 	fmt.Println("****** node Xmit ********")
 	var buffer []byte
 	var err error
-
 	if inv.Type() == common.TRANSACTION {
 		fmt.Printf("****TX transaction message*****\n")
 		transaction, isTransaction := inv.(*transaction.Transaction)

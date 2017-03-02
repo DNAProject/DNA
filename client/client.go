@@ -15,17 +15,16 @@ import (
 	"math/rand"
 	"bytes"
 	"GoOnchain/common/serialization"
-	"GoOnchain/core/contract"
 )
 
-type Version struct {
+type ClientVersion struct {
 	Major uint32
 	Minor uint32
 	Build uint32
 	Revision uint32
 }
 
-func (v *Version) ToArray() []byte {
+func (v *ClientVersion) ToArray() []byte {
 	vbuf := bytes.NewBuffer(nil)
 	serialization.WriteUint32( vbuf, v.Major )
 	serialization.WriteUint32( vbuf, v.Minor )
@@ -127,8 +126,8 @@ func NewClient( path string, passwordKey []byte, create bool ) *Client {
 			return nil
 		}
 
-		v := Version{0,0,0,1}
-		err = newClient.store.SaveStoredData("Version",v.ToArray())
+		v := ClientVersion{0,0,0,1}
+		err = newClient.store.SaveStoredData("ClientVersion",v.ToArray())
 		if err != nil {
 			fmt.Println( err )
 			return nil
@@ -314,7 +313,7 @@ func (cl *Client) ProcessBlocks() {
 
 			cl.mu.Lock()
 
-			block ,_:= ledger.DefaultLedger.Blockchain.GetBlockWithHeight(cl.currentHeight)
+			block ,_:= ledger.DefaultLedger.GetBlockWithHeight(cl.currentHeight)
 			if block != nil{
 				cl.ProcessNewBlock(block)
 			}
@@ -342,8 +341,11 @@ func (cl *Client) Sign(context *ct.ContractContext) bool{
 		account := cl.GetAccountByProgramHash(hash)
 		if account == nil {continue}
 
-		signature := sig.SignBySigner(context.Data,account)
-		err := context.AddContract(contract,account.PublicKey,signature)
+		signature,err:= sig.SignBySigner(context.Data,account)
+		if err != nil {
+			return fSuccess
+		}
+		err = context.AddContract(contract,account.PublicKey,signature)
 
 		if err != nil {
 			fSuccess = false
