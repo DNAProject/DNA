@@ -249,14 +249,17 @@ func (node node) Xmit(inv common.Inventory) error {
 				return err
 			}
 		}
-	} /*else if inv.Type() == common.CONSENSUS {
+	} else if inv.Type() == common.CONSENSUS {
 		fmt.Printf("*****TX consensus message****\n")
 		payload, isConsensusPayload := inv.(*ConsensusPayload)
 		if isConsensusPayload {
-			payload.Serialize(tmpBuffer)
+			buffer, err = NewConsensus(payload)
+			if err != nil {
+				fmt.Println("Error New Block message ", err.Error())
+				return err
+			}
 		}
-		msg.P.Blk = tmpBuffer.Bytes()
-	}*/
+	}
 
 	node.neighb.Broadcast(buffer)
 
