@@ -9,6 +9,7 @@ import (
 	ser "GoOnchain/common/serialization"
 	cl "GoOnchain/client"
 	"fmt"
+	"bytes"
 )
 
 const ContextVersion uint32 = 0
@@ -125,6 +126,11 @@ func (cxt *ConsensusContext)  MakePayload(message ConsensusMessage) *msg.Consens
 
 func (cxt *ConsensusContext)  MakePrepareRequest() *msg.ConsensusPayload{
 	Trace()
+	//* test use
+	buf :=bytes.NewBuffer([]byte{})
+	(cxt.Transactions[cxt.TransactionHashes[0]]).Serialize(buf)
+	fmt.Println("MakePrepareRequest cxt.Transactions[cxt.TransactionHashes[0]=",buf.Bytes() )
+
 	preReq := &PrepareRequest{
 		Nonce: cxt.Nonce,
 		NextMiner: cxt.NextMiner,
