@@ -125,13 +125,6 @@ func (cxt *ConsensusContext)  MakePayload(message ConsensusMessage) *msg.Consens
 
 func (cxt *ConsensusContext)  MakePrepareRequest() *msg.ConsensusPayload{
 	Trace()
-	fmt.Println("len(cxt.Transactions)=",len(cxt.Transactions))
-	    for k, v := range cxt.Transactions {
-		    fmt.Println("cxt.Transactions=",k)
-		    fmt.Println("cxt.Transactions=",v)
-	        }
-
-	fmt.Println("cxt.TransactionHashes[0]",cxt.TransactionHashes[0])
 	preReq := &PrepareRequest{
 		Nonce: cxt.Nonce,
 		NextMiner: cxt.NextMiner,
