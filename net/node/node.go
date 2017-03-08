@@ -2,6 +2,7 @@ package node
 
 import (
 	"GoOnchain/common"
+	"GoOnchain/common/log"
 	. "GoOnchain/config"
 	"GoOnchain/core/ledger"
 	"GoOnchain/core/transaction"
@@ -220,7 +221,10 @@ func (node node) Xmit(inv common.Inventory) error {
 				return err
 			}
 		}
-	}
+	}  else {
+		log.Info("Unknow Xmit message type")
+		return errors.New("Unknow Xmit message type\n")
+ 	}
 
 	node.nbrNodes.Broadcast(buffer)
 
@@ -232,7 +236,6 @@ func (node node) GetAddr() string {
 }
 
 func (node node) GetAddr16() ([16]byte, error) {
-	common.Trace()
 	var result [16]byte
 	ip := net.ParseIP(node.addr).To16()
 	if ip == nil {
