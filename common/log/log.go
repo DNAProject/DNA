@@ -1,6 +1,8 @@
 package log
 
 import (
+	"GoOnchain/common"
+	"GoOnchain/config"
 	"bytes"
 	"fmt"
 	"io"
@@ -23,11 +25,11 @@ const (
 
 var (
 	levels = map[int]string{
-		debugLog:   "DEBUG",
-		infoLog:    "INFO",
-		warnLog: "WARN",
-		errorLog:   "ERROR",
-		fatalLog:   "FATAL",
+		debugLog: "DEBUG",
+		infoLog:  "INFO",
+		warnLog:  "WARN",
+		errorLog: "ERROR",
+		fatalLog: "FATAL",
 	}
 )
 
@@ -80,7 +82,13 @@ func New(out io.Writer, prefix string, flag, level int) *Logger {
 }
 
 func (l *Logger) output(level int, s string) error {
-	return l.logger.Output(callDepth, AddBracket(LevelName(level))+" "+s)
+	if level == 0 {
+		gid := common.GetGID()
+		gidStr := strconv.FormatUint(gid, 10)
+		return l.logger.Output(callDepth, AddBracket(LevelName(level))+" "+"GID"+" "+gidStr+", "+s)
+	} else {
+		return l.logger.Output(callDepth, AddBracket(LevelName(level))+" "+s)
+	}
 }
 
 func (l *Logger) Output(level int, a ...interface{}) error {
@@ -171,7 +179,7 @@ func CreatePrintLog(path string) {
 	if err != nil {
 		fmt.Printf("%s\n", err.Error)
 	}
-	var printlevel int = 1
+	var printlevel int = config.Parameters.PrintLevel
 	writers := []io.Writer{
 		logfile,
 		os.Stdout,
