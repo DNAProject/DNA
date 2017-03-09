@@ -18,6 +18,7 @@ type ProtocolConfiguration struct {
 	StandbyMiners []string `json:"StandbyMiners"`
 	SeedList      []string `json:"SeedList"`
 	HttpJsonPort  int      `json:"HttpJsonPort"`
+	HttpLocalPort int      `json:"HttpLocalPort"`
 	NodePort      int      `json:"NodePort"`
 	WebSocketPort int      `json:"WebSocketPort"`
 	MinerName     string   `json:"MinerName"`
