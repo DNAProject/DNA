@@ -16,6 +16,7 @@
     ],
     "HttpJsonPort": 20337,
     "NodePort": 20338,
-    "MinerName": "c4"
+    "MinerName": "c4",
+    "PrintLevel": 0
   }
 }
