@@ -17,10 +17,11 @@ type ProtocolConfiguration struct {
 	CoinVersion   int      `json:"CoinVersion"`
 	StandbyMiners []string `json:"StandbyMiners"`
 	SeedList      []string `json:"SeedList"`
-	HttpJsonPort  int	`json:"HttpJsonPort"`
-	NodePort      int	`json:"NodePort"`
-	WebSocketPort int	`json:"WebSocketPort"`
-	MinerName     string	`json:"MinerName"`
+	HttpJsonPort  int      `json:"HttpJsonPort"`
+	NodePort      int      `json:"NodePort"`
+	WebSocketPort int      `json:"WebSocketPort"`
+	MinerName     string   `json:"MinerName"`
+	PrintLevel    int      `json:"PrintLevel"`
 }
 
 type ProtocolFile struct {
