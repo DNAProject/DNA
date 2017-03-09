@@ -7,14 +7,15 @@ import (
 )
 
 type PrepareResponse struct {
-	msgData *ConsensusMessageData
+	msgData ConsensusMessageData
 	Signature []byte
 }
 
-func (pres *PrepareResponse) Serialize(w io.Writer){
+func (pres *PrepareResponse) Serialize(w io.Writer)error{
 	Trace()
 	pres.msgData.Serialize(w)
 	w.Write(pres.Signature)
+	return nil
 }
 
 //read data to reader
@@ -44,5 +45,5 @@ func (pres *PrepareResponse) ViewNumber() byte{
 
 func (pres *PrepareResponse) ConsensusMessageData() *ConsensusMessageData{
 	Trace()
-	return pres.msgData
+	return &(pres.msgData)
 }

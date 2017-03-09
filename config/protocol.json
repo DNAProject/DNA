@@ -16,6 +16,6 @@
     ],
     "HttpJsonPort": 20337,
     "NodePort": 20338,
-    "NodeWebSocketPort": 20334
+    "MinerName": "c4"
   }
 }

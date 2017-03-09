@@ -2,14 +2,13 @@ package message
 
 import (
 	"GoOnchain/common"
-	"GoOnchain/events"
 	"GoOnchain/core/ledger"
+	"GoOnchain/events"
 	//"GoOnchain/events"
 	. "GoOnchain/net/protocol"
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"unsafe"
 )
@@ -86,8 +85,6 @@ func NewBlock(bk *ledger.Block) ([]byte, error) {
 		return nil, err
 	}
 
-	str := hex.EncodeToString(m)
-	fmt.Printf("The message length is %d, %s\n", len(m), str)
 	return m, nil
 }
 
@@ -128,6 +125,7 @@ func (msg *block) Deserialization(p []byte) error {
 		uint32(unsafe.Sizeof(*msg)))
 
 	buf := bytes.NewBuffer(p)
-	err := binary.Read(buf, binary.LittleEndian, msg)
+	err := binary.Read(buf, binary.LittleEndian, msg.msgHdr)
+	msg.blk.Deserialize(buf)
 	return err
 }

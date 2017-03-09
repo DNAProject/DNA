@@ -1,26 +1,26 @@
 package main
 
 import (
-	"GoOnchain/common/log"
-	"GoOnchain/core/ledger"
-	"GoOnchain/core/store"
-	"GoOnchain/core/transaction"
-	"GoOnchain/crypto"
-	"GoOnchain/net"
-	"GoOnchain/net/httpjsonrpc"
-	"fmt"
-	"runtime"
-	"time"
-	//"GoOnchain/consensus/dbft"
 	. "GoOnchain/client"
 	. "GoOnchain/common"
+	"GoOnchain/common/log"
+	"GoOnchain/config"
 	"GoOnchain/consensus/dbft"
 	. "GoOnchain/core/asset"
 	"GoOnchain/core/contract"
+	"GoOnchain/core/ledger"
 	"GoOnchain/core/signature"
+	"GoOnchain/core/store"
+	"GoOnchain/core/transaction"
 	"GoOnchain/core/validation"
+	"GoOnchain/crypto"
+	"GoOnchain/net"
+	"GoOnchain/net/httpjsonrpc"
 	"crypto/sha256"
+	"fmt"
 	"os"
+	"runtime"
+	"time"
 )
 
 const (
@@ -37,6 +37,8 @@ func init() {
 }
 
 func main() {
+	var path string = "./Log/"
+	log.CreatePrintLog(path)
 	fmt.Printf("Node version: %s\n", Version)
 	fmt.Println("//**************************************************************************")
 	fmt.Println("//*** 0. Client open                                                     ***")
@@ -59,7 +61,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	admin := issuer
+	//admin := issuer
 
 	fmt.Println("//**************************************************************************")
 	fmt.Println("//*** 2. Set Miner                                                     ***")
@@ -80,7 +82,9 @@ func main() {
 
 	time.Sleep(2 * time.Second)
 	neter := net.StartProtocol()
-	time.Sleep(2 * time.Second)
+
+
+	time.Sleep(20 * time.Second)
 
 	fmt.Println("//**************************************************************************")
 	fmt.Println("//*** 5. Start DBFT Services                                             ***")
@@ -95,32 +99,27 @@ func main() {
 	go httpjsonrpc.StartServer()
 
 	time.Sleep(2 * time.Second)
-	//httpjsonrpc.StartClient()
-	// Modules start sample
-	//ledger.Start(net.NetToLedgerCh <-chan *Msg, net.LedgerToNetCh chan<- *Msg)
-	//consensus.Start(net.NetToConsensusCh <-chan *Msg, net.ConsensusToNetCh chan<- *Msg)
+	// if config.Parameters.MinerName == "c4" {
+	// 	time.Sleep(2 * time.Second)
+	// 	tx := sampleTransaction(issuer, admin)
+	// 	fmt.Println("//**************************************************************************")
+	// 	fmt.Println("//*** transaction gen complete, neter Xmit start                         ***")
+	// 	fmt.Println("//**************************************************************************")
+	// 	neter.Xmit(tx)
+	// 	time.Sleep(10 * time.Second)
+	// 	fmt.Println("//**************************************************************************")
+	// 	fmt.Println("//*** neter Xmit completed                                               ***")
+	// 	fmt.Println("//**************************************************************************")
+	// 	//for {
+	// 		fmt.Println("ledger.DefaultLedger.Blockchain.BlockHeight", ledger.DefaultLedger.Blockchain.BlockHeight)
+	// 		genesisBlockHash, _ := ledger.DefaultLedger.Store.GetBlockHash(0)
+	// 		fmt.Println("gensisBlockGet =", genesisBlockHash)
+	// 		firstblock, _ := ledger.DefaultLedger.Store.GetBlockHash(1)
+	// 		fmt.Println("FirstBlockGet =", firstblock)
+	// 		time.Sleep(10 * time.Second)
+	// 	//}
 
-	if os.Getenv("CLIENT_NAME") == "c4" {
-		time.Sleep(2 * time.Second)
-		tx := sampleTransaction(issuer, admin)
-		fmt.Println("//**************************************************************************")
-		fmt.Println("//*** transaction gen complete, neter Xmit start                         ***")
-		fmt.Println("//**************************************************************************")
-		neter.Xmit(tx)
-		time.Sleep(10 * time.Second)
-		fmt.Println("//**************************************************************************")
-		fmt.Println("//*** neter Xmit completed                                               ***")
-		fmt.Println("//**************************************************************************")
-		for {
-			fmt.Println("ledger.DefaultLedger.Blockchain.BlockHeight", ledger.DefaultLedger.Blockchain.BlockHeight)
-			genesisBlockHash, _ := ledger.DefaultLedger.Store.GetBlockHash(0)
-			fmt.Println("gensisBlockGet =", genesisBlockHash)
-			firstblock, _ := ledger.DefaultLedger.Store.GetBlockHash(1)
-			fmt.Println("FirstBlockGet =", firstblock)
-			time.Sleep(10 * time.Second)
-		}
-
-	}
+	// }
 
 	for {
 		time.Sleep(2 * time.Second)
@@ -202,21 +201,40 @@ func SampleAsset() *Asset {
 }
 
 func OpenClientAndGetAccount() *Client {
-	//CreateClient( "wallet.db3", []byte("\x12\x34\x56") )
-	//cl := OpenClient( "wallet.db3", []byte("\x12\x34\x56") )
-	clientName := os.Getenv("CLIENT_NAME")
+	clientName := config.Parameters.MinerName
+	fmt.Printf("The Miner name is %s\n", clientName)
 	if clientName == "" {
-		fmt.Printf("Please Check your client's ENV SET, which schould be c1,c2,c3,c4. Now is %s\n", clientName)
+		fmt.Printf("Miner name not be set at config file protocol.json, which schould be c1,c2,c3,c4. Now is %s\n", clientName)
 		return nil
 	}
-	//c1 := CreateClient("wallet1.db3", []byte("\x12\x34\x56"))
-	//c2 := CreateClient("wallet2.db3", []byte("\x12\x34\x56"))
-	//c3 := CreateClient("wallet3.db3", []byte("\x12\x34\x56"))
-	//c4 := CreateClient("wallet4.db3", []byte("\x12\x34\x56"))
-	c1 := OpenClient("wallet1.db3", []byte("\x12\x34\x56"))
-	c2 := OpenClient("wallet2.db3", []byte("\x12\x34\x56"))
-	c3 := OpenClient("wallet3.db3", []byte("\x12\x34\x56"))
-	c4 := OpenClient("wallet4.db3", []byte("\x12\x34\x56"))
+	var c1 *Client
+	var c2 *Client
+	var c3 *Client
+	var c4 *Client
+
+	if fileExisted("wallet1.db3") {
+		c1 = OpenClient("wallet1.db3", []byte("\x12\x34\x56"))
+	} else {
+		c1 = CreateClient("wallet1.db3", []byte("\x12\x34\x56"))
+	}
+
+	if fileExisted("wallet2.db3") {
+		c2 = OpenClient("wallet2.db3", []byte("\x12\x34\x56"))
+	} else {
+		c2 = CreateClient("wallet2.db3", []byte("\x12\x34\x56"))
+	}
+
+	if fileExisted("wallet3.db3") {
+		c3 = OpenClient("wallet3.db3", []byte("\x12\x34\x56"))
+	} else {
+		c3 = CreateClient("wallet3.db3", []byte("\x12\x34\x56"))
+	}
+
+	if fileExisted("wallet4.db3") {
+		c4 = OpenClient("wallet4.db3", []byte("\x12\x34\x56"))
+	} else {
+		c4 = CreateClient("wallet4.db3", []byte("\x12\x34\x56"))
+	}
 
 	//ac,_ := cl.GetDefaultAccount()
 	//fmt.Printf("PrivateKey: %x\n", ac.PrivateKey)
@@ -237,7 +255,7 @@ func OpenClientAndGetAccount() *Client {
 	}
 }
 
-func Exist(filename string) bool {
+func fileExisted(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
 }
