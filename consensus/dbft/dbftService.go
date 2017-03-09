@@ -23,8 +23,10 @@ import (
 	"GoOnchain/core/contract/program"
 )
 
-const TimePerBlock = 15
-const SecondsPerBlock = 15
+const (
+	TimePerBlock = (15 * time.Second)
+	SecondsPerBlock = (15 * time.Second)
+)
 
 type DbftService struct {
 	context ConsensusContext
@@ -79,12 +81,13 @@ func (ds *DbftService) AddTransaction(TX *tx.Transaction) error{
 		}
 
 		if minerAddress == ds.context.NextMiner {
-			log.Debug("Send perpare response")
+			log.Debug("Send prepare response")
 			ds.context.State |= SignatureSent
 			miner,err:=ds.Client.GetAccount(ds.context.Miners[ds.context.MinerIndex])
 			if err != nil {
 				return NewDetailErr(err,ErrNoCode,"[DbftService] ,GetAccount failed.")
 			}
+
 			//sig.SignBySigner(ds.context.MakeHeader(),miner)
 			ds.context.Signatures[ds.context.MinerIndex],err = sig.SignBySigner(ds.context.MakeHeader(),miner)
 			if err != nil {
@@ -134,22 +137,22 @@ func (ds *DbftService) CheckSignatures() error{
 				if err != nil {
 					return NewDetailErr(err, ErrNoCode, "[DbftService], CheckSignatures AddContract failed.")
 				}
+
 				j++
 			}
 		}
 		cxt.Data.SetPrograms(cxt.GetPrograms())
 		block.Transcations = ds.context.GetTXByHashes()
 
-		con.Log(fmt.Sprintf("cxt.GetPrograms(): %d", cxt.GetPrograms()))
-		con.Log(fmt.Sprintf("cxt.Data.GetPrograms(): %d", cxt.Data.GetPrograms()))
-		con.Log(fmt.Sprintf("relay block: %d", block.Hash()))
+		con.Debug(fmt.Sprintf("cxt.GetPrograms(): %d", cxt.GetPrograms()))
+		con.Debug(fmt.Sprintf("cxt.Data.GetPrograms(): %d", cxt.Data.GetPrograms()))
+		con.Debug(fmt.Sprintf("relay block: %d", block.Hash()))
 
 		if err := ds.localNet.Xmit(block); err != nil{
 			con.Log(fmt.Sprintf("reject block: %s", block.Hash()))
-		}
+    }
 		Trace()
 		ds.context.State |= BlockSent
-
 	}
 	return nil
 }
@@ -233,12 +236,10 @@ func (ds *DbftService) InitializeConsensus(viewNum byte) error  {
 		ds.timerHeight = ds.context.Height
 		ds.timeView = viewNum
 		span := time.Now().Sub(ds.blockReceivedTime)
-		Trace()
 		if span > TimePerBlock {
-			Trace()
 			go ds.Timeout()
 		} else {
-			time.AfterFunc(TimePerBlock-span,ds.Timeout)
+			time.AfterFunc((TimePerBlock - span), ds.Timeout)
 		}
 	} else {
 		ds.context.State = Backup
@@ -270,24 +271,23 @@ func (ds *DbftService) NewConsensusPayload(payload *msg.ConsensusPayload){
 	ds.mu.Lock()
 	defer ds.mu.Unlock()
 
-	Trace()
-	if int(payload.MinerIndex) == ds.context.MinerIndex {return }
-
+	if int(payload.MinerIndex) == ds.context.MinerIndex {
+		return
+	}
 	if payload.Version != ContextVersion || payload.PrevHash != ds.context.PrevHash || payload.Height != ds.context.Height {
 		return
 	}
 
-	Trace()
-	if int(payload.MinerIndex) >= len(ds.context.Miners) {return }
-
-	message,err := DeserializeMessage(payload.Data)
-	if err != nil {
-		log.Error(fmt.Sprintf("DeserializeMessage failed!!!: %s\n",err))
-		fmt.Printf("DeserializeMessage failed!!!: %s\n",err)
+	if int(payload.MinerIndex) >= len(ds.context.Miners) {
 		return
 	}
 
-	Trace()
+	message,err := DeserializeMessage(payload.Data)
+	if err != nil {
+		log.Error(fmt.Sprintf("DeserializeMessage failed: %s\n", err))
+		return
+	}
+
 	if message.ViewNumber() != ds.context.ViewNumber && message.Type() != ChangeViewMsg {
 		fmt.Printf("message.ViewNumber()=%d\n",message.ViewNumber())
 		fmt.Printf("ds.context.ViewNumber=%d\n",ds.context.ViewNumber)
@@ -296,24 +296,20 @@ func (ds *DbftService) NewConsensusPayload(payload *msg.ConsensusPayload){
 		return
 	}
 
-	Trace()
 	switch message.Type() {
 	case ChangeViewMsg:
-		log.Info("==========Recieved Change view")
 		if cv, ok := message.(*ChangeView); ok {
-			ds.ChangeViewReceived(payload,cv)
+			ds.ChangeViewReceived(payload, cv)
 		}
 		break
 	case PrepareRequestMsg:
-		log.Info("==========Recieved PrepareRequest")
 		if pr, ok := message.(*PrepareRequest); ok {
-			ds.PrepareRequestReceived(payload,pr)
+			ds.PrepareRequestReceived(payload, pr)
 		}
 		break
 	case PrepareResponseMsg:
-		log.Info("==========Recieved PrepareResponse")
 		if pres, ok := message.(*PrepareResponse); ok {
-			ds.PrepareResponseReceived(payload,pres)
+			ds.PrepareResponseReceived(payload, pres)
 		}
 		break
 	}
@@ -384,7 +380,7 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	}
 
 	minerLen := len(ds.context.Miners)
-	ds.context.Signatures = make([][]byte,minerLen)
+	ds.context.Signatures = make([][]byte, minerLen)
 	ds.context.Signatures[payload.MinerIndex] = message.Signature
 	Trace()
 	if err := ds.AddTransaction(message.BookkeepingTransaction); err != nil {
@@ -521,7 +517,7 @@ func (ds *DbftService) Timeout() {
 			block := ds.context.MakeHeader()
 			account,_:= ds.Client.GetAccount(ds.context.Miners[ds.context.MinerIndex])
 			//TODO: add error catch
-			ds.context.Signatures[ds.context.MinerIndex],_ = sig.SignBySigner(block,account)
+			ds.context.Signatures[ds.context.MinerIndex], _ = sig.SignBySigner(block, account)
 			//TODO: add error catch
 		}
 		payload := ds.context.MakePrepareRequest()
