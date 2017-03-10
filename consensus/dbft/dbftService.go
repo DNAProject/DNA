@@ -239,9 +239,7 @@ func (ds *DbftService) InitializeConsensus(viewNum byte) error  {
 		ds.timerHeight = ds.context.Height
 		ds.timeView = viewNum
 		span := time.Now().Sub(ds.blockReceivedTime)
-		Trace()
 		if span > TimePerBlock {
-			Trace()
 			go ds.Timeout()
 		} else {
 			time.AfterFunc((TimePerBlock - span), ds.Timeout)
@@ -293,7 +291,6 @@ func (ds *DbftService) NewConsensusPayload(payload *msg.ConsensusPayload){
 		return
 	}
 
-	Trace()
 	if message.ViewNumber() != ds.context.ViewNumber && message.Type() != ChangeViewMsg {
 		fmt.Printf("message.ViewNumber()=%d\n",message.ViewNumber())
 		fmt.Printf("ds.context.ViewNumber=%d\n",ds.context.ViewNumber)
@@ -302,22 +299,18 @@ func (ds *DbftService) NewConsensusPayload(payload *msg.ConsensusPayload){
 		return
 	}
 
-	Trace()
 	switch message.Type() {
 	case ChangeViewMsg:
-		log.Info("==========Recieved Change view")
 		if cv, ok := message.(*ChangeView); ok {
 			ds.ChangeViewReceived(payload, cv)
 		}
 		break
 	case PrepareRequestMsg:
-		log.Info("==========Recieved PrepareRequest")
 		if pr, ok := message.(*PrepareRequest); ok {
 			ds.PrepareRequestReceived(payload, pr)
 		}
 		break
 	case PrepareResponseMsg:
-		log.Info("==========Recieved PrepareResponse")
 		if pres, ok := message.(*PrepareResponse); ok {
 			ds.PrepareResponseReceived(payload, pres)
 		}
