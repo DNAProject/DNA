@@ -61,6 +61,8 @@ func (bc *Blockchain) AddBlock(block *Block) error {
 			return err
 		}
 		bc.BlockHeight = bc.BlockHeight+1
+		bc.BlockCache.CheckAndAddBlockFromPool(bc.BlockHeight)
+
 	}
 	return nil
 }
@@ -142,6 +144,9 @@ func (bc *Blockchain) BlockAddVerifyOK(block *Block) bool{
 
 func (bp *BlockPool) CheckAndAddBlockFromPool(height uint32) error {
 	for _, v := range *bp {
+		if v.Blockdata.Height > height{
+			return nil
+		}
 		if v.Blockdata.Height==height{
 			err := DefaultLedger.Blockchain.AddBlock(&v)
 			if (err != nil) {
@@ -150,8 +155,8 @@ func (bp *BlockPool) CheckAndAddBlockFromPool(height uint32) error {
 			}
 		}
 		height++
+		DefaultLedger.Blockchain.BlockHeight = DefaultLedger.Blockchain.BlockHeight + 1
 	}
-
 	return nil
 }
 
