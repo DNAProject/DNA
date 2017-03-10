@@ -9,10 +9,15 @@ import (
 	"GoOnchain/events"
 	"errors"
 	"sync"
+	"fmt"
+	"bytes"
+	"sort"
 )
 
+type BlockPool []Block
+
 type Blockchain struct {
-	BlockCache  map[Uint256]*Block
+	BlockCache  BlockPool
 	BlockHeight uint32
 	BCEvents    *events.Event
 	mutex       sync.Mutex
@@ -21,7 +26,7 @@ type Blockchain struct {
 func NewBlockchain() *Blockchain {
 	return &Blockchain{
 		BlockHeight: 0,
-		BlockCache: make(map[Uint256]*Block),
+		BlockCache: BlockPool{},
 		BCEvents:   events.NewEvent(),
 	}
 }
@@ -35,7 +40,7 @@ func NewBlockchainWithGenesisBlock() (*Blockchain,error) {
 	genesisBlock.RebuildMerkleRoot()
 	hashx :=genesisBlock.Hash()
 	genesisBlock.hash = &hashx
-	blockchain.AddBlock(genesisBlock)
+	blockchain.SaveBlock(genesisBlock)
 	return blockchain,nil
 }
 
@@ -46,27 +51,34 @@ func (bc *Blockchain) AddBlock(block *Block) error {
 	bc.AddBlockCache(block)
 
 	//Block header verfiy
+	if ok:=bc.BlockAddVerifyOK(block);ok{
+		//save block
+		buf := bytes.NewBuffer([]byte{})
+		block.Serialize(buf)
+		fmt.Printf("***Blockchain Height %d,AddBlock detail %d\n",bc.BlockHeight,buf.Bytes())
+		err := bc.SaveBlock(block)
+		if err != nil {
+			return err
+		}
+		bc.BlockHeight = bc.BlockHeight+1
+		bc.BlockCache.CheckAndAddBlockFromPool(bc.BlockHeight)
 
-	//save block
-	err := bc.SaveBlock(block)
-	if err != nil {
-		return err
 	}
-
 	return nil
 }
 
 func (bc *Blockchain) AddBlockCache(block *Block) {
 	bc.mutex.Lock()
 	defer bc.mutex.Unlock()
-	if _, ok := bc.BlockCache[block.Hash()]; !ok {
-		bc.BlockCache[block.Hash()] = block
-	}
+	bc.BlockCache.AddBlockToPool(block)
 }
 
 func (bc *Blockchain) ContainsBlock(hash Uint256) bool {
-	//TODO: implement ContainsBlock
-	return false
+	_,err:=DefaultLedger.GetBlockWithHash(hash)
+	if err!= nil{
+		return false
+	}
+	return true
 }
 
 func (bc *Blockchain) GetHeader(hash Uint256) (*Header,error) {
@@ -116,3 +128,55 @@ func (bc *Blockchain) CurrentBlockHash() Uint256 {
 	return DefaultLedger.Store.GetCurrentBlockHash()
 }
 
+func (bc *Blockchain) BlockAddVerifyOK(block *Block) bool{
+	bc.mutex.Lock()
+	defer bc.mutex.Unlock()
+	fmt.Println(block.Blockdata.Height)
+	fmt.Println(DefaultLedger.Blockchain.BlockHeight)
+	if block.Blockdata.Height != DefaultLedger.Blockchain.BlockHeight +1{
+		return false
+	}
+	if ok:=bc.ContainsBlock(block.Hash());ok{
+		return false
+	}
+	return true
+}
+
+func (bp *BlockPool) CheckAndAddBlockFromPool(height uint32) error {
+	for _, v := range *bp {
+		if v.Blockdata.Height > height{
+			return nil
+		}
+		if v.Blockdata.Height==height{
+			err := DefaultLedger.Blockchain.AddBlock(&v)
+			if (err != nil) {
+				log.Warn("Add block error and blockheight is ",v.Blockdata.Height)
+				return errors.New("Add block error from BlockPool\n")
+			}
+		}
+		height++
+		DefaultLedger.Blockchain.BlockHeight = DefaultLedger.Blockchain.BlockHeight + 1
+	}
+	return nil
+}
+
+func (b BlockPool) Len() int           { return len(b) }
+func (b BlockPool) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+func (b BlockPool) Less(i, j int) bool { return b[i].Blockdata.Height < b[j].Blockdata.Height}
+
+func (bp *BlockPool) CheckBlockPoolIsExist(bk *Block) bool{
+	for _, v := range *bp {
+		if v.Blockdata.Height == bk.Blockdata.Height {
+			return  true
+		}
+	}
+	return false
+}
+
+func (bp *BlockPool) AddBlockToPool(bk *Block) error {
+	if exist:=bp.CheckBlockPoolIsExist(bk); !exist{
+		*bp = append(*bp,*bk)
+	}
+	sort.Sort(BlockPool(*bp))
+	return nil
+}
