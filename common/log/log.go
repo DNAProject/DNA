@@ -1,21 +1,27 @@
 package log
 
-import(
+import (
+	"GoOnchain/common"
+	"GoOnchain/config"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
 	"strings"
-	"io"
-	"bytes"
-	"time"
 	"sync"
+	"time"
+)
+
+const (
+	PRINTLEVEL = 0
 )
 
 const (
 	debugLog = iota
 	infoLog
-	warningLog
+	warnLog
 	errorLog
 	fatalLog
 	numSeverity = 5
@@ -23,17 +29,17 @@ const (
 
 var (
 	levels = map[int]string{
-		debugLog:    "DEBUG",
-		infoLog:     "INFO",
-		warningLog:  "WARNING",
-		errorLog:    "ERROR",
-		fatalLog:	 "FATAL",
+		debugLog: "DEBUG",
+		infoLog:  "INFO",
+		warnLog:  "WARN",
+		errorLog: "ERROR",
+		fatalLog: "FATAL",
 	}
 )
 
 const (
 	namePrefix = "LEVEL"
-	callDepth = 2
+	callDepth  = 2
 )
 
 var Log *Logger
@@ -59,12 +65,12 @@ func NameLevel(name string) int {
 	return level
 }
 
-func AddBracket(s string) string{
+func AddBracket(s string) string {
 	b := bytes.Buffer{}
-    b.WriteString("[")
-    b.WriteString(s)
-    b.WriteString("]")
-    return b.String()
+	b.WriteString("[")
+	b.WriteString(s)
+	b.WriteString("]")
+	return b.String()
 }
 
 type Logger struct {
@@ -80,7 +86,13 @@ func New(out io.Writer, prefix string, flag, level int) *Logger {
 }
 
 func (l *Logger) output(level int, s string) error {
-	return l.logger.Output(callDepth, AddBracket(LevelName(level))+" "+s)
+	if (level == 0) || (level == 3) {
+		gid := common.GetGID()
+		gidStr := strconv.FormatUint(gid, 10)
+		return l.logger.Output(callDepth, AddBracket(LevelName(level))+" "+"GID"+" "+gidStr+", "+s)
+	} else {
+		return l.logger.Output(callDepth, AddBracket(LevelName(level))+" "+s)
+	}
 }
 
 func (l *Logger) Output(level int, a ...interface{}) error {
@@ -102,10 +114,10 @@ func (l *Logger) Info(a ...interface{}) {
 	l.Output(infoLog, a...)
 }
 
-func (l *Logger) Warning(a ...interface{}) {
+func (l *Logger) Warn(a ...interface{}) {
 	lock.Lock()
 	defer lock.Unlock()
-	l.Output(warningLog, a...)
+	l.Output(warnLog, a...)
 }
 
 func (l *Logger) Error(a ...interface{}) {
@@ -128,8 +140,8 @@ func Info(a ...interface{}) {
 	Log.Info(fmt.Sprint(a...))
 }
 
-func Warning(a ...interface{}) {
-	Log.Warning(fmt.Sprint(a...))
+func Warn(a ...interface{}) {
+	Log.Warn(fmt.Sprint(a...))
 }
 
 func Error(a ...interface{}) {
@@ -155,27 +167,32 @@ func FileOpen(path string) (*os.File, error) {
 
 	var currenttime string = time.Now().Format("2006-01-02")
 
-	logfile,err := os.OpenFile(path + currenttime + "_LOG.log", os.O_RDWR| os.O_CREATE, 0666)
-	if err != nil{
+	logfile, err := os.OpenFile(path+currenttime+"_LOG.log", os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 		//os.Exit(-1)
 	}
 
-	//defer logfile.Close()	
+	//defer logfile.Close()
 
 	return logfile, nil
 }
 
-func CreatePrintLog(path string){
+func CreatePrintLog(path string) {
 	logfile, err := FileOpen(path)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error)
 	}
-	var printlevel int = 1
-	Log = New(logfile, "\r\n", log.Ldate|log.Ltime|log.Llongfile, printlevel)
+	var printlevel int = config.Parameters.PrintLevel
+	writers := []io.Writer{
+		logfile,
+		os.Stdout,
+	}
+	fileAndStdoutWrite := io.MultiWriter(writers...)
+
+	Log = New(fileAndStdoutWrite, "\r\n", log.Lmicroseconds, printlevel)
 }
 
-func ClosePrintLog(){
+func ClosePrintLog() {
 	//TODO
 }
-

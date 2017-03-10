@@ -4,11 +4,15 @@ import (
 	"GoOnchain/common"
 	. "GoOnchain/net/message"
 	. "GoOnchain/net/protocol"
+	. "GoOnchain/config"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"net"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,6 +25,7 @@ type link struct {
 		p   []byte
 		len int
 	}
+	connCnt	uint64		// The connection count
 }
 
 // Shrinking the buf to the exactly reading in byte length
@@ -28,7 +33,6 @@ type link struct {
 func unpackNodeBuf(node *node, buf []byte) {
 	var msgLen int
 	var msgBuf []byte
-
 	if node.rxBuf.p == nil {
 		if len(buf) < MSGHDRLEN {
 			fmt.Println("Unexpected size of received message")
@@ -36,7 +40,7 @@ func unpackNodeBuf(node *node, buf []byte) {
 			return
 		}
 		// FIXME Check the payload < 0 error case
-		fmt.Printf("The Rx msg payload is %d\n", PayloadLen(buf))
+		//fmt.Printf("The Rx msg payload is %d\n", PayloadLen(buf))
 		msgLen = PayloadLen(buf) + MSGHDRLEN
 	} else {
 		msgLen = node.rxBuf.len
@@ -92,9 +96,24 @@ disconnect:
 	return err
 }
 
+func printIPAddr() {
+	host, _ := os.Hostname()
+	addrs, _ := net.LookupIP(host)
+	for _, addr := range addrs {
+		if ipv4 := addr.To4(); ipv4 != nil {
+			fmt.Println("IPv4: ", ipv4)
+		}
+	}
+}
+
+func (link link) CloseConn() {
+	link.conn.Close()
+}
+
 // Init the server port, should be run in another thread
 func (n *node) initConnection() {
-	listener, err := net.Listen("tcp", "localhost:"+strconv.Itoa(NODETESTPORT))
+	common.Trace()
+	listener, err := net.Listen("tcp", ":"+strconv.Itoa(Parameters.NodePort))
 	if err != nil {
 		fmt.Println("Error listening\n", err.Error())
 		return
@@ -106,23 +125,27 @@ func (n *node) initConnection() {
 			fmt.Println("Error accepting\n", err.Error())
 			return
 		}
+		fmt.Println("Remote node connect with ", conn.RemoteAddr(), conn.LocalAddr())
+
+		n.link.connCnt++
+
 		node := NewNode()
-		// Currently we use the address as the ID
-		node.id = conn.RemoteAddr().String()
-		node.addr = conn.RemoteAddr().String()
+		node.addr, err = parseIPaddr(conn.RemoteAddr().String())
 		node.local = n
-		fmt.Println("Remote node %s connect with %s\n",
-			conn.RemoteAddr(), conn.LocalAddr())
 		node.conn = conn
-		// TOOD close the conn when erro happened
-		// TODO lock the node and assign the connection to Node.
-		n.neighb.add(node)
 		go node.rx()
-		// FIXME is there any timing race with rx
-		buf, _ := NewVersion(n)
-		go node.Tx(buf)
 	}
 	//TODO When to free the net listen resouce?
+}
+
+
+func parseIPaddr(s string) (string, error) {
+	i := strings.Index(s, ":")
+	if (i < 0) {
+		fmt.Printf("Split IP address&port  error\n")
+		return s, errors.New("Split IP address&port error")
+	}
+	return s[:i], nil
 }
 
 func (node *node) Connect(nodeAddr string) {
@@ -133,39 +156,40 @@ func (node *node) Connect(nodeAddr string) {
 			fmt.Println("Error dialing\n", err.Error())
 			return err
 		}
+		node.link.connCnt++
 
 		n := NewNode()
 		n.conn = conn
-		n.id = conn.RemoteAddr().String()
-		n.addr = conn.RemoteAddr().String()
-		// FixMe Only for testing
-		n.height = 1000
+		n.addr, err = parseIPaddr(conn.RemoteAddr().String())
 		n.local = node
 
 		fmt.Printf("Connect node %s connect with %s with %s\n",
 			conn.LocalAddr().String(), conn.RemoteAddr().String(),
 			conn.RemoteAddr().Network())
-		// TODO Need lock
-		node.neighb.add(n)
 		go n.rx()
 
+		time.Sleep(2 * time.Second)
 		// FIXME is there any timing race with rx
-//		buf, _ := NewVersion(node)
-//		go n.Tx(buf)
+		buf, _ := NewVersion(node)
+		n.Tx(buf)
+
 		return nil
 	}
 }
 
 // TODO construct a TX channel and other application just drop the message to the channel
 func (node node) Tx(buf []byte) {
-	node.chF <- func() error {
-		common.Trace()
-		_, err := node.conn.Write(buf)
-		if err != nil {
-			fmt.Println("Error sending messge to peer node\n", err.Error())
-		}
-		return err
+	//node.chF <- func() error {
+	common.Trace()
+	str := hex.EncodeToString(buf)
+	fmt.Printf("TX buf length: %d\n%s\n", len(buf), str)
+
+	_, err := node.conn.Write(buf)
+	if err != nil {
+		fmt.Println("Error sending messge to peer node\n", err.Error())
 	}
+	//return err
+	//}
 }
 
 // func (net net) Xmit(inv Inventory) error {

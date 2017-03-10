@@ -2,17 +2,18 @@ package node
 
 import (
 	"GoOnchain/common"
-	"GoOnchain/core/transaction"
+	"GoOnchain/common/log"
+	. "GoOnchain/config"
 	"GoOnchain/core/ledger"
-	"math/rand"
+	"GoOnchain/core/transaction"
 	. "GoOnchain/net/message"
 	. "GoOnchain/net/protocol"
+	"errors"
 	"fmt"
+	"math/rand"
 	"net"
 	"runtime"
-	"sync/atomic"
 	"time"
-	"errors"
 )
 
 // The node capability flag
@@ -23,49 +24,54 @@ const (
 )
 
 type node struct {
-	state          uint      // node status
-	id             string    // The nodes's id, MAC or IP?
-	addr           string    // The address of the node
-	conn           net.Conn  // Connect socket with the peer node
-	nonce          uint32    // Random number to identify different entity from the same IP
-	cap            uint32    // The node capability set
-	version        uint32    // The network protocol the node used
-	services       uint64    // The services the node supplied
-	port           uint16    // The server port of the node
-	relay          bool      // The relay capability of the node (merge into capbility flag)
-	handshakeRetry uint32    // Handshake retry times
-	handshakeTime  time.Time // Last Handshake trigger time
-	height         uint64    // The node latest block height
-	time           time.Time // The latest time the node activity
+	state    uint   // node status
+	id       uint64 // The nodes's id
+	cap      uint32 // The node capability set
+	version  uint32 // The network protocol the node used
+	services uint64 // The services the node supplied
+	relay    bool   // The relay capability of the node (merge into capbility flag)
+	height   uint64 // The node latest block height
 	// TODO does this channel should be a buffer channel
-	chF   chan func() error // Channel used to operate the node without lock
-	rxBuf struct {          // The RX buffer of this node to solve mutliple packets problem
-		p   []byte
-		len int
-	}
-	link           // The link status and infomation
-	local  *node   // The pointer to local node
-	neighb nodeMap // The neighbor node connect with currently node except itself
-	//neighborNodes	*nodeMAP	// The node connect with it except the local node
-	eventQueue // The event queue to notice notice other modules
-	TXNPool    // Unconfirmed transaction pool
-	idCache    // The buffer to store the id of the items which already be processed
-	ledger  *ledger.Ledger	// The Local ledger 
-	private *uint // Reserver for future using
+	chF        chan func() error // Channel used to operate the node without lock
+	link                         // The link status and infomation
+	local      *node             // The pointer to local node
+	nbrNodes                     // The neighbor node connect with currently node except itself
+	eventQueue                   // The event queue to notice notice other modules
+	TXNPool                      // Unconfirmed transaction pool
+	idCache                      // The buffer to store the id of the items which already be processed
+	ledger     *ledger.Ledger    // The Local ledger
 }
 
-func (node node) dumpInfo() {
+func (node node) DumpInfo() {
 	fmt.Printf("Node info:\n")
 	fmt.Printf("\t state = %d\n", node.state)
-	fmt.Printf("\t id = %s\n", node.id)
+	fmt.Printf("\t id = 0x%x\n", node.id)
 	fmt.Printf("\t addr = %s\n", node.addr)
 	fmt.Printf("\t conn = %v\n", node.conn)
-	fmt.Printf("\t nonce = %d\n", node.nonce)
 	fmt.Printf("\t cap = %d\n", node.cap)
 	fmt.Printf("\t version = %d\n", node.version)
 	fmt.Printf("\t services = %d\n", node.services)
 	fmt.Printf("\t port = %d\n", node.port)
 	fmt.Printf("\t relay = %v\n", node.relay)
+	fmt.Printf("\t height = %v\n", node.height)
+
+	fmt.Printf("\t conn cnt = %v\n", node.link.connCnt)
+}
+
+func (node *node) UpdateInfo(t time.Time, version uint32, services uint64,
+	port uint16, nonce uint64, relay uint8, height uint64) {
+	// TODO need lock
+	node.UpdateTime(t)
+	node.id = nonce
+	node.version = version
+	node.services = services
+	node.port = port
+	if relay == 0 {
+		node.relay = false
+	} else {
+		node.relay = true
+	}
+	node.height = uint64(height)
 }
 
 func NewNode() *node {
@@ -73,52 +79,51 @@ func NewNode() *node {
 		state: INIT,
 		chF:   make(chan func() error),
 	}
-	// Update nonce
 	runtime.SetFinalizer(&n, rmNode)
 	go n.backend()
 	return &n
 }
 
-func InitNode() Tmper {
+func InitNode() Noder {
 	var err error
 	n := NewNode()
 
 	n.version = PROTOCOLVERSION
 	n.services = NODESERVICES
-	n.port = NODETESTPORT
+	n.link.port = uint16(Parameters.NodePort)
 	n.relay = true
 	rand.Seed(time.Now().UTC().UnixNano())
 	// Fixme replace with the real random number
-	n.nonce = rand.Uint32()
-
-	n.neighb.init()
+	n.id = uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
+	fmt.Printf("Init node ID to 0x%0x \n", n.id)
+	n.nbrNodes.init()
 	n.local = n
 	n.TXNPool.init()
 	n.eventQueue.init()
 	n.ledger, err = ledger.GetDefaultLedger()
 	if err != nil {
+		fmt.Printf("Get Default Ledger error\n")
 		errors.New("Get Default Ledger error")
-		// FIXME report the error
 	}
 
 	go n.initConnection()
 	go n.updateNodeInfo()
+
 	return n
 }
 
 func rmNode(node *node) {
-	fmt.Printf("Remove node %s\n", node.addr)
+	log.Debug(fmt.Sprintf("Remove unused/deuplicate node: 0x%0x", node.id))
 }
 
 // TODO pass pointer to method only need modify it
 func (node *node) backend() {
-	common.Trace()
 	for f := range node.chF {
 		f()
 	}
 }
 
-func (node node) GetID() string {
+func (node node) GetID() uint64 {
 	return node.id
 }
 
@@ -132,10 +137,6 @@ func (node node) getConn() net.Conn {
 
 func (node node) GetPort() uint16 {
 	return node.port
-}
-
-func (node node) GetNonce() uint32 {
-	return node.nonce
 }
 
 func (node node) GetRelay() bool {
@@ -154,25 +155,8 @@ func (node *node) SetState(state uint) {
 	node.state = state
 }
 
-func (node node) GetHandshakeTime() time.Time {
-	return node.handshakeTime
-}
-
-func (node *node) SetHandshakeTime(t time.Time) {
-	node.handshakeTime = t
-}
-
 func (node *node) LocalNode() Noder {
 	return node.local
-}
-
-func (node node) GetHandshakeRetry() uint32 {
-	return atomic.LoadUint32(&(node.handshakeRetry))
-}
-
-func (node *node) SetHandshakeRetry(r uint32) {
-	node.handshakeRetry = r
-	atomic.StoreUint32(&(node.handshakeRetry), r)
 }
 
 func (node node) GetHeight() uint64 {
@@ -194,25 +178,56 @@ func (node node) GetMemoryPool() map[common.Uint256]*transaction.Transaction {
 
 func (node node) SynchronizeMemoryPool() {
 	// Fixme need lock
-	for _, n := range node.neighb.List {
+	for _, n := range node.nbrNodes.List {
 		if n.state == ESTABLISH {
-			ReqMemoryPool(&node)
+			ReqMemoryPool(n)
 		}
 	}
 }
 
 func (node node) Xmit(inv common.Inventory) error {
-	// Fixme here we only consider 1 inventory case
-	var msg Inv
-	t := "inv"
-	copy(msg.Hdr.CMD[0:len(t)], t)
-	msg.P.InvType = uint8(inv.Type())
-	// FIXME filling the inventory header
-	hash := inv.Hash()
-	msg.P.Blk = hash[:]
-	buf, _ := msg.Serialization()
-	node.neighb.Broadcast(buf)
-	// FIXME currenly we have no error check
+	common.Trace()
+	var buffer []byte
+	var err error
+	if inv.Type() == common.TRANSACTION {
+		log.Info("****TX transaction message*****\n")
+		transaction, isTransaction := inv.(*transaction.Transaction)
+		if isTransaction {
+			//transaction.Serialize(tmpBuffer)
+			buffer, err = NewTx(transaction)
+			if err != nil {
+				fmt.Println("Error New Tx message ", err.Error())
+				return err
+			}
+		}
+
+	} else if inv.Type() == common.BLOCK {
+		log.Info("****TX block message****\n")
+		block, isBlock := inv.(*ledger.Block)
+		if isBlock {
+			buffer, err = NewBlock(block)
+			if err != nil {
+				fmt.Println("Error New Block message ", err.Error())
+				return err
+			}
+		}
+	} else if inv.Type() == common.CONSENSUS {
+		log.Info("*****TX consensus message****\n")
+		payload, isConsensusPayload := inv.(*ConsensusPayload)
+		if isConsensusPayload {
+			buffer, err = NewConsensus(payload)
+			if err != nil {
+				fmt.Println("Error New consensus message ", err.Error())
+				return err
+			}
+		}
+	}  else {
+		log.Info("Unknow Xmit message type")
+		return errors.New("Unknow Xmit message type\n")
+ 	}
+
+	node.nbrNodes.Broadcast(buffer)
+
 	return nil
 }
 
@@ -220,16 +235,41 @@ func (node node) GetAddr() string {
 	return node.addr
 }
 
-func (node *node) GetAddrs() ([]string, uint) {
-	var addrstr []string
-	var i uint = 0
-	// TODO write lock
-	for _, node := range node.neighb.List {
-		s := node.GetState()
-		if s == ESTABLISH {
-			addrstr[i] = node.addr
-			i++
-		}
+func (node node) GetAddr16() ([16]byte, error) {
+	var result [16]byte
+	ip := net.ParseIP(node.addr).To16()
+	if ip == nil {
+		fmt.Printf("Parse IP address error\n")
+		return result, errors.New("Parse IP address error")
 	}
-	return addrstr, i
+
+	copy(result[:], ip[:16])
+	return result, nil
+}
+
+func (node node) GetTime() int64 {
+	t := time.Now()
+	return t.UnixNano()
+}
+
+func (node node) GetNeighborAddrs() ([]NodeAddr, uint64) {
+	var i uint64
+	var addrs []NodeAddr
+	// TODO read lock
+	for _, n := range node.nbrNodes.List {
+		if n.GetState() != ESTABLISH {
+			continue
+		}
+		var addr NodeAddr
+		addr.IpAddr, _ = n.GetAddr16()
+		addr.Time = n.GetTime()
+		addr.Services = n.Services()
+		addr.Port = n.GetPort()
+		addr.ID = n.GetID()
+		addrs = append(addrs, addr)
+
+		i++
+	}
+
+	return addrs, i
 }

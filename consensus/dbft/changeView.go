@@ -6,14 +6,15 @@ import (
 )
 
 type ChangeView struct {
-	msgData *ConsensusMessageData
+	msgData ConsensusMessageData
 	NewViewNumber byte
 }
 
 
-func (cv *ChangeView) Serialize(w io.Writer){
+func (cv *ChangeView) Serialize(w io.Writer)error{
 	cv.msgData.Serialize(w)
 	w.Write([]byte{cv.NewViewNumber})
+	return nil
 }
 
 //read data to reader
@@ -36,6 +37,6 @@ func (cv *ChangeView) ViewNumber() byte{
 }
 
 func (cv *ChangeView) ConsensusMessageData() *ConsensusMessageData{
-	return cv.msgData
+	return &(cv.msgData)
 }
 

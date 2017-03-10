@@ -12,7 +12,12 @@
       "02486fd15702c4490a26703112a5cc1d0923fd697a33406bd5a1c00e0013b09a70"
     ],
     "SeedList": [
-      "seed5.antshares.org:20333"
-    ]
+      "192.168.33.11:20338"
+    ],
+    "HttpJsonPort": 20337,
+    "HttpLocalPort": 20336,
+    "NodePort": 20338,
+    "MinerName": "c4",
+    "PrintLevel": 0
   }
 }

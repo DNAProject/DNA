@@ -2,12 +2,11 @@ package crypto
 
 import (
 	. "GoOnchain/errors"
-	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"errors"
-	"io"
 	"math/big"
+	"crypto/ecdsa"
 )
 
 const (
@@ -21,17 +20,6 @@ const (
 	NOCOMPRESSEDFLAG = 0x04
 	P256PARAMA       = -3
 )
-
-type PubKey ECPoint
-
-func (e *PubKey) Serialize(w io.Writer) {
-	//TODO: implement PubKey.serialize
-}
-
-func (e *PubKey) DeSerialize(r io.Reader) error {
-	//TODO
-	return nil
-}
 
 func isEven(k *big.Int) bool {
 	z := big.NewInt(0)
@@ -222,8 +210,8 @@ func deCompress(yTilde int, xValue []byte, curve *elliptic.CurveParams) (*PubKey
 	xCoord.SetBytes(xValue)
 
 	//y**2 = x**3 + A*x +B, A = -3, there is no A's clear definition in the realization of p256.
-	paramA := big.NewInt(P256PARAMA)
-
+	paramA := new(big.Int).Set(Crypto.EccParamA)
+	//paramA := big.NewInt(P256PARAMA)
 	//compute x**3 + A*x +B
 	ySqare := big.NewInt(0)
 	ySqare.Exp(xCoord, big.NewInt(2), curve.P)
@@ -249,17 +237,16 @@ func deCompress(yTilde int, xValue []byte, curve *elliptic.CurveParams) (*PubKey
 }
 
 // DecodePoint is used for restoring the PublicKey
-// fix me: when the value of encodeData[0] is 0x00, should it return an err?
 func DecodePoint(encodeData []byte) (*PubKey, error) {
 	if nil == encodeData {
 		return nil, NewDetailErr(errors.New("The encodeData cann't be nil"), ErrNoCode, "")
 	}
 
-	expectedLength := (Crypto.eccParams.P.BitLen() + 7) / 8
+	expectedLength := (Crypto.EccParams.P.BitLen() + 7) / 8
 
 	switch encodeData[0] {
 	case 0x00:
-		return nil, NewDetailErr(errors.New("The encodeData format is error"), ErrNoCode, "")
+		return &PubKey{nil, nil}, nil
 
 	case 0x02, 0x03: //compressed
 		if len(encodeData) != expectedLength+1 {
@@ -268,7 +255,7 @@ func DecodePoint(encodeData []byte) (*PubKey, error) {
 
 		yTilde := int(encodeData[0] & 1)
 		pubKey, err := deCompress(yTilde, encodeData[FLAGLEN:FLAGLEN+XORYVALUELEN],
-			&Crypto.eccParams)
+			&Crypto.EccParams)
 		if nil != err {
 			return nil, NewDetailErr(err, ErrNoCode, "Invalid point encoding")
 		}
@@ -285,11 +272,11 @@ func DecodePoint(encodeData []byte) (*PubKey, error) {
 }
 
 // EncodePoint is used for compressing PublicKey for less space used as same as which in bitcoin.
-// fix me: when the point is Infinity, should it return an err?
 func (e *PubKey) EncodePoint(isCommpressed bool) ([]byte, error) {
 	//if X is infinity, then Y cann't be computed, so here used "||"
 	if nil == e.X || nil == e.Y {
-		return nil, NewDetailErr(errors.New("The PubKey is an infinity point"), ErrNoCode, "")
+		infinity := make([]byte, 1)
+		return infinity, nil
 	}
 
 	var encodedData []byte
@@ -318,37 +305,17 @@ func (e *PubKey) EncodePoint(isCommpressed bool) ([]byte, error) {
 }
 
 func NewPubKey(prikey []byte) *PubKey {
-	//TODO: NewPubKey
-	return nil
-}
-
-func GenPrivKey() []byte {
-	return nil
-}
-
-//FIXME, does the privkey need base58 encoding?
-//This generates a public & private key pair
-func GenKeyPair() ([]byte, PubKey, error) {
-	pubkey := new(PubKey)
 	privatekey := new(ecdsa.PrivateKey)
-	privatekey, err := ecdsa.GenerateKey(Crypto.curve, rand.Reader)
-	if err != nil {
-		return nil, *pubkey, errors.New("Generate key pair error")
-	}
+	privatekey.PublicKey.Curve = Crypto.Curve
 
-	privkey := privatekey.D.Bytes()
+	k := new(big.Int)
+	k.SetBytes(prikey)
+	privatekey.D = k
+
+	privatekey.PublicKey.X, privatekey.PublicKey.Y = Crypto.Curve.ScalarBaseMult(k.Bytes())
+
+	pubkey := new(PubKey)
 	pubkey.X = privatekey.PublicKey.X
 	pubkey.Y = privatekey.PublicKey.Y
-	return privkey, *pubkey, nil
-}
-
-type PubKeySlice []*PubKey
-
-func (p PubKeySlice) Len() int { return len(p) }
-func (p PubKeySlice) Less(i, j int) bool {
-	//TODO:PubKeySlice Less
-	return false
-}
-func (p PubKeySlice) Swap(i, j int) {
-	//TODO:PubKeySlice Swap
+	return pubkey
 }

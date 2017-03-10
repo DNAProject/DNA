@@ -8,6 +8,7 @@ import (
 	"GoOnchain/core/contract/program"
 	. "GoOnchain/core/asset"
 	"GoOnchain/common/serialization"
+	"GoOnchain/common/log"
 	"bytes"
 	"fmt"
 	tx "GoOnchain/core/transaction"
@@ -19,7 +20,12 @@ type LevelDBStore struct {
 	db *leveldb.DB // LevelDB instance
 	b  *leveldb.Batch
 	it *Iterator
-	header_index *[]Uint256
+
+	header_index map[uint32]*Uint256
+	current_block_height uint32
+}
+
+func init() {
 }
 
 func NewLevelDBStore(file string) (*LevelDBStore, error) {
@@ -39,13 +45,12 @@ func NewLevelDBStore(file string) (*LevelDBStore, error) {
 		return nil, err
 	}
 
-	var headerindex = make ([]Uint256,0)
-
 	return &LevelDBStore{
 		db: db,
 		b: nil,
 		it: nil,
-		header_index: &headerindex,
+		header_index: map[uint32]*Uint256{},
+		current_block_height: 0,
 	}, nil
 }
 
@@ -160,7 +165,8 @@ func (bd *LevelDBStore) GetBlockHash(height uint32) (Uint256, error) {
 }
 
 func (bd *LevelDBStore) GetCurrentBlockHash() Uint256 {
-	return Uint256{}
+
+	return *bd.header_index[bd.current_block_height]
 }
 
 func (bd *LevelDBStore) GetContract(hash []byte) ([]byte, error) {
@@ -231,7 +237,7 @@ func (bd *LevelDBStore) GetHeader(hash Uint256) (*Header, error) {
 
 	prefix := []byte{ byte(DATA_Header) }
 	data,err_get := bd.Get( append(prefix,hash.ToArray()...) )
-	fmt.Printf( "Get Header Data: %x\n",  data )
+	//fmt.Printf( "Get Header Data: %x\n",  data )
 	if ( err_get != nil ) {
 		//TODO: implement error process
 		return nil, err_get
@@ -309,30 +315,32 @@ func (bd *LevelDBStore) GetNextBlockHash(hash []byte) common.Uint256 {
 */
 
 func (bd *LevelDBStore) GetTransaction(hash Uint256) (*tx.Transaction, error) {
-
-	fmt.Printf( "GetTransaction Hash: %x\n",  hash )
-
+	Trace()
+	log.Debug(fmt.Sprintf("GetTransaction Hash: %x\n", hash))
 	t := new(tx.Transaction)
-	err := bd.getTx( t, hash )
+	err := bd.getTx(t, hash)
 
-	return t,err
+	if err != nil  {
+		return nil, err
+	}
+
+	return t, err
 }
 
 func (bd *LevelDBStore) getTx(tx *tx.Transaction, hash Uint256) error {
-	fmt.Printf( "getTx Hash: %x\n",  hash )
-
 	prefix := []byte{ byte(DATA_Transaction) }
-	tHash,err_get := bd.Get( append(prefix,hash.ToArray()...) )
-	fmt.Printf( "getTx Data: %x\n",  tHash )
+	tHash, err_get := bd.Get( append(prefix,hash.ToArray()...) )
+	fmt.Printf("getTx Data: %x\n", tHash)
 	if ( err_get != nil ) {
 		//TODO: implement error process
+		log.Warn("Get TX from DB error")
 		return err_get
 	}
 
 	r := bytes.NewReader(tHash)
 
 	// get height
-	height,err := serialization.ReadUint32(r)
+	height, err := serialization.ReadUint32(r)
 	fmt.Printf( "tx height: %d\n",  height )
 
 	// Deserialize Transaction
@@ -461,6 +469,11 @@ func (bd *LevelDBStore) SaveBlock(b *Block) error {
 			bd.SaveTransaction(b.Transcations[i],b.Blockdata.Height)
 		}
 	}
+
+	// save hash with height
+	bd.current_block_height = b.Blockdata.Height
+	bh := b.Blockdata.Hash()
+	bd.header_index[b.Blockdata.Height] = &bh
 
 	return nil
 }

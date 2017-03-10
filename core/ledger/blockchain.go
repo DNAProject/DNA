@@ -23,16 +23,23 @@ type Blockchain struct {
 
 func NewBlockchain() *Blockchain {
 	return &Blockchain{
+		BlockHeight: 0,
 		BlockCache: make(map[Uint256]*Block),
 		BCEvents:   events.NewEvent(),
 	}
 }
 
-func NewBlockchainWithGenesisBlock() *Blockchain {
+func NewBlockchainWithGenesisBlock() (*Blockchain,error) {
 	blockchain := NewBlockchain()
-	blockchain.AddBlock(GenesisBlockInit())
-
-	return blockchain
+	genesisBlock,err:=GenesisBlockInit()
+	if err != nil{
+		return nil,NewDetailErr(err, ErrNoCode, "[Blockchain], NewBlockchainWithGenesisBlock failed.")
+	}
+	genesisBlock.RebuildMerkleRoot()
+	hashx :=genesisBlock.Hash()
+	genesisBlock.hash = &hashx
+	blockchain.AddBlock(genesisBlock)
+	return blockchain,nil
 }
 
 func (bc *Blockchain) AddBlock(block *Block) error {
@@ -85,7 +92,7 @@ func (bc *Blockchain) SaveBlock(block *Block) error {
 
 func (bc *Blockchain) ContainsTransaction(hash Uint256) bool {
 	//TODO: implement error catch
-	tx ,_ := DefaultLedger.Store.GetTransaction(hash)
+	tx, _ := DefaultLedger.Store.GetTransaction(hash)
 	if tx != nil{
 		return true
 	}
@@ -94,12 +101,16 @@ func (bc *Blockchain) ContainsTransaction(hash Uint256) bool {
 
 func (bc *Blockchain) GetMinersByTXs(others []*tx.Transaction) []*crypto.PubKey {
 	//TODO: GetMiners()
-	return nil
+	//TODO: Just for TestUse
+
+	return StandbyMiners
 }
 
 func (bc *Blockchain) GetMiners() []*crypto.PubKey {
 	//TODO: GetMiners()
-	return nil
+	//TODO: Just for TestUse
+
+	return StandbyMiners
 }
 
 func (bc *Blockchain) CurrentBlockHash() Uint256 {

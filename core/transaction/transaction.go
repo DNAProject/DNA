@@ -63,16 +63,27 @@ type Transaction struct {
 }
 
 //Serialize the Transaction
-func (tx *Transaction) Serialize(w io.Writer) {
+func (tx *Transaction) Serialize(w io.Writer) error{
 
-	tx.SerializeUnsigned(w)
-
-	//Serialize  Transaction's programs
-	len := uint64(len(tx.Programs))
-	serialization.WriteVarUint(w, len)
-	for _, p := range tx.Programs {
-		p.Serialize(w)
+	err :=tx.SerializeUnsigned(w)
+	if err != nil {
+		return NewDetailErr(err, ErrNoCode, "Transaction txSerializeUnsigned Serialize failed.")
 	}
+	//Serialize  Transaction's programs
+	lens := uint64(len(tx.Programs))
+	err =serialization.WriteVarUint(w, lens)
+	if err != nil {
+		return NewDetailErr(err, ErrNoCode, "Transaction WriteVarUint failed.")
+	}
+	if lens >0 {
+		for _, p := range tx.Programs {
+			err = p.Serialize(w)
+			if err != nil {
+				return NewDetailErr(err, ErrNoCode, "Transaction Programs Serialize failed.")
+			}
+		}
+	}
+	return nil
 }
 
 //Serialize the Transaction data without contracts
@@ -87,22 +98,26 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 	}
 	tx.Payload.Serialize(w)
 	//nonce
-	//serialization.WriteVarUint(w, tx.Nonce)
+	serialization.WriteVarUint(w, tx.Nonce)
 	//[]*txAttribute
 	err := serialization.WriteVarUint(w, uint64(len(tx.Attributes)))
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "Transaction item txAttribute length serialization failed.")
 	}
-	for _, attr := range tx.Attributes {
-		attr.Serialize(w)
+	if len(tx.Attributes) > 0 {
+		for _, attr := range tx.Attributes {
+			attr.Serialize(w)
+		}
 	}
 	//[]*UTXOInputs
 	err = serialization.WriteVarUint(w, uint64(len(tx.UTXOInputs)))
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "Transaction item UTXOInputs length serialization failed.")
 	}
-	for _, utxo := range tx.UTXOInputs {
-		utxo.Serialize(w)
+	if len(tx.UTXOInputs) > 0 {
+		for _, utxo := range tx.UTXOInputs {
+			utxo.Serialize(w)
+		}
 	}
 	/*
 		//[]*BalanceInputs
@@ -119,8 +134,10 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "Transaction item Outputs length serialization failed.")
 	}
-	for _, output := range tx.Outputs {
-		output.Serialize(w)
+	if len(tx.Outputs) > 0 {
+		for _, output := range tx.Outputs {
+			output.Serialize(w)
+		}
 	}
 
 	return nil
@@ -132,17 +149,17 @@ func (tx *Transaction) Deserialize(r io.Reader) error {
 	tx.DeserializeUnsigned(r)
 
 	// tx program
-	len, _ := serialization.ReadVarUint(r, 0)
+	lens, _ := serialization.ReadVarUint(r, 0)
 
 	programHashes := []*program.Program{}
-
-	for i := 0; i < int(len); i++ {
-		outputHashes := new(program.Program)
-		outputHashes.Deserialize(r)
-		programHashes = append(programHashes, outputHashes)
+	if lens>0 {
+		for i := 0; i < int(lens); i++ {
+			outputHashes := new(program.Program)
+			outputHashes.Deserialize(r)
+			programHashes = append(programHashes, outputHashes)
+		}
+		tx.Programs = programHashes
 	}
-	tx.Programs = programHashes
-
 	return nil
 }
 
@@ -177,6 +194,9 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 		tx.Payload.Deserialize(r)
 	} else if tx.TxType == IssueAsset {
 		// Asset Issue
+	}else if tx.TxType == BookKeeping{
+		tx.Payload = new(payload.MinerPayload)
+		tx.Payload.Deserialize(r)
 	}
 	//	else if tx.TxType == 0x00 {
 	//		// Miner
@@ -184,31 +204,41 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 	//		tx.Payload.Deserialize(r)
 	//	}
 	//attributes
+
+	nonce, err := serialization.ReadVarUint(r, 0)
+	if err != nil {
+		return errors.New("Parse nonce error")
+	}
+	tx.Nonce = nonce
+
 	Len, err := serialization.ReadVarUint(r, 0)
 	if err != nil {
 		return err
 	}
-	for i := uint64(0); i < Len; i++ {
-		attr := new(TxAttribute)
-		err = attr.Deserialize(r)
-		if err != nil {
-			return err
+	if Len > uint64(0) {
+		for i := uint64(0); i < Len; i++ {
+			attr := new(TxAttribute)
+			err = attr.Deserialize(r)
+			if err != nil {
+				return err
+			}
+			tx.Attributes = append(tx.Attributes, attr)
 		}
-		tx.Attributes = append(tx.Attributes, attr)
 	}
-
 	//UTXOInputs
 	Len, err = serialization.ReadVarUint(r, 0)
 	if err != nil {
 		return err
 	}
-	for i := uint64(0); i < Len; i++ {
-		utxo := new(UTXOTxInput)
-		err = utxo.Deserialize(r)
-		if err != nil {
-			return err
+	if Len > uint64(0) {
+		for i := uint64(0); i < Len; i++ {
+			utxo := new(UTXOTxInput)
+			err = utxo.Deserialize(r)
+			if err != nil {
+				return err
+			}
+			tx.UTXOInputs = append(tx.UTXOInputs, utxo)
 		}
-		tx.UTXOInputs = append(tx.UTXOInputs, utxo)
 	}
 	/*
 		//balanceInputs
@@ -230,11 +260,13 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 	if err != nil {
 		return err
 	}
-	for i := uint64(0); i < Len; i++ {
-		output := new(TxOutput)
-		output.Deserialize(r)
+	if Len > uint64(0) {
+		for i := uint64(0); i < Len; i++ {
+			output := new(TxOutput)
+			output.Deserialize(r)
 
-		tx.Outputs = append(tx.Outputs, output)
+			tx.Outputs = append(tx.Outputs, output)
+		}
 	}
 	return nil
 }

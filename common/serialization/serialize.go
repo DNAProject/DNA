@@ -15,10 +15,10 @@ var ErrEof = errors.New("got EOF, can not get the next byte")
 type SerializableData interface {
 
 	//Write data to writer
-	Serialize(w io.Writer)
+	Serialize(w io.Writer) error
 
 	//read data to reader
-	Deserialize(r io.Reader)
+	Deserialize(r io.Reader) error
 }
 
 func WriteDataList(w io.Writer, list []SerializableData) error {

@@ -2,13 +2,26 @@ package message
 
 import (
 	"GoOnchain/common"
+	"GoOnchain/common/serialization"
+	"GoOnchain/core/ledger"
 	. "GoOnchain/net/protocol"
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"unsafe"
 )
+
+type InventoryType byte
+
+type blocksReq struct {
+	Hdr             msgHdr
+	HeaderHashCount []byte
+	HashStart       []common.Uint256
+	HashStop        common.Uint256
+}
 
 type invPayload struct {
 	InvType uint8
@@ -18,6 +31,49 @@ type invPayload struct {
 type Inv struct {
 	Hdr msgHdr
 	P   invPayload
+}
+
+func (msg blocksReq) Verify(buf []byte) error {
+
+	// TODO verify the message Content
+	err := msg.Hdr.Verify(buf)
+	return err
+}
+
+func (msg blocksReq) Handle(node Noder) error {
+	common.Trace()
+
+	var starthash []common.Uint256
+	var stophash common.Uint256
+	starthash = msg.HashStart
+	stophash = msg.HashStop
+	//FIXME if HeaderHashCount > 1
+	inv := GetInvFromBlockHash(starthash[0], stophash)
+	buf, _ := NewInv(inv)
+	go node.Tx(buf)
+	return nil
+}
+
+func (msg blocksReq) Serialization() ([]byte, error) {
+	var buf bytes.Buffer
+
+	fmt.Printf("The size of messge is %d in serialization\n",
+		uint32(unsafe.Sizeof(msg)))
+	err := binary.Write(&buf, binary.LittleEndian, msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), err
+}
+
+func (msg *blocksReq) Deserialization(p []byte) error {
+	fmt.Printf("The size of messge is %d in deserialization\n",
+		uint32(unsafe.Sizeof(*msg)))
+
+	buf := bytes.NewBuffer(p)
+	err := binary.Read(buf, binary.LittleEndian, msg)
+	return err
 }
 
 func (msg Inv) Verify(buf []byte) error {
@@ -61,15 +117,14 @@ func (msg Inv) Handle(node Noder) error {
 }
 
 func (msg Inv) Serialization() ([]byte, error) {
-	var buf bytes.Buffer
-
 	fmt.Printf("The size of messge is %d in serialization\n",
 		uint32(unsafe.Sizeof(msg)))
-
-	err := binary.Write(&buf, binary.LittleEndian, msg)
+	hdrBuf, err := msg.Hdr.Serialization()
 	if err != nil {
 		return nil, err
 	}
+	buf := bytes.NewBuffer(hdrBuf)
+	msg.P.Serialization(buf)
 
 	return buf.Bytes(), err
 }
@@ -110,4 +165,76 @@ func (msg Inv) invLen() (uint64, uint8) {
 	}
 
 	return val, size
+}
+
+func GetInvFromBlockHash(starthash common.Uint256, stophash common.Uint256) invPayload {
+	//FIXME need add error handle for GetBlockWithHash
+	var stopheight uint32
+	var count uint32 = 0
+	var i uint32
+	/*wait for GetBlockWithHash commit
+	var empty common.Uint256
+	bkstart, _ := ledger.DefaultLedger.Blockchain.GetBlockWithHash(starthash)
+	startheight := bkstart.Blockdata.Height
+	if (stophash != empty){
+		bkstop, _ := ledger.DefaultLedger.Blockchain.GetBlockWithHash(starthash)
+		stopheight = bkstop.Blockdata.Height
+		count = startheight - stopheight
+		if (count >= 500) {
+			count = 500
+		}
+	}else{
+		count = 500
+	}
+	*/
+
+	tmpBuffer := bytes.NewBuffer([]byte{})
+	for i = 1; i <= count; i++ {
+		//FIXME need add error handle for GetBlockWithHash
+		hash, _ := ledger.DefaultLedger.Store.GetBlockHash(stopheight + i)
+		hash.Serialize(tmpBuffer)
+	}
+	var inv invPayload
+	inv.Blk = tmpBuffer.Bytes()
+	inv.InvType = 0x02
+	return inv
+}
+
+func NewInv(inv invPayload) ([]byte, error) {
+	var msg Inv
+
+	msg.P.Blk = inv.Blk
+	msg.P.InvType = inv.InvType
+	msg.Hdr.Magic = NETMAGIC
+	cmd := "inv"
+	copy(msg.Hdr.CMD[0:len(cmd)], cmd)
+	tmpBuffer := bytes.NewBuffer([]byte{})
+	inv.Serialization(tmpBuffer)
+
+	b := new(bytes.Buffer)
+	err := binary.Write(b, binary.LittleEndian, tmpBuffer.Bytes())
+	if err != nil {
+		fmt.Println("Binary Write failed at new Msg")
+		return nil, err
+	}
+	s := sha256.Sum256(b.Bytes())
+	s2 := s[:]
+	s = sha256.Sum256(s2)
+	buf := bytes.NewBuffer(s[:4])
+	binary.Read(buf, binary.LittleEndian, &(msg.Hdr.Checksum))
+	msg.Hdr.Length = uint32(len(buf.Bytes()))
+	fmt.Printf("The message payload length is %d\n", msg.Hdr.Length)
+
+	m, err := msg.Serialization()
+	if err != nil {
+		fmt.Println("Error Convert net message ", err.Error())
+		return nil, err
+	}
+
+	return m, nil
+}
+
+func (msg *invPayload) Serialization(w io.Writer) {
+	serialization.WriteUint8(w, msg.InvType)
+	serialization.WriteVarBytes(w, msg.Blk)
 }
