@@ -9,6 +9,8 @@ import (
 	"GoOnchain/events"
 	"errors"
 	"sync"
+	"fmt"
+	"bytes"
 )
 
 type Blockchain struct {
@@ -48,11 +50,14 @@ func (bc *Blockchain) AddBlock(block *Block) error {
 	//Block header verfiy
 
 	//save block
+	buf := bytes.NewBuffer([]byte{})
+	block.Serialize(buf)
+	fmt.Printf("***Blockchain Height %d,AddBlock detail %d\n",bc.BlockHeight,buf.Bytes())
 	err := bc.SaveBlock(block)
 	if err != nil {
 		return err
 	}
-
+	bc.BlockHeight = bc.BlockHeight+1
 	return nil
 }
 
