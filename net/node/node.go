@@ -209,17 +209,16 @@ func (node node) Xmit(inv common.Inventory) error {
 			log.Warn("Wrong block be Xmit")
 			return errors.New("Wrong block be Xmit")
 		}
-		if block.Blockdata.Height==ledger.DefaultLedger.Blockchain.BlockHeight +1 {
-			err := ledger.DefaultLedger.Blockchain.AddBlock(block)
-			if (err != nil) {
-				log.Warn("Add block error")
-				return errors.New("Add block error before Xmit")
-			}
-			buffer, err = NewBlock(block)
-			if err != nil {
-				log.Warn("Error New Block message ", err.Error())
-				return err
-			}
+
+		err := ledger.DefaultLedger.Blockchain.AddBlock(block)
+		if (err != nil) {
+			log.Warn("Add block error")
+			return errors.New("Add block error before Xmit")
+		}
+		buffer, err = NewBlock(block)
+		if err != nil {
+			log.Warn("Error New Block message ", err.Error())
+			return err
 		}
 	} else if inv.Type() == common.CONSENSUS {
 		log.Info("*****TX consensus message****\n")

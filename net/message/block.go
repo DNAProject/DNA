@@ -11,12 +11,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"sort"
-	"sync"
 )
-
-var DefaultBlockPool BlockPool
-type BlockPool []ledger.Block
 
 type blockReq struct {
 	msgHdr
@@ -26,68 +21,22 @@ type blockReq struct {
 type block struct {
 	msgHdr
 	blk ledger.Block
-	mu           sync.Mutex
 	// TBD
 	//event *events.Event
 }
 
 func (msg block) Handle(node Noder) error {
 	common.Trace()
-	msg.mu.Lock()
-	defer msg.mu.Unlock()
-	log.Debug("RX block message and the block height is ",msg.blk.Blockdata.Height)
-	if msg.blk.Blockdata.Height == ledger.DefaultLedger.Blockchain.BlockHeight + 1{
-		err := ledger.DefaultLedger.Blockchain.AddBlock(&msg.blk)
-		if (err != nil) {
-			log.Warn("Add block error")
-			return errors.New("Add block error before Xmit\n")
-		}
-		DefaultBlockPool.CheckAndAddBlockFromPool(msg.blk.Blockdata.Height+1)
-		node.LocalNode().GetEvent("block").Notify(events.EventNewInventory, &msg.blk)
-	}else {
-		if msg.blk.Blockdata.Height > (ledger.DefaultLedger.Blockchain.BlockHeight + 1){
-			msg.AddBlockToPool()
-		}
+
+	log.Debug("RX block message")
+	err := ledger.DefaultLedger.Blockchain.AddBlock(&msg.blk)
+	if (err != nil) {
+		log.Warn("Add block error")
+		return errors.New("Add block error before Xmit\n")
 	}
+	node.LocalNode().GetEvent("block").Notify(events.EventNewInventory, &msg.blk)
 	return nil
 }
-
-func (msg *block) AddBlockToPool() error {
-	if exist:=msg.CheckBlockPoolIsExist(); !exist{
-		DefaultBlockPool = append(DefaultBlockPool,msg.blk)
-	}
-	sort.Sort(BlockPool(DefaultBlockPool))
-	return nil
-}
-
-func (msg *block) CheckBlockPoolIsExist() bool{
-	for _, v := range DefaultBlockPool {
-	    if v.Blockdata.Height == msg.blk.Blockdata.Height {
-		    return  true
-	    }
-	}
-	return false
-}
-
-func (bp *BlockPool) CheckAndAddBlockFromPool(height uint32) error {
-	for _, v := range *bp {
-		if v.Blockdata.Height==height{
-			err := ledger.DefaultLedger.Blockchain.AddBlock(&v)
-			if (err != nil) {
-				log.Warn("Add block error and blockheight is ",v.Blockdata.Height)
-				return errors.New("Add block error from BlockPool\n")
-			}
-		}
-		height++
-	}
-
-	return nil
-}
-
-func (b BlockPool) Len() int           { return len(b) }
-func (b BlockPool) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
-func (b BlockPool) Less(i, j int) bool { return b[i].Blockdata.Height < b[j].Blockdata.Height}
-
 
 func (msg dataReq) Handle(node Noder) error {
 	common.Trace()
