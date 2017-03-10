@@ -24,22 +24,22 @@ const (
 )
 
 type node struct {
-	state          uint      // node status
-	id             uint64    // The nodes's id
-	cap            uint32    // The node capability set
-	version        uint32    // The network protocol the node used
-	services       uint64    // The services the node supplied
-	relay          bool      // The relay capability of the node (merge into capbility flag)
-	height         uint64    // The node latest block height
+	state    uint   // node status
+	id       uint64 // The nodes's id
+	cap      uint32 // The node capability set
+	version  uint32 // The network protocol the node used
+	services uint64 // The services the node supplied
+	relay    bool   // The relay capability of the node (merge into capbility flag)
+	height   uint64 // The node latest block height
 	// TODO does this channel should be a buffer channel
-	chF   chan func() error // Channel used to operate the node without lock
-	link			// The link status and infomation
-	local  *node		// The pointer to local node
-	nbrNodes		// The neighbor node connect with currently node except itself
-	eventQueue                // The event queue to notice notice other modules
-	TXNPool                   // Unconfirmed transaction pool
-	idCache                   // The buffer to store the id of the items which already be processed
-	ledger     *ledger.Ledger // The Local ledger
+	chF        chan func() error // Channel used to operate the node without lock
+	link                         // The link status and infomation
+	local      *node             // The pointer to local node
+	nbrNodes                     // The neighbor node connect with currently node except itself
+	eventQueue                   // The event queue to notice notice other modules
+	TXNPool                      // Unconfirmed transaction pool
+	idCache                      // The buffer to store the id of the items which already be processed
+	ledger     *ledger.Ledger    // The Local ledger
 }
 
 func (node node) DumpInfo() {
@@ -84,7 +84,7 @@ func NewNode() *node {
 	return &n
 }
 
-func InitNode() Tmper {
+func InitNode() Noder {
 	var err error
 	n := NewNode()
 
@@ -108,11 +108,12 @@ func InitNode() Tmper {
 
 	go n.initConnection()
 	go n.updateNodeInfo()
+
 	return n
 }
 
 func rmNode(node *node) {
-	fmt.Printf("Remove node %s\n", node.addr)
+	log.Debug(fmt.Sprintf("Remove unused/deuplicate node: 0x%0x", node.id))
 }
 
 // TODO pass pointer to method only need modify it
@@ -203,12 +204,21 @@ func (node node) Xmit(inv common.Inventory) error {
 	} else if inv.Type() == common.BLOCK {
 		log.Info("****TX block message****\n")
 		block, isBlock := inv.(*ledger.Block)
-		if isBlock {
-			buffer, err = NewBlock(block)
-			if err != nil {
-				fmt.Println("Error New Block message ", err.Error())
-				return err
-			}
+		// FiXME, should be moved to higher layer
+		if isBlock == false {
+			log.Warn("Wrong block be Xmit")
+			return errors.New("Wrong block be Xmit")
+		}
+
+		err := ledger.DefaultLedger.Blockchain.AddBlock(block)
+		if (err != nil) {
+			log.Warn("Add block error")
+			return errors.New("Add block error before Xmit")
+		}
+		buffer, err = NewBlock(block)
+		if err != nil {
+			fmt.Println("Error New Block message ", err.Error())
+			return err
 		}
 	} else if inv.Type() == common.CONSENSUS {
 		log.Info("*****TX consensus message****\n")

@@ -15,7 +15,6 @@ import (
 const ContextVersion uint32 = 0
 
 type ConsensusContext struct {
-
 	State ConsensusState
 	PrevHash Uint256
 	Height uint32
@@ -60,7 +59,7 @@ func (cxt *ConsensusContext)  ChangeView(viewNum byte)  {
 
 	if cxt.State == Initial{
 		cxt.TransactionHashes = nil
-		cxt.Signatures = make([][]byte,len(cxt.Miners))
+		cxt.Signatures = make([][]byte, len(cxt.Miners))
 	}
 	cxt.header = nil
 }
@@ -137,7 +136,7 @@ func (cxt *ConsensusContext) MakePrepareRequest() *msg.ConsensusPayload{
 	return cxt.MakePayload(preReq)
 }
 
-func (cxt *ConsensusContext) MakePerpareResponse(signature []byte) *msg.ConsensusPayload{
+func (cxt *ConsensusContext) MakePrepareResponse(signature []byte) *msg.ConsensusPayload{
 	Trace()
 	preRes := &PrepareResponse{
 		Signature: signature,
@@ -149,7 +148,7 @@ func (cxt *ConsensusContext) MakePerpareResponse(signature []byte) *msg.Consensu
 func (cxt *ConsensusContext) GetSignaturesCount() (count int){
 	Trace()
 	count = 0
-	for _,sig := range cxt.Signatures {
+	for _, sig := range cxt.Signatures {
 		if sig != nil {
 			count += 1
 		}
@@ -193,7 +192,7 @@ func (cxt *ConsensusContext)  CheckTxHashesExist() bool {
 	return true
 }
 
-func (cxt *ConsensusContext) Reset(client *cl.Client){
+func (cxt *ConsensusContext) Reset(client cl.Client){
 	Trace()
 	cxt.State = Initial
 	cxt.PrevHash = ledger.DefaultLedger.Blockchain.CurrentBlockHash()
@@ -208,19 +207,18 @@ func (cxt *ConsensusContext) Reset(client *cl.Client){
 	cxt.Signatures = make([][]byte,minerLen)
 	cxt.ExpectedView = make([]byte,minerLen)
 
-	fmt.Println("minerLen=",minerLen)
-	    for _, v := range cxt.Miners {
-		    pubkey, _ := v.EncodePoint(true)
-	           fmt.Println("Miners pub key =",pubkey)
-	        }
+	log.Info("minerLen= ", minerLen)
+	for _, v := range cxt.Miners {
+		pubkey, _ := v.EncodePoint(true)
+		log.Info("Miners pub key = ", pubkey)
+	}
 
-	for i:=0;i<minerLen ;i++  {
+	for i := 0; i < minerLen; i++  {
 		if client.ContainsAccount(cxt.Miners[i]){
-			fmt.Println("Runed.")
 			cxt.MinerIndex = i
 			break
 		}
 	}
-	fmt.Println("cxt.MinerIndex = ",cxt.MinerIndex)
+	log.Info("cxt.MinerIndex = ", cxt.MinerIndex)
 	cxt.header = nil
 }
