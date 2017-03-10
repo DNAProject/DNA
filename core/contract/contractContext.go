@@ -60,7 +60,7 @@ func (cxt *ContractContext) AddContract(contract *Contract, pubkey *crypto.PubKe
 		// add multi sig contract
 
 		index := cxt.GetIndex(contract.ProgramHash)
-		if index <= 0 {
+		if index < 0 {
 			return errors.New("The program hash is not exist.")
 		}
 		if cxt.Codes[index] == nil {
@@ -170,9 +170,9 @@ func (cxt *ContractContext) GetIndex(programHash Uint160) int {
 
 func (cxt *ContractContext) GetPrograms() []*pg.Program {
 	Trace()
-	//fmt.Println("!cxt.IsCompleted()=",!cxt.IsCompleted())
-	//fmt.Println(cxt.Codes)
-	//fmt.Println(cxt.Parameters)
+	fmt.Println("!cxt.IsCompleted()=",!cxt.IsCompleted())
+	fmt.Println(cxt.Codes)
+	fmt.Println(cxt.Parameters)
 	if !cxt.IsCompleted() {
 		return nil
 	}
