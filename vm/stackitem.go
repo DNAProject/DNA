@@ -227,6 +227,11 @@ func (si *StackItem) GetBoolArray() []bool {
 	return bools
 }
 
+func (si *StackItem) GetBool() bool {
+	flag := si.array[0].(bool)
+	return flag
+}
+
 func (si *StackItem) ToBool() bool {
 	return AsBool(si.array[0])
 }
@@ -235,8 +240,24 @@ func (si *StackItem) ToBigInt() *big.Int {
 	var bi big.Int
 
 	switch t := si.array[0].(type){
-	case []byte:
-		bi.SetBytes(t)
+		case []byte:
+			bi.SetBytes(t)
+		case int64:
+			bi.SetInt64(int64(t))
+		case int32:
+			bi.SetInt64(int64(t))
+		case int16:
+			bi.SetInt64(int64(t))
+		case int8:
+			bi.SetInt64(int64(t))
+		case uint64:
+			bi.SetUint64(uint64(t))
+		case uint32:
+			bi.SetUint64(uint64(t))
+		case uint16:
+			bi.SetUint64(uint64(t))
+		case uint8:
+			bi.SetUint64(uint64(t))
 	}
 
 	return &bi
