@@ -146,12 +146,12 @@ func (ds *DbftService) CheckSignatures() error{
 		cxt.Data.SetPrograms(cxt.GetPrograms())
 		block.Transcations = ds.context.GetTXByHashes()
 
-		con.Log(fmt.Sprintf("cxt.GetPrograms(): %d", cxt.GetPrograms()))
-		con.Log(fmt.Sprintf("cxt.Data.GetPrograms(): %d", cxt.Data.GetPrograms()))
-		con.Log(fmt.Sprintf("relay block: %d", block.Hash()))
+		log.Info(fmt.Sprintf("cxt.GetPrograms(): %d", cxt.GetPrograms()))
+		log.Info(fmt.Sprintf("cxt.Data.GetPrograms(): %d", cxt.Data.GetPrograms()))
+		log.Info(fmt.Sprintf("relay block: %d", block.Hash()))
 
 		if err := ds.localNet.Xmit(block); err != nil{
-			con.Log(fmt.Sprintf("reject block: %s", block.Hash()))
+			log.Warn(fmt.Sprintf("Reject block: %s", block.Hash()))
 		}
 
 		ds.context.State |= BlockSent
@@ -211,8 +211,8 @@ func (ds *DbftService) Halt() error  {
 	}
 
 	if ds.started {
-		ledger.DefaultLedger.Blockchain.BCEvents.UnSubscribe(events.EventBlockPersistCompleted,ds.blockPersistCompletedSubscriber)
-		ds.localNet.GetEvent("consensus").UnSubscribe(events.EventNewInventory,ds.newInventorySubscriber)
+		ledger.DefaultLedger.Blockchain.BCEvents.UnSubscribe(events.EventBlockPersistCompleted, ds.blockPersistCompletedSubscriber)
+		ds.localNet.GetEvent("consensus").UnSubscribe(events.EventNewInventory, ds.newInventorySubscriber)
 	}
 	return nil
 }
@@ -435,6 +435,7 @@ func  (ds *DbftService) RefreshPolicy(){
 
 func  (ds *DbftService) RequestChangeView() {
 	Trace()
+	// FIXME if there is no save block notifcation, when the timeout call this function it will crash
 	ds.context.ExpectedView[ds.context.MinerIndex]++
 	log.Info(fmt.Sprintf("Request change view: height=%d View=%d nv=%d state=%d",ds.context.Height,ds.context.ViewNumber,ds.context.MinerIndex,ds.context.State))
 
@@ -470,8 +471,7 @@ func (ds *DbftService) Timeout() {
 	if ds.timerHeight != ds.context.Height || ds.timeView != ds.context.ViewNumber {
 		return
 	}
-	log.Info("Timeout: height: ", ds.timerHeight, "View: ", ds.timeView, "State: ", ds.context.State)
-	log.Info(fmt.Sprintf("Timeout: height=%d View=%d state=%d",ds.timerHeight,ds.timeView,ds.context.State))
+	log.Info("Timeout: height: ", ds.timerHeight, " View: ", ds.timeView, " State: ", ds.context.State)
 	fmt.Printf(" ds.context.State %x\n", ds.context.State)
 	fmt.Println("ds.context.State.HasFlag(Primary)=",ds.context.State.HasFlag(Primary))
 	fmt.Println("ds.context.State.HasFlag(RequestSent)=",ds.context.State.HasFlag(RequestSent))
