@@ -10,6 +10,7 @@ import (
 	ser "GoOnchain/common/serialization"
 	cl "GoOnchain/client"
 	"fmt"
+	"sync"
 )
 
 const ContextVersion uint32 = 0
@@ -31,8 +32,9 @@ type ConsensusContext struct {
 	ExpectedView []byte
 
 	txlist []*tx.Transaction
-
 	header *ledger.Block
+
+	contextMu    sync.Mutex
 }
 
 func (cxt *ConsensusContext)  M() int {
@@ -170,6 +172,20 @@ func (cxt *ConsensusContext) GetTransactionList() []*tx.Transaction{
 	return cxt.txlist
 }
 
+func  (cxt *ConsensusContext) GetStateDetail() string{
+
+	return  fmt.Sprintf("Initial: %s, Primary: %s, Backup: %s, RequestSent: %s, RequestReceived: %s, SignatureSent: %s, BlockSent: %s, ",
+		cxt.State.HasFlag(Initial),
+		cxt.State.HasFlag(Backup),
+		cxt.State.HasFlag(Primary),
+		cxt.State.HasFlag(RequestSent),
+		cxt.State.HasFlag(RequestReceived),
+		cxt.State.HasFlag(SignatureSent),
+		cxt.State.HasFlag(BlockSent))
+
+}
+
+
 func (cxt *ConsensusContext)  GetTXByHashes()  []*tx.Transaction{
 	Trace()
 	TXs := []*tx.Transaction{}
@@ -206,10 +222,10 @@ func (cxt *ConsensusContext) Reset(client cl.Client){
 	cxt.Signatures = make([][]byte,minerLen)
 	cxt.ExpectedView = make([]byte,minerLen)
 
-	log.Info("minerLen= ", minerLen)
+	log.Debug("[Consensus Reset] minerLen= ", minerLen)
 	for _, v := range cxt.Miners {
 		pubkey, _ := v.EncodePoint(true)
-		log.Info("Miners pub key = ", pubkey)
+		log.Debug("[Consensus Reset] Miners pub key = ", pubkey)
 	}
 
 	for i := 0; i < minerLen; i++  {
@@ -218,6 +234,6 @@ func (cxt *ConsensusContext) Reset(client cl.Client){
 			break
 		}
 	}
-	log.Info("cxt.MinerIndex = ", cxt.MinerIndex)
+	log.Debug("cxt.MinerIndex = ", cxt.MinerIndex)
 	cxt.header = nil
 }
