@@ -194,7 +194,7 @@ func (node node) Xmit(inv common.Inventory) error {
 		transaction, ret := inv.(*transaction.Transaction)
 		if ret {
 			//transaction.Serialize(tmpBuffer)
-			buffer, err = NewTx(transaction)
+			buffer, err = NewTxn(transaction)
 			if err != nil {
 				log.Warn("Error New Tx message ", err.Error())
 				return err
@@ -211,7 +211,7 @@ func (node node) Xmit(inv common.Inventory) error {
 		}
 
 		err := ledger.DefaultLedger.Blockchain.AddBlock(block)
-		if (err != nil) {
+		if err != nil {
 			log.Warn("Add block error")
 			return errors.New("Add block error before Xmit")
 		}
@@ -230,10 +230,10 @@ func (node node) Xmit(inv common.Inventory) error {
 				return err
 			}
 		}
-	}  else {
+	} else {
 		log.Info("Unknown Xmit message type")
 		return errors.New("Unknow Xmit message type\n")
- 	}
+	}
 
 	node.nbrNodes.Broadcast(buffer)
 
