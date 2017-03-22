@@ -7,12 +7,12 @@ import (
 	"GoOnchain/crypto"
 	. "GoOnchain/errors"
 	"GoOnchain/events"
-	"errors"
 	"sync"
 )
 
 type Blockchain struct {
-	BlockCache  map[Uint256]*Block
+	//BlockCache  map[Uint256]*Block
+	GenesisBlock *Block
 	BlockHeight uint32
 	BCEvents    *events.Event
 	mutex       sync.Mutex
@@ -21,69 +21,59 @@ type Blockchain struct {
 func NewBlockchain() *Blockchain {
 	return &Blockchain{
 		BlockHeight: 0,
-		BlockCache: make(map[Uint256]*Block),
+		//BlockCache: make(map[Uint256]*Block),
 		BCEvents:   events.NewEvent(),
 	}
 }
 
-func NewBlockchainWithGenesisBlock() (*Blockchain,error) {
-	blockchain := NewBlockchain()
-	genesisBlock,err:=GenesisBlockInit()
-	if err != nil{
-		return nil,NewDetailErr(err, ErrNoCode, "[Blockchain], NewBlockchainWithGenesisBlock failed.")
-	}
-	genesisBlock.RebuildMerkleRoot()
-	hashx :=genesisBlock.Hash()
-	genesisBlock.hash = &hashx
-	blockchain.AddBlock(genesisBlock)
-	return blockchain,nil
-}
-
 func (bc *Blockchain) AddBlock(block *Block) error {
 	Trace()
+	bc.mutex.Lock()
+	defer bc.mutex.Unlock()
 
-	//set block cache
-	bc.AddBlockCache(block)
-
-	//Block header verfiy
-
-	//save block
 	err := bc.SaveBlock(block)
 	if err != nil {
 		return err
 	}
 
 	// Need atomic oepratoion
-	bc.BlockHeight++
+	bc.BlockHeight = bc.BlockHeight +1
+
 	return nil
 }
 
-func (bc *Blockchain) AddBlockCache(block *Block) {
-	bc.mutex.Lock()
-	defer bc.mutex.Unlock()
-	if _, ok := bc.BlockCache[block.Hash()]; !ok {
-		bc.BlockCache[block.Hash()] = block
-	}
-}
+//func (bc *Blockchain) AddBlockCache(block *Block) {
+//	bc.mutex.Lock()
+//	defer bc.mutex.Unlock()
+//	if _, ok := bc.BlockCache[block.Hash()]; !ok {
+//		bc.BlockCache[block.Hash()] = block
+//	}
+//}
 
 func (bc *Blockchain) ContainsBlock(hash Uint256) bool {
 	//TODO: implement ContainsBlock
+	Trace()
+	log.Info("bc.GenesisBlock.Hash()=",bc.GenesisBlock.Hash())
+	log.Info("Blockhash=",hash)
+	if hash == bc.GenesisBlock.Hash(){
+		return true
+	}
 	return false
 }
 
 func (bc *Blockchain) GetHeader(hash Uint256) (*Header,error) {
 	 header,err:=DefaultLedger.Store.GetHeader(hash)
 	if err != nil{
-		return nil, NewDetailErr(errors.New("[Blockchain], GetHeader failed."), ErrNoCode, "")
+		return nil, NewDetailErr(err, ErrNoCode, "[Blockchain], GetHeader failed.")
 	}
 	return header,nil
 }
 
 func (bc *Blockchain) SaveBlock(block *Block) error {
 	Trace()
-	err := DefaultLedger.Store.SaveBlock(block)
+	err := DefaultLedger.Store.SaveBlock(block,DefaultLedger)
 	if err != nil {
-		log.Error("Save block failure")
+		log.Error("Save block failure ,err=",err)
 		return err
 	}
 	bc.BCEvents.Notify(events.EventBlockPersistCompleted, block)
