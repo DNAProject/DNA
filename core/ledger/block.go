@@ -10,6 +10,7 @@ import (
 	"io"
 	"time"
 	"GoOnchain/vm"
+	"GoOnchain/common/log"
 )
 
 type Block struct {
@@ -91,6 +92,7 @@ func (b *Block) Hash() Uint256 {
 }
 
 func (b *Block) Verify() error {
+	log.Info("This function is expired.please use Validation/blockValidator to Verify Block.")
 	return nil
 }
 
@@ -142,9 +144,7 @@ func GenesisBlockInit() (*Block,error){
 	}
 	genesisBlock.Blockdata = genesisBlockdata
 
-	Transcations := []*tx.Transaction{}
-	Transcations = append(Transcations, trans)
-	genesisBlock.Transcations = Transcations
+	genesisBlock.Transcations = append(genesisBlock.Transcations,trans)
 
 	//hashx := genesisBlock.Hash()
 

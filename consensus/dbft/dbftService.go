@@ -586,7 +586,10 @@ func (ds *DbftService) Timeout() {
 
 			now := uint32(time.Now().Unix())
 			fmt.Println("ds.context.PrevHash", ds.context.PrevHash)
-			header, _ := ledger.DefaultLedger.Blockchain.GetHeader(ds.context.PrevHash)
+			header, err:= ledger.DefaultLedger.Blockchain.GetHeader(ds.context.PrevHash)
+			if err != nil {
+				log.Info("GetHeader failed with err:%s",err)
+			}
 			fmt.Println(" ledger.DefaultLedger.Blockchain.GetHeader(ds.context.PrevHash)", header)
 
 			//set context Timestamp

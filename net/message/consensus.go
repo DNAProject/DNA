@@ -40,7 +40,11 @@ type consensus struct {
 }
 
 func (cp *ConsensusPayload) Hash() common.Uint256 {
-	return common.Uint256{}
+	d := sig.GetHashData(cp)
+	temp := sha256.Sum256([]byte(d))
+	f := sha256.Sum256(temp[:])
+	hash := common.Uint256(f)
+	return hash
 }
 
 func (cp *ConsensusPayload) Verify() error {
