@@ -1,0 +1,16 @@
+/idea/*
+/temp/*
+idea/*
+temp/*
+temp/
+idea/
+.idea/
+GoOnchain.iml
+.log
+.DS_Store
+*.orig
+*.rej
+Log
+/core/*/*_test.go
+/core/*/*/*_test.go
+/config/*

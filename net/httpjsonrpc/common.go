@@ -1,11 +1,25 @@
 package httpjsonrpc
 
 import (
+	"GoOnchain/consensus/dbft"
+	"GoOnchain/core/ledger"
+	tx "GoOnchain/core/transaction"
+	. "GoOnchain/net/protocol"
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
+
+func init() {
+	mainMux.m = make(map[string]func(*http.Request, map[string]interface{}) map[string]interface{})
+}
+
+//an instance of the multiplexer
+var mainMux ServeMux
+var node Noder
+var dBFT *dbft.DbftService
 
 //multiplexer that keeps track of every function to be called on specific rpc call
 type ServeMux struct {
@@ -13,11 +27,48 @@ type ServeMux struct {
 	defaultFunction func(http.ResponseWriter, *http.Request)
 }
 
-//an instance of the multiplexer
-var mainMux ServeMux
+type BlockInfo struct {
+	Hash      string
+	BlockData *ledger.Blockdata
+}
 
-func InitServeMux() {
-	mainMux.m = make(map[string]func(*http.Request, map[string]interface{}) map[string]interface{})
+type TxInfo struct {
+	Hash string
+	Hex  string
+	Tx   *tx.Transaction
+}
+
+type TxoutInfo struct {
+	High  uint32
+	Low   uint32
+	Txout tx.TxOutput
+}
+
+type NodeInfo struct {
+	State    uint   // node status
+	Port     uint16 // The nodes's port
+	ID       uint64 // The nodes's id
+	Time     int64
+	Version  uint32 // The network protocol the node used
+	Services uint64 // The services the node supplied
+	Relay    bool   // The relay capability of the node (merge into capbility flag)
+	Height   uint64 // The node latest block height
+}
+
+type ConsensusInfo struct {
+	// TODO
+}
+
+func RegistRpcNode(n Noder) {
+	if node == nil {
+		node = n
+	}
+}
+
+func RegistDbftService(d *dbft.DbftService) {
+	if dBFT == nil {
+		dBFT = d
+	}
 }
 
 //a function to register functions to be called for specific rpc calls
@@ -113,4 +164,40 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write(data)
 	}
+}
+
+func responsePacking(result interface{}, id interface{}) map[string]interface{} {
+	resp := map[string]interface{}{
+		"Jsonrpc": "2.0",
+		"Result":  result,
+		"Id":      id,
+	}
+	return resp
+}
+
+// Call sends RPC request to server
+func Call(address string, method string, id interface{}, params []interface{}) ([]byte, error) {
+	data, err := json.Marshal(map[string]interface{}{
+		"method": method,
+		"id":     id,
+		"params": params,
+	})
+	if err != nil {
+		log.Fatalf("Marshal: %v", err)
+		return nil, err
+	}
+	resp, err := http.Post(address, "application/json", strings.NewReader(string(data)))
+	if err != nil {
+		log.Fatalf("Post: %v", err)
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("ReadAll: %v", err)
+		return nil, err
+	}
+
+	return body, nil
 }
