@@ -5,9 +5,9 @@ import (
 	"GoOnchain/common/log"
 	"GoOnchain/common/serialization"
 	"GoOnchain/core/ledger"
+	"GoOnchain/crypto"
 	. "GoOnchain/net/protocol"
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -213,9 +213,7 @@ func NewInv(inv invPayload) ([]byte, error) {
 		log.Error("Binary Write failed at new Msg", err.Error())
 		return nil, err
 	}
-	s := sha256.Sum256(b.Bytes())
-	s2 := s[:]
-	s = sha256.Sum256(s2)
+	s := crypto.DoubleHash256(b.Bytes())
 	buf := bytes.NewBuffer(s[:4])
 	binary.Read(buf, binary.LittleEndian, &(msg.Hdr.Checksum))
 	msg.Hdr.Length = uint32(len(buf.Bytes()))

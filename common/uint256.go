@@ -66,7 +66,7 @@ func (u *Uint256) Deserialize(r io.Reader) error {
 func (u *Uint256) ToString() string {
 	return string(u.ToArray())
 }
-
+				     
 func Uint256ParseFromBytes(f []byte) (Uint256,error){
 	if ( len(f) != 32 ) {
 		return Uint256{},NewDetailErr(errors.New("[Common]: Uint256ParseFromBytes err, len != 32"), ErrNoCode, "");

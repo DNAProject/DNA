@@ -4,7 +4,6 @@ import (
 	"GoOnchain/crypto/p256r1"
 	"GoOnchain/crypto/sm2"
 	"GoOnchain/crypto/util"
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
@@ -124,13 +123,19 @@ func (p PubKeySlice) Less(i, j int) bool {
 	//TODO:PubKeySlice Less
 	return false
 }
+
 func (p PubKeySlice) Swap(i, j int) {
 	//TODO:PubKeySlice Swap
 }
 
-func Sha256(value []byte) []byte {
-	data := make([]byte, 32)
-	digest := sha256.Sum256(value)
-	copy(data, digest[0:32])
-	return data
+func Hash256(value []byte) [util.HASHLEN]byte {
+	return util.Hash256(value)
+}
+
+func DoubleHash256(value []byte) [util.HASHLEN]byte {
+	return util.DoubleHash256(value)
+}
+
+func Hash160(value []byte) []byte {
+	return util.Hash160(value)
 }

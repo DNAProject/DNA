@@ -4,9 +4,9 @@ import (
 	"GoOnchain/common"
 	"GoOnchain/common/log"
 	"GoOnchain/core/ledger"
+	"GoOnchain/crypto"
 	. "GoOnchain/net/protocol"
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -62,9 +62,7 @@ func NewVersion(n Noder) ([]byte, error) {
 		log.Error("Binary Write failed at new Msg")
 		return nil, err
 	}
-	s := sha256.Sum256(p.Bytes())
-	s2 := s[:]
-	s = sha256.Sum256(s2)
+	s := crypto.DoubleHash256(p.Bytes())
 	buf := bytes.NewBuffer(s[:4])
 	binary.Read(buf, binary.LittleEndian, &(msg.Hdr.Checksum))
 	msg.Hdr.Length = uint32(len(p.Bytes()))

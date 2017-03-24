@@ -5,9 +5,9 @@ import (
 	"GoOnchain/common/log"
 	"GoOnchain/common/serialization"
 	"GoOnchain/core/ledger"
+	"GoOnchain/crypto"
 	. "GoOnchain/net/protocol"
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 )
@@ -30,7 +30,9 @@ type blkHeader struct {
 func NewHeadersReq(n Noder) ([]byte, error) {
 	var h headersReq
 
+	// Fixme correct with the exactly request length
 	h.p.len = 1
+	//Fixme! Should get the remote Node height.
 	buf := ledger.DefaultLedger.Blockchain.CurrentBlockHash()
 	copy(h.p.hashStart[:], reverse(buf[:]))
 
@@ -186,9 +188,7 @@ func NewHeaders(headers []ledger.Blockdata, count uint32) ([]byte, error) {
 		log.Error("Binary Write failed at new Msg")
 		return nil, err
 	}
-	s := sha256.Sum256(b.Bytes())
-	s2 := s[:]
-	s = sha256.Sum256(s2)
+	s := crypto.DoubleHash256(b.Bytes())
 	buf := bytes.NewBuffer(s[:4])
 	binary.Read(buf, binary.LittleEndian, &(msg.hdr.Checksum))
 	msg.hdr.Length = uint32(len(b.Bytes()))

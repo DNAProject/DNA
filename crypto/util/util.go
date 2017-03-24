@@ -5,7 +5,10 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
+	"io"
 	"math/big"
+
+	"golang.org/x/crypto/ripemd160"
 )
 
 const (
@@ -36,9 +39,23 @@ func RandomNum(n int) ([]byte, error) {
 	return b, nil
 }
 
-// Hash ---
-func Hash(data []byte) [HASHLEN]byte {
-	return sha256.Sum256(data)
+func Hash256(value []byte) [HASHLEN]byte {
+	var data [HASHLEN]byte
+	digest := sha256.Sum256(value)
+	copy(data[0:HASHLEN], digest[0:32])
+	return data
+}
+
+func DoubleHash256(value []byte) [HASHLEN]byte {
+	var data [HASHLEN]byte
+	digest1 := sha256.Sum256(value)
+	digest2 := sha256.Sum256(digest1[0:HASHLEN])
+	copy(data[0:HASHLEN], digest2[0:HASHLEN])
+	for i := 0; i < HASHLEN; i++ {
+		digest1[i] = 0
+		digest2[i] = 0
+	}
+	return data
 }
 
 // CheckMAC reports whether messageMAC is a valid HMAC tag for message.
@@ -49,8 +66,9 @@ func CheckMAC(message, messageMAC, key []byte) bool {
 	return hmac.Equal(messageMAC, expectedMAC)
 }
 
-func RIPEMD160(value []byte) []byte {
-	//TODO: implement RIPEMD160
-
-	return nil
+func Hash160(value []byte) []byte {
+	md := ripemd160.New()
+	io.WriteString(md, string(value))
+	f := md.Sum(nil)
+	return f
 }

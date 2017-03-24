@@ -4,7 +4,6 @@ import (
 	. "GoOnchain/common"
 	. "GoOnchain/errors"
 	"bytes"
-	"crypto/sha256"
 	"errors"
 )
 
@@ -14,8 +13,8 @@ var (
 		for _, d := range s {
 			d.Serialize(b)
 		}
-		temp := sha256.Sum256(b.Bytes())
-		f := sha256.Sum256(temp[:])
+
+		f := DoubleHash256(b.Bytes())
 		return Uint256(f)
 	}
 )
