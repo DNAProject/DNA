@@ -16,7 +16,6 @@ import (
 	"GoOnchain/crypto"
 	"GoOnchain/net"
 	"GoOnchain/net/httpjsonrpc"
-	"crypto/sha256"
 	"fmt"
 	"os"
 	"runtime"
@@ -198,7 +197,7 @@ func sampleTransaction(issuer *Account, admin *Account) *transaction.Transaction
 }
 func SampleAsset() *Asset {
 	var x string = "Onchain"
-	a1 := Asset{Uint256(sha256.Sum256([]byte("a"))), x, byte(0x00), AssetType(Share), UTXO}
+	a1 := Asset{Uint256(crypto.Hash256([]byte("a"))), x, byte(0x00), AssetType(Share), UTXO}
 	fmt.Println("  Asset generate complete. Func test Start...")
 	return &a1
 }

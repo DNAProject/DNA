@@ -3,9 +3,9 @@ package message
 import (
 	"GoOnchain/common"
 	"GoOnchain/common/log"
+	"GoOnchain/crypto"
 	. "GoOnchain/net/protocol"
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -231,9 +231,7 @@ func PayloadLen(buf []byte) int {
 }
 
 func checkSum(p []byte) []byte {
-	t := sha256.Sum256(p)
-	s := sha256.Sum256(t[:])
-
+	s := crypto.DoubleHash256(p)
 	// Currently we only need the front 4 bytes as checksum
 	return s[:CHECKSUMLEN]
 }

@@ -1,25 +1,24 @@
 package crypto
 
 import (
-	"errors"
+	//. "GoOnchain/common"
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"bytes"
-	"crypto/sha256"
-	. "GoOnchain/common"
+	"errors"
 )
 
-func ToAesKey( pwd []byte ) []byte {
-	pwdhash := sha256.Sum256(pwd)
-	pwdhash2 := sha256.Sum256(pwdhash[:])
+func ToAesKey(pwd []byte) []byte {
+	pwdhash := DoubleHash256(pwd)
+	for i := 0; i < len(pwd); i++ {
+		pwd[i] = 0
+	}
+	//ClearBytes(pwd, len(pwd))
 
-	ClearBytes(pwd,len(pwd))
-	ClearBytes(pwdhash[:],32)
-
-	return pwdhash2[:]
+	return pwdhash[:]
 }
 
-func AesEncrypt(plaintext []byte, key []byte, iv[]byte) ([]byte, error) {
+func AesEncrypt(plaintext []byte, key []byte, iv []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, errors.New("invalid decrypt key")
@@ -34,7 +33,7 @@ func AesEncrypt(plaintext []byte, key []byte, iv[]byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
-func AesDecrypt(ciphertext []byte, key []byte, iv[]byte) ([]byte, error) {
+func AesDecrypt(ciphertext []byte, key []byte, iv []byte) ([]byte, error) {
 
 	block, err := aes.NewCipher(key)
 	if err != nil {

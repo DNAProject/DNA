@@ -7,7 +7,6 @@ import (
 	. "GoOnchain/errors"
 	"GoOnchain/vm"
 	"bytes"
-	"crypto/sha256"
 	"io"
 )
 
@@ -44,7 +43,7 @@ func GetHashData(data SignableData) []byte {
 
 func GetHashForSigning(data SignableData) []byte {
 	//TODO: GetHashForSigning
-	temp := sha256.Sum256(GetHashData(data))
+	temp := crypto.Hash256(GetHashData(data))
 	return temp[:]
 }
 

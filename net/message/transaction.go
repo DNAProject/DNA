@@ -5,9 +5,9 @@ import (
 	"GoOnchain/common/log"
 	"GoOnchain/core/ledger"
 	"GoOnchain/core/transaction"
+	"GoOnchain/crypto"
 	. "GoOnchain/net/protocol"
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -109,9 +109,7 @@ func NewTxn(txn *transaction.Transaction) ([]byte, error) {
 		log.Error("Binary Write failed at new Msg")
 		return nil, err
 	}
-	s := sha256.Sum256(b.Bytes())
-	s2 := s[:]
-	s = sha256.Sum256(s2)
+	s := crypto.DoubleHash256(b.Bytes())
 	buf := bytes.NewBuffer(s[:4])
 	binary.Read(buf, binary.LittleEndian, &(msg.msgHdr.Checksum))
 	msg.msgHdr.Length = uint32(len(b.Bytes()))
@@ -147,7 +145,6 @@ func (msg trn) DeSerialization(p []byte) error {
 
 	return nil
 }
-
 
 type txnPool struct {
 	msgHdr

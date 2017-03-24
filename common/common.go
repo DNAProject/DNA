@@ -1,26 +1,21 @@
 package common
 
 import (
+	"GoOnchain/crypto/util"
 	. "GoOnchain/errors"
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	_ "io"
 	"math/rand"
-	"github.com/golang/crypto/ripemd160"
-	"encoding/hex"
-	"errors"
-	"io"
 )
 
 func ToCodeHash(code []byte) (Uint160, error) {
 	//TODO: ToCodeHash
-	temp := sha256.Sum256(code)
-	md := ripemd160.New()
-	io.WriteString(md, string(temp[:]))
-	f := md.Sum(nil)
-
+	temp := util.Hash256(code)
+	f := util.Hash160(temp[:])
 	hash, err := Uint160ParseFromBytes(f)
 	if err != nil {
 		return Uint160{}, NewDetailErr(errors.New("[Common] , ToCodeHash err."), ErrNoCode, "")

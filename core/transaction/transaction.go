@@ -7,8 +7,8 @@ import (
 	"GoOnchain/core/contract/program"
 	sig "GoOnchain/core/signature"
 	"GoOnchain/core/transaction/payload"
+	"GoOnchain/crypto"
 	. "GoOnchain/errors"
-	"crypto/sha256"
 	"errors"
 	"io"
 	"sort"
@@ -63,19 +63,19 @@ type Transaction struct {
 }
 
 //Serialize the Transaction
-func (tx *Transaction) Serialize(w io.Writer) error{
+func (tx *Transaction) Serialize(w io.Writer) error {
 
-	err :=tx.SerializeUnsigned(w)
+	err := tx.SerializeUnsigned(w)
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "Transaction txSerializeUnsigned Serialize failed.")
 	}
 	//Serialize  Transaction's programs
 	lens := uint64(len(tx.Programs))
-	err =serialization.WriteVarUint(w, lens)
+	err = serialization.WriteVarUint(w, lens)
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "Transaction WriteVarUint failed.")
 	}
-	if lens >0 {
+	if lens > 0 {
 		for _, p := range tx.Programs {
 			err = p.Serialize(w)
 			if err != nil {
@@ -152,7 +152,7 @@ func (tx *Transaction) Deserialize(r io.Reader) error {
 	lens, _ := serialization.ReadVarUint(r, 0)
 
 	programHashes := []*program.Program{}
-	if lens>0 {
+	if lens > 0 {
 		for i := 0; i < int(lens); i++ {
 			outputHashes := new(program.Program)
 			outputHashes.Deserialize(r)
@@ -194,7 +194,7 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 		tx.Payload.Deserialize(r)
 	} else if tx.TxType == IssueAsset {
 		// Asset Issue
-	}else if tx.TxType == BookKeeping{
+	} else if tx.TxType == BookKeeping {
 		tx.Payload = new(payload.MinerPayload)
 		tx.Payload.Deserialize(r)
 	}
@@ -341,12 +341,10 @@ func (tx *Transaction) GetMessage() []byte {
 func (tx *Transaction) Hash() Uint256 {
 	if tx.hash == nil {
 		d := sig.GetHashData(tx)
-		temp := sha256.Sum256([]byte(d))
-		f := Uint256(sha256.Sum256(temp[:]))
+		f := Uint256(crypto.DoubleHash256([]byte(d)))
 		tx.hash = &f
 	}
 	return *tx.hash
-
 }
 
 func (tx *Transaction) SetHash(hash Uint256) {
@@ -356,6 +354,7 @@ func (tx *Transaction) SetHash(hash Uint256) {
 func (tx *Transaction) Type() InventoryType {
 	return TRANSACTION
 }
+
 func (tx *Transaction) Verify() error {
 	//TODO: Verify()
 	return nil

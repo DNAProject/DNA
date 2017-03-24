@@ -153,6 +153,7 @@ func (node *node) CompareAndSetState(old, new uint32) bool {
 	return atomic.CompareAndSwapUint32(&(node.state), old, new)
 }
 
+
 func (node *node) LocalNode() Noder {
 	return node.local
 }
@@ -169,7 +170,6 @@ func (node node) Xmit(inv common.Inventory) error {
 	common.Trace()
 	var buffer []byte
 	var err error
-
 	if inv.Type() == common.TRANSACTION {
 		log.Info("****TX transaction message*****\n")
 		transaction, ret := inv.(*transaction.Transaction)

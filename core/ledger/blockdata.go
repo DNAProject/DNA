@@ -5,8 +5,8 @@ import (
 	"GoOnchain/common/serialization"
 	"GoOnchain/core/contract/program"
 	sig "GoOnchain/core/signature"
+	"GoOnchain/crypto"
 	. "GoOnchain/errors"
-	"crypto/sha256"
 	"errors"
 	"io"
 )
@@ -115,9 +115,9 @@ func (bd *Blockdata) GetProgramHashes() ([]Uint160, error) {
 
 	if bd.PrevBlockHash == zero {
 		pg := *bd.Program
-		outputHashes,err:=ToCodeHash(pg.Code)
-		if err !=nil{
-			return nil,NewDetailErr(err, ErrNoCode, "[Blockdata], GetProgramHashes failed.")
+		outputHashes, err := ToCodeHash(pg.Code)
+		if err != nil {
+			return nil, NewDetailErr(err, ErrNoCode, "[Blockdata], GetProgramHashes failed.")
 		}
 		programHashes = append(programHashes, outputHashes)
 		return programHashes, nil
@@ -146,13 +146,12 @@ func (bd *Blockdata) GetPrograms() []*program.Program {
 func (bd *Blockdata) Hash() Uint256 {
 
 	d := sig.GetHashData(bd)
-	temp := sha256.Sum256([]byte(d))
-	f := sha256.Sum256(temp[:])
+	f := crypto.DoubleHash256([]byte(d))
 	hash := Uint256(f)
 	return hash
 }
 
 func (bd *Blockdata) GetMessage() []byte {
 	//return sig.GetHashData(bd)
-	return  sig.GetHashForSigning(bd)
+	return sig.GetHashForSigning(bd)
 }

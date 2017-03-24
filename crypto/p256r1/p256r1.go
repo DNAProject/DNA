@@ -39,7 +39,7 @@ func Sign(Crypto *util.InterfaceCrypto, priKey []byte, data []byte) (*big.Int, *
 	// 	return nil, errors.New("Unexpected private key length")
 	// }
 
-	digest := util.Hash(data)
+	digest := util.Hash256(data)
 
 	privateKey := new(ecdsa.PrivateKey)
 	privateKey.Curve = Crypto.Curve
@@ -64,7 +64,7 @@ func Verify(Crypto *util.InterfaceCrypto, X *big.Int, Y *big.Int, data []byte, r
 		return false, errors.New("ECDSA signature contained zero or negative values")
 	}
 	*/
-	digest := util.Hash(data)
+	digest := util.Hash256(data)
 
 	pub := new(ecdsa.PublicKey)
 	pub.Curve = Crypto.Curve

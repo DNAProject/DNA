@@ -206,6 +206,7 @@ func (ds *DbftService) CheckSignatures() error {
 				j++
 			}
 		}
+
 		//set signed program to the block
 		cxt.Data.SetPrograms(cxt.GetPrograms())
 
