@@ -630,7 +630,7 @@ func (bd *LevelDBStore) persistBlocks() {
 	log.Debug("persistBlocks()")
 
 	if uint32(len(bd.header_index)) <= bd.current_block_height+1 {
-		fmt.Printf("[persistBlocks]: error, header_index.count < current_block_height + 1")
+		fmt.Printf("[persistBlocks]: error, header_index.count: %d < current_block_height + 1: %d\n", len(bd.header_index), bd.current_block_height+1)
 		return
 	}
 
@@ -655,40 +655,40 @@ func (bd *LevelDBStore) SaveBlock(b *Block, ledger *Ledger) error {
 		bd.block_cache[b.Hash()] = b
 	}
 	bd.persistBlocks()
-/*
-	if b.Blockdata.Height-uint32(len(bd.header_index)) >= 1 {
-		//return false,NewDetailErr(errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - header_index.count >= 1, block height:%d, header_index.count:%d",b.Blockdata.Height, uint32(len(bd.header_index)) )),ErrDuplicatedBlock,"")
-		return errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - header_index.count >= 1, block height:%d, header_index.count:%d", b.Blockdata.Height, uint32(len(bd.header_index))))
-	}
-
-	if b.Blockdata.Height == uint32(len(bd.header_index)) {
-		//Block verify
-		// TO TEST Verify func
-		err := validation.VerifyBlock(b, ledger, true)
-		if err != nil {
-			log.Debug("VerifyBlock() error!")
-			return err
+	/*
+		if b.Blockdata.Height-uint32(len(bd.header_index)) >= 1 {
+			//return false,NewDetailErr(errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - header_index.count >= 1, block height:%d, header_index.count:%d",b.Blockdata.Height, uint32(len(bd.header_index)) )),ErrDuplicatedBlock,"")
+			return errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - header_index.count >= 1, block height:%d, header_index.count:%d", b.Blockdata.Height, uint32(len(bd.header_index))))
 		}
 
-		batch := new(leveldb.Batch)
-		bd.onAddHeader(b.Blockdata, batch)
-		log.Debug("batch dump: ", batch.Dump())
-		err = bd.db.Write(batch, nil)
-		if err != nil {
-			return err
-		}
-	} else {
-		return errors.New("[SaveBlock] block height != header_index")
-	}
+		if b.Blockdata.Height == uint32(len(bd.header_index)) {
+			//Block verify
+			// TO TEST Verify func
+			err := validation.VerifyBlock(b, ledger, true)
+			if err != nil {
+				log.Debug("VerifyBlock() error!")
+				return err
+			}
 
-	if b.Blockdata.Height < uint32(len(bd.header_index)) {
-		// TODO: block event set
-		//new_block_event.Set();
-		bd.persistBlocks()
-	} else {
-		return errors.New("[SaveBlock] block height < header_index")
-	}
-*/
+			batch := new(leveldb.Batch)
+			bd.onAddHeader(b.Blockdata, batch)
+			log.Debug("batch dump: ", batch.Dump())
+			err = bd.db.Write(batch, nil)
+			if err != nil {
+				return err
+			}
+		} else {
+			return errors.New("[SaveBlock] block height != header_index")
+		}
+
+		if b.Blockdata.Height < uint32(len(bd.header_index)) {
+			// TODO: block event set
+			//new_block_event.Set();
+			bd.persistBlocks()
+		} else {
+			return errors.New("[SaveBlock] block height < header_index")
+		}
+	*/
 
 	return nil
 }

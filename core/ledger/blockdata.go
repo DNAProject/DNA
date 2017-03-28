@@ -28,7 +28,10 @@ type Blockdata struct {
 func (bd *Blockdata) Serialize(w io.Writer) {
 	bd.SerializeUnsigned(w)
 	w.Write([]byte{byte(1)})
-	bd.Program.Serialize(w)
+	//FIXME program shouldn't be nil
+	if bd.Program != nil {
+		bd.Program.Serialize(w)
+	}
 }
 
 //Serialize the blockheader data without program
@@ -115,9 +118,9 @@ func (bd *Blockdata) GetProgramHashes() ([]Uint160, error) {
 
 	if bd.PrevBlockHash == zero {
 		pg := *bd.Program
-		outputHashes,err:=ToCodeHash(pg.Code)
-		if err !=nil{
-			return nil,NewDetailErr(err, ErrNoCode, "[Blockdata], GetProgramHashes failed.")
+		outputHashes, err := ToCodeHash(pg.Code)
+		if err != nil {
+			return nil, NewDetailErr(err, ErrNoCode, "[Blockdata], GetProgramHashes failed.")
 		}
 		programHashes = append(programHashes, outputHashes)
 		return programHashes, nil
@@ -154,5 +157,5 @@ func (bd *Blockdata) Hash() Uint256 {
 
 func (bd *Blockdata) GetMessage() []byte {
 	//return sig.GetHashData(bd)
-	return  sig.GetHashForSigning(bd)
+	return sig.GetHashForSigning(bd)
 }

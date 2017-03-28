@@ -33,7 +33,7 @@ func (bc *Blockchain) AddBlock(block *Block) error {
 
 	// Need atomic oepratoion
 	bc.BlockHeight = bc.BlockHeight + 1
-
+	log.Debug("AddBlock block height: ", bc.BlockHeight)
 	return nil
 }
 
