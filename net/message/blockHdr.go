@@ -94,10 +94,12 @@ func (msg *blkHeader) Deserialization(p []byte) error {
 	buf := bytes.NewBuffer(p)
 	err := binary.Read(buf, binary.LittleEndian, &(msg.hdr))
 	err = binary.Read(buf, binary.LittleEndian, &(msg.cnt))
-	log.Debug("The block header count is ", msg.cnt)
-	msg.blkHdr = make([]ledger.Blockdata, msg.cnt)
+
 	for i := 0; i < int(msg.cnt); i++ {
-		err := binary.Read(buf, binary.LittleEndian, &(msg.blkHdr[i]))
+		var headers ledger.Blockdata
+		err := (&headers).Deserialize(buf)
+		msg.blkHdr = append(msg.blkHdr, headers)
+		log.Debug("blkHeader Deserialization blkHdr is ", msg.blkHdr)
 		if err != nil {
 			goto blkHdrErr
 		}
@@ -142,7 +144,7 @@ func (msg blkHeader) Handle(node Noder) error {
 func GetHeadersFromHash(starthash common.Uint256, stophash common.Uint256) ([]ledger.Blockdata, uint32, error) {
 	var count uint32 = 0
 	var empty [HASHLEN]byte
-	headers := make([]ledger.Blockdata, 1)
+	headers := []ledger.Blockdata{}
 	var startheight uint32
 	var stopheight uint32
 	curHeight := ledger.DefaultLedger.GetLocalBlockChainHeight()
@@ -181,9 +183,8 @@ func GetHeadersFromHash(starthash common.Uint256, stophash common.Uint256) ([]le
 
 	var i uint32
 	for i = 1; i <= count; i++ {
-		//FIXME need add error handle for GetBlockWithHeight
-		log.Debug("stopheight + i is ", stopheight+i)
 		bk, err := ledger.DefaultLedger.GetBlockWithHeight(stopheight + i)
+
 		if err != nil {
 			log.Error("GetBlockWithHeight failed ", err.Error())
 			return nil, 0, err
