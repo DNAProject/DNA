@@ -31,18 +31,19 @@ The requirements to build DNA are:
 * glide (third-party package management tool) is required.
 * A properly configured go environment.
 
-Clone the DNA repo into appropriate GOPATH/src directory
+Clone the DNA repo into $GOPATH/src/github.com/DNAProject/
 
 ```shell
-$ git clone https://github.com/DNAProject/DNA.git
+$ git clone https://github.com/DNAProject/DNA.git $GOPATH/src/github.com/DNAProject/DNA
 
 ```
 
-Fetch the dependent third-party packages with glide.
+Step into DNA directory and fetch the dependent third-party packages with glide tool
 
 
 ````shell
-$ cd DNA; glide up;
+$ cd $GOPATH/src/github.com/DNAProject/DNA; glide up;
+
 ````
 
 Build the source with make
