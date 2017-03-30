@@ -62,7 +62,7 @@ func (msg verACK) Handle(node Noder) error {
 	}
 
 	node.SetState(ESTABLISH)
-	if (s == HANDSHAKE) {
+	if s == HANDSHAKE {
 		buf, _ := NewVerack()
 		node.Tx(buf)
 	}
@@ -75,11 +75,23 @@ func (msg verACK) Handle(node Noder) error {
 	// node which will trigger a warning
 	node.ReqNeighborList()
 
+	log.Debug("ledger.DefaultLedger.Blockchain.BlockHeight is ", ledger.DefaultLedger.Blockchain.BlockHeight)
+	log.Debug("others height", node.GetHeight())
 	// FIXME compact to a seperate function
 	if uint64(ledger.DefaultLedger.Blockchain.BlockHeight) < node.GetHeight() {
-		buf, err := NewHeadersReq(node)
+		/*
+			log.Info("request header")
+			buf, err := NewHeadersReq(node)
+			if err != nil {
+				log.Error("failed build a new headersReq")
+			} else {
+				node.Tx(buf)
+			}
+		*/
+		log.Info("request blocks header hash")
+		buf, err := NewBlocksReq(node)
 		if err != nil {
-			log.Error("failed build a new headersReq")
+			log.Error("failed build a new blockReq")
 		} else {
 			node.Tx(buf)
 		}
