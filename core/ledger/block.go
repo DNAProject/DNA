@@ -1,16 +1,17 @@
 package ledger
 
 import (
-	. "DNA/common"
-	"DNA/common/serialization"
-	"DNA/core/contract/program"
-	tx "DNA/core/transaction"
-	"DNA/crypto"
-	. "DNA/errors"
+	. "github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/serialization"
+	"github.com/DNAProject/DNA/core/contract/program"
+	tx "github.com/DNAProject/DNA/core/transaction"
+	sig "github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/crypto"
+	. "github.com/DNAProject/DNA/errors"
 	"io"
 	"time"
-	"DNA/vm"
-	"DNA/common/log"
+	"github.com/DNAProject/DNA/vm"
+	"github.com/DNAProject/DNA/common/log"
 )
 
 type Block struct {
@@ -65,8 +66,7 @@ func (b *Block) Deserialize(r io.Reader) error {
 }
 
 func (b *Block) GetMessage() []byte {
-	//TODO: GetMessage
-	return []byte{}
+	return  sig.GetHashForSigning(b)
 }
 
 func (b *Block) GetProgramHashes() ([]Uint160, error) {
