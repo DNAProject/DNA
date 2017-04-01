@@ -39,24 +39,23 @@ func NewExecutionEngine(container interfaces.IScriptContainer, crypto interfaces
 }
 
 type ExecutionEngine struct  {
-	crypto interfaces.ICrypto   // 加密接口
-	table interfaces.IScriptTable  //
+	crypto interfaces.ICrypto
+	table interfaces.IScriptTable
 	service *InteropService
 
 	scriptContainer interfaces.IScriptContainer
-	invocationStack *utils.RandomAccessStack  //初始加载script栈
-	opCount int  // 最大步数计数
+	invocationStack *utils.RandomAccessStack
+	opCount int
 
 	maxSteps int
 
-	evaluationStack *utils.RandomAccessStack  // 操作栈
-	altStack *utils.RandomAccessStack  // 暂存栈
-	state VMState  // vm状态
+	evaluationStack *utils.RandomAccessStack
+	altStack *utils.RandomAccessStack
+	state VMState
 
-	context *ExecutionContext //
+	context *ExecutionContext
 
-	//current opcode
-	opCode OpCode     //操作码
+	opCode OpCode
 }
 
 func (e *ExecutionEngine) GetState() VMState {
