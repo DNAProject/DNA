@@ -48,7 +48,7 @@ func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.T
 
 		for _, v := range results {
 			//Quantity  has been issued before.
-			var quantity_issued common.Fixed64
+			var quantity_issued *common.Fixed64
 			trx,err := tx.TxStore.GetTransaction(v.AssetId)
 			if err != nil {
 				return errors.New("[VerifyTransaction], AssetId does exist.")
@@ -81,7 +81,7 @@ func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.T
 			}
 
 			//calc weather out off the amount when Registed.
-			if *AssetReg.Amount - quantity_issued < -v.Amount{
+			if *AssetReg.Amount - *quantity_issued < -v.Amount{
 				return errors.New("[VerifyTransaction], Amount check error.")
 			}
 
