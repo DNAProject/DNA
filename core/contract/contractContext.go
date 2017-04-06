@@ -10,6 +10,7 @@ import (
 	"errors"
 	"math/big"
 	"sort"
+	"fmt"
 )
 
 type ContractContext struct {
@@ -110,6 +111,7 @@ func (cxt *ContractContext) AddContract(contract *Contract, pubkey *crypto.PubKe
 
 	} else {
 		//add non multi sig contract
+		fmt.Println("contract Parameters", contract.Parameters)
 		log.Trace()
 		index := -1
 		for i := 0; i < len(contract.Parameters); i++ {

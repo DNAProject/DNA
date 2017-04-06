@@ -1,0 +1,38 @@
+14:49:14.617002 [1;35m[TRACE][m GID 1, DNA/core/signature.SignBySigner signature.go:33
+14:49:14.618031 [1;35m[TRACE][m GID 1, DNA/core/contract.NewContractContext contractContext.go:30
+14:49:14.618084 [0;32m[DEBUG][m GID 1, programHashes= [[218 223 32 3 51 168 212 233 87 131 125 212 221 26 215 133 167 184 61 214]]
+14:49:14.618202 [0;32m[DEBUG][m GID 1, hashLen := len(programHashes) 1
+14:49:14.618239 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).AddContract contractContext.go:62
+14:49:14.618270 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).AddContract contractContext.go:117
+14:49:14.618329 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).Add contractContext.go:46
+14:49:14.618364 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).GetPrograms contractContext.go:233
+14:49:14.618388 [0;32m[DEBUG][m GID 1,  len(cxt.Codes)1
+14:49:14.618449 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).GetPrograms contractContext.go:233
+14:49:14.618473 [0;32m[DEBUG][m GID 1,  len(cxt.Codes)1
+14:49:14.619404 [0;32m[DEBUG][m GID 1, GetBlock Data: ffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000407feb4a4b8303baf4f84e29a209e0dcfd62e81f88c8edb7675c5a95d90e5c900026ae58000000001dac2b7c00000000d1455f403dbf30799e15a7f14a09a2d1f132e7dc010100013001407feb4a4b8303baf4f84e29a209e0dcfd62e81f88c8edb7675c5a95d90e5c90
+
+14:49:14.619444 [0;32m[DEBUG][m GID 1, sysfee: 18446744073709551615
+
+14:49:14.619509 [0;32m[DEBUG][m GID 1, tx height: 0
+
+14:49:14.619596 [1;35m[TRACE][m GID 1, DNA/core/signature.SignBySigner signature.go:33
+14:49:14.619686 [1;35m[TRACE][m GID 1, DNA/core/contract.NewContractContext contractContext.go:30
+14:49:14.619712 [0;32m[DEBUG][m GID 1, GetHeader Data:[239 134 226 153 205 141 223 20 166 99 94 201 193 35 233 95 5 233 84 56 191 10 117 7 219 75 205 32 101 237 74 40]
+14:49:14.619739 [0;32m[DEBUG][m GID 1, sysfee: 18446744073709551615
+
+14:49:14.619763 [0;32m[DEBUG][m GID 1, programHashes= [[209 69 95 64 61 191 48 121 158 21 167 241 74 9 162 209 241 50 231 220]]
+14:49:14.619778 [0;32m[DEBUG][m GID 1, hashLen := len(programHashes) 1
+14:49:14.619806 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).AddContract contractContext.go:62
+14:49:14.619826 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).AddContract contractContext.go:117
+14:49:14.620001 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).Add contractContext.go:46
+14:49:14.620021 [1;35m[TRACE][m GID 1, DNA/core/contract.(*ContractContext).GetPrograms contractContext.go:233
+14:49:14.620054 [0;32m[DEBUG][m GID 1, GetHeader Data:[239 134 226 153 205 141 223 20 166 99 94 201 193 35 233 95 5 233 84 56 191 10 117 7 219 75 205 32 101 237 74 40]
+14:49:14.620084 [0;32m[DEBUG][m GID 1, sysfee: 18446744073709551615
+
+14:49:14.620122 [0;32m[DEBUG][m GID 1, GetHeader Data:[239 134 226 153 205 141 223 20 166 99 94 201 193 35 233 95 5 233 84 56 191 10 117 7 219 75 205 32 101 237 74 40]
+14:49:14.620199 [0;32m[DEBUG][m GID 1, sysfee: 18446744073709551615
+
+14:49:14.620394 [1;35m[TRACE][m GID 1, DNA/core/ledger.(*Blockchain).AddBlock blockchain.go:26
+14:49:14.620417 [1;35m[TRACE][m GID 1, DNA/core/ledger.(*Blockchain).SaveBlock blockchain.go:59
+14:49:14.620446 [0;32m[DEBUG][m GID 1, SaveBlock()
+14:49:14.620490 [0;33m[WARN ][m GID 1, Save block failure ,err= WARNING: [SaveBlock] block height - header_index.count >= 1, block height:1, header_index.count:0
