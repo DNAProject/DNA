@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DefaultConfigFilename = "./config.json"
+	DefaultConfigFilename = "/Users/tanyuan/Documents/go/src/DNA/config/config.json"
 )
 
 type ProtocolConfiguration struct {
