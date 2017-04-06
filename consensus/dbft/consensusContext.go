@@ -213,7 +213,7 @@ func (cxt *ConsensusContext) Reset(client cl.Client, localNode net.Neter) {
 	log.Trace()
 	cxt.State = Initial
 	cxt.PrevHash = ledger.DefaultLedger.Blockchain.CurrentBlockHash()
-	cxt.Height = ledger.DefaultLedger.Blockchain.BlockHeight + 1
+	cxt.Height = ledger.DefaultLedger.Blockchain.BlockHeight
 	cxt.ViewNumber = 0
 	cxt.MinerIndex = -1
 
