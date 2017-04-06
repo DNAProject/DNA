@@ -3,6 +3,7 @@ package log
 import (
 	"DNA/config"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -29,17 +30,13 @@ func Color(code, msg string) string {
 }
 
 const (
-	PRINTLEVEL = 0
-)
-
-const (
 	debugLog = iota
 	infoLog
 	warnLog
 	errorLog
 	fatalLog
 	traceLog
-	numSeverity = 6
+	maxLevelLog
 )
 
 var (
@@ -68,7 +65,6 @@ func GetGID() uint64 {
 }
 
 var Log *Logger
-var lock = sync.Mutex{}
 
 func LevelName(level int) string {
 	if name, ok := levels[level]; ok {
@@ -91,6 +87,7 @@ func NameLevel(name string) int {
 }
 
 type Logger struct {
+	sync.Mutex
 	level  int
 	logger *log.Logger
 }
@@ -100,6 +97,16 @@ func New(out io.Writer, prefix string, flag, level int) *Logger {
 		level:  level,
 		logger: log.New(out, prefix, flag),
 	}
+}
+
+func (l *Logger) SetDebugLevel(level int) error {
+	l.Lock()
+	defer l.Unlock()
+	if level >= maxLevelLog || level < 0 {
+		return errors.New("Invalid Debug Level")
+	}
+	l.level = level
+	return nil
 }
 
 func (l *Logger) output(level int, s string) error {
@@ -123,38 +130,38 @@ func (l *Logger) Output(level int, a ...interface{}) error {
 }
 
 func (l *Logger) Trace(a ...interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	l.Output(traceLog, a...)
 }
 
 func (l *Logger) Debug(a ...interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	l.Output(debugLog, a...)
 }
 
 func (l *Logger) Info(a ...interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	l.Output(infoLog, a...)
 }
 
 func (l *Logger) Warn(a ...interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	l.Output(warnLog, a...)
 }
 
 func (l *Logger) Error(a ...interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	l.Output(errorLog, a...)
 }
 
 func (l *Logger) Fatal(a ...interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
+	l.Lock()
+	defer l.Unlock()
 	l.Output(fatalLog, a...)
 }
 
