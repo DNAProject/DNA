@@ -33,14 +33,13 @@ const (
 )
 
 const (
-	traceLog = iota
-	debugLog
+	debugLog = iota
 	infoLog
 	warnLog
 	errorLog
 	fatalLog
-	printLog
-	numSeverity = 5
+	traceLog
+	numSeverity = 6
 )
 
 var (
@@ -51,7 +50,6 @@ var (
 		warnLog:  Color(Yellow, "[WARN ]"),
 		errorLog: Color(Red, "[ERROR]"),
 		fatalLog: Color(Red, "[FATAL]"),
-		printLog: Color(Cyan, "[ForcePrint]"),
 	}
 )
 
@@ -130,12 +128,6 @@ func (l *Logger) Trace(a ...interface{}) {
 	l.Output(traceLog, a...)
 }
 
-func (l *Logger) Print(a ...interface{}) {
-	lock.Lock()
-	defer lock.Unlock()
-	l.Output(printLog, a...)
-}
-
 func (l *Logger) Debug(a ...interface{}) {
 	lock.Lock()
 	defer lock.Unlock()
@@ -172,8 +164,7 @@ func Trace(a ...interface{}) {
 	f := runtime.FuncForPC(pc[0])
 	file, line := f.FileLine(pc[0])
 	fileName := filepath.Base(file)
-
-	Log.Trace(fmt.Sprint(f.Name(), " ", fileName, ":", line))
+	Log.Trace(fmt.Sprint(f.Name(), " ", fileName, ":", line, " ", fmt.Sprint(a...)))
 
 }
 
@@ -195,10 +186,6 @@ func Error(a ...interface{}) {
 
 func Fatal(a ...interface{}) {
 	Log.Fatal(fmt.Sprint(a...))
-}
-
-func Print(a ...interface{}) {
-	Log.Print(fmt.Sprint(a...))
 }
 
 func FileOpen(path string) (*os.File, error) {
@@ -232,6 +219,7 @@ func CreatePrintLog(path string) {
 	if err != nil {
 		fmt.Printf("%s\n", err.Error)
 	}
+
 	var printlevel int = config.Parameters.PrintLevel
 	writers := []io.Writer{
 		logfile,
