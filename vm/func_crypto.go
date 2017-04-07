@@ -62,7 +62,7 @@ func opCheckMultiSig(e *ExecutionEngine) (VMState, error) {
 	}
 
 	signatures := make([][]byte, m)
-	for i := 0; i < n; i++ {
+	for i := 0; i < m; i++ {
 		signatures[i] = AssertStackItem(e.evaluationStack.Pop()).GetByteArray()
 	}
 
