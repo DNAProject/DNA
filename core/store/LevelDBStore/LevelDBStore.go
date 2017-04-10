@@ -638,12 +638,13 @@ func (bd *LevelDBStore) onAddHeader(header *Blockdata, batch *leveldb.Batch) {
 func (bd *LevelDBStore) persistBlocks() {
 	log.Debug("persistBlocks()")
 
-	if uint32(len(bd.header_index)) <= bd.current_block_height+1 {
-		fmt.Printf("[persistBlocks]: error, header_index.count < current_block_height + 1")
+	log.Info("[persistBlocks]: info, header_index.count: ", len(bd.header_index), " current_block_height + 1: ", bd.current_block_height+1)
+	if uint32(len(bd.header_index)) < bd.current_block_height+1 {
+		log.Error("[persistBlocks]: error, header_index.count: ", len(bd.header_index), " < current_block_height + 1: ", bd.current_block_height+1)
 		return
 	}
 
-	hash := bd.header_index[bd.current_block_height+1]
+	hash := bd.header_index[bd.current_block_height]
 
 	block, ok := bd.block_cache[hash]
 	if ok {
@@ -664,6 +665,7 @@ func (bd *LevelDBStore) SaveBlock(b *Block, ledger *Ledger) error {
 		bd.block_cache[b.Hash()] = b
 	}
 
+	log.Info("len(bd.header_index) is ", len(bd.header_index), " ,b.Blockdata.Height is ", b.Blockdata.Height)
 	if b.Blockdata.Height-uint32(len(bd.header_index)) >= 1 {
 		//return false,NewDetailErr(errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - header_index.count >= 1, block height:%d, header_index.count:%d",b.Blockdata.Height, uint32(len(bd.header_index)) )),ErrDuplicatedBlock,"")
 		return errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - header_index.count >= 1, block height:%d, header_index.count:%d", b.Blockdata.Height, uint32(len(bd.header_index))))
