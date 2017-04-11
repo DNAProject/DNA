@@ -125,6 +125,16 @@ func (ds *DbftService) BlockPersistCompleted(v interface{}) {
 	log.Trace()
 	if block, ok := v.(*ledger.Block); ok {
 		log.Info(fmt.Sprintf("persist block: %d", block.Hash()))
+		//TODO: workarround start
+		var trxHashToBeDelete []*Uint256
+		for _, transaction := range block.Transactions {
+			temp := *transaction
+			hash := temp.Hash()
+			trxHashToBeDelete = append(trxHashToBeDelete,&hash)
+		}
+		ds.localNet.CleanTxnPool(trxHashToBeDelete)
+		//TODO: workarround end
+		log.Fatal(fmt.Sprintf("persist block: %d with %d transactions\n", block.Hash(),len(trxHashToBeDelete)))
 	}
 
 	ds.blockReceivedTime = time.Now()
@@ -430,7 +440,7 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	ds.context.Signatures = make([][]byte, len(ds.context.Miners))
 	ds.context.Signatures[payload.MinerIndex] = message.Signature
 
-	mempool := ds.localNet.GetTxnPool(true)
+	mempool := ds.localNet.GetTxnPool(false)
 	for _, hash := range ds.context.TransactionHashes[1:] {
 		if transaction, ok := mempool[hash]; ok {
 			if err := ds.AddTransaction(transaction, false); err != nil {
@@ -573,7 +583,7 @@ func (ds *DbftService) Timeout() {
 			}
 
 			ds.context.Nonce = GetNonce()
-			transactionsPool := ds.localNet.GetTxnPool(true) //TODO: add policy
+			transactionsPool := ds.localNet.GetTxnPool(false) //TODO: add policy
 
 			//TODO: add max TX limitation
 

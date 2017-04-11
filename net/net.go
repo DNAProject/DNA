@@ -16,6 +16,8 @@ type Neter interface {
 	Xmit(common.Inventory) error // The transmit interface
 	GetEvent(eventName string) *events.Event
 	GetMinersAddrs() ([]*crypto.PubKey, uint64)
+	CleanTxnPool(txHashes []*common.Uint256) error
+
 }
 
 func StartProtocol(pubKey *crypto.PubKey) (Neter, protocol.Noder) {
