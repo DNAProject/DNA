@@ -125,7 +125,6 @@ func (ds *DbftService) BlockPersistCompleted(v interface{}) {
 	log.Trace()
 	if block, ok := v.(*ledger.Block); ok {
 		log.Info(fmt.Sprintf("persist block: %d", block.Hash()))
-		//TODO: workarround start
 		var trxHashToBeDelete []*Uint256
 		for _, transaction := range block.Transactions {
 			temp := *transaction
@@ -133,8 +132,7 @@ func (ds *DbftService) BlockPersistCompleted(v interface{}) {
 			trxHashToBeDelete = append(trxHashToBeDelete,&hash)
 		}
 		ds.localNet.CleanTxnPool(trxHashToBeDelete)
-		//TODO: workarround end
-		log.Fatal(fmt.Sprintf("persist block: %d with %d transactions\n", block.Hash(),len(trxHashToBeDelete)))
+		//log.Debug(fmt.Sprintf("persist block: %d with %d transactions\n", block.Hash(),len(trxHashToBeDelete)))
 	}
 
 	ds.blockReceivedTime = time.Now()

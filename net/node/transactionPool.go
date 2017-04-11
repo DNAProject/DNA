@@ -71,12 +71,12 @@ func (txnPool *TXNPool) CleanTxnPool(txHashes []*common.Uint256) error{
 		if _,ok:= txnPool.list[*txHash]; ok{
 			delete(txnPool.list,*txHash)
 			cleaned ++
-		}else{
-			log.Fatal("Delete failed of transaction hash =",txHash)
 		}
 	}
-
-	log.Fatal(fmt.Sprintf("[CleanTxnPool], Requested %d clean, %d transactions cleaned from localNode.TransPool and remains %d still in TxPool",txsNum,cleaned,txInPoolNum-cleaned))
+	if len(txHashes) - cleaned != 1{
+		log.Fatal(fmt.Sprintf("The Transactions num Unmatched. Expect %d, got %d .\n",len(txHashes),cleaned))
+	}
+	log.Debug(fmt.Sprintf("[CleanTxnPool], Requested %d clean, %d transactions cleaned from localNode.TransPool and remains %d still in TxPool",txsNum,cleaned,txInPoolNum-cleaned))
 	return nil
 }
 
