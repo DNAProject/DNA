@@ -45,14 +45,16 @@ func (msg dataReq) Handle(node Noder) error {
 	switch reqtype {
 	case common.BLOCK:
 		block, err := NewBlockFromHash(hash)
+		log.Debug("block height is ", block.Blockdata.Height, " ,block hash is ", block.Hash())
 		if err != nil {
+			log.Error("Can't get block from hash: ", hash)
 			return err
 		}
 		buf, err := NewBlock(block)
 		if err != nil {
 			return err
 		}
-		go node.Tx(buf)
+		node.Tx(buf)
 
 	case common.TRANSACTION:
 		txn, err := NewTxnFromHash(hash)
@@ -98,7 +100,7 @@ func NewBlock(bk *ledger.Block) ([]byte, error) {
 	buf := bytes.NewBuffer(s[:4])
 	binary.Read(buf, binary.LittleEndian, &(msg.msgHdr.Checksum))
 	msg.msgHdr.Length = uint32(len(p.Bytes()))
-	log.Debug("The message payload length is %d\n", msg.msgHdr.Length)
+	log.Debug("The message payload length is ", msg.msgHdr.Length)
 
 	m, err := msg.Serialization()
 	if err != nil {
@@ -137,7 +139,7 @@ func reqBlkData(node Noder, hash common.Uint256) error {
 		return err
 	}
 
-	go node.Tx(sendBuf)
+	node.Tx(sendBuf)
 
 	return nil
 }
