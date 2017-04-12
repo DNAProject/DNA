@@ -9,6 +9,7 @@ import (
 	"DNA/core/asset"
 	"DNA/core/contract"
 	"DNA/common"
+	"DNA/common/log"
 )
 
 var DefaultLedger *Ledger
@@ -77,10 +78,13 @@ func (l *Ledger) GetAsset(assetId Uint256) (*asset.Asset,error) {
 //Get Block With Height.
 func (l *Ledger) GetBlockWithHeight(height uint32) (*Block, error) {
 	temp, err := l.Store.GetBlockHash(height)
+	log.Debug("height is ", height, " , temp is ", temp)
 	if err != nil{
 		return nil,NewDetailErr(err, ErrNoCode, "[Ledger],GetBlockWithHeight failed with height="+ string(height))
 	}
 	bk, err := DefaultLedger.Store.GetBlock(temp)
+	log.Debug("bk height is ", bk.Blockdata.Height, " , bk hash is ", bk.Hash())
+	log.Debug("bk header is ", bk.Blockdata)
 	if err != nil {
 		return nil,NewDetailErr(err, ErrNoCode, "[Ledger],GetBlockWithHeight failed with hash="+ temp.ToString())
 	}
