@@ -71,9 +71,6 @@ func opCheckMultiSig(e *ExecutionEngine) (VMState, error) {
 
 	for i, j := 0, 0; fSuccess && i < m && j < n; {
 		ver, _ := e.crypto.VerifySignature(message, signatures[i], pubkeys[j])
-		//if err != nil {
-		//	return FAULT, err
-		//}
 		if ver {
 			i++
 		}
