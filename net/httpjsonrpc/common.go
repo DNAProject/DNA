@@ -1,17 +1,17 @@
 package httpjsonrpc
 
 import (
-	"DNA/consensus/dbft"
 	. "DNA/common"
+	"DNA/consensus/dbft"
 	. "DNA/core/transaction"
 	tx "DNA/core/transaction"
 	. "DNA/net/protocol"
 	"encoding/json"
 	"io/ioutil"
-	"sync"
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 func init() {
@@ -30,37 +30,60 @@ type ServeMux struct {
 	defaultFunction func(http.ResponseWriter, *http.Request)
 }
 
-type TxOutputInfo struct {
-	Key Uint256
-	Txout []* TxOutput
+type TxAttributeInfo struct {
+	Usage TransactionAttributeUsage
+	Date  string
+	Size  uint32
 }
 
-type AmountInfo struct {
-	Key Uint256
+type UTXOTxInputInfo struct {
+	ReferTxID          string
+	ReferTxOutputIndex uint16
+}
+
+type BalanceTxInputInfo struct {
+	AssetID     string
+	Value       Fixed64
+	ProgramHash string
+}
+
+type TxoutputInfo struct {
+	AssetID     string
+	Value       Fixed64
+	ProgramHash string
+}
+
+type TxOutputMap struct {
+	Key   Uint256
+	Txout []TxoutputInfo
+}
+
+type AmountMap struct {
+	Key   Uint256
 	Value Fixed64
 }
 
 type ProgramInfo struct {
-	Code string
+	Code      string
 	Parameter string
 }
 
 type Transactions struct {
 	TxType         TransactionType
 	PayloadVersion byte
-	Payload        Payload
+	Payload        PayloadInfo
 	Nonce          uint64
-	Attributes     []*TxAttribute
-	UTXOInputs     []*UTXOTxInput
-	BalanceInputs  []*BalanceTxInput
-	Outputs        []*TxOutput
-	Programs       []*ProgramInfo
-	
-	AssetOutputs      []TxOutputInfo
-	AssetInputAmount  []AmountInfo
-	AssetOutputAmount []AmountInfo
-	
-	Hash  string
+	Attributes     []TxAttributeInfo
+	UTXOInputs     []UTXOTxInputInfo
+	BalanceInputs  []BalanceTxInputInfo
+	Outputs        []TxoutputInfo
+	Programs       []ProgramInfo
+
+	AssetOutputs      []TxOutputMap
+	AssetInputAmount  []AmountMap
+	AssetOutputAmount []AmountMap
+
+	Hash string
 }
 
 type BlockHead struct {
@@ -72,14 +95,14 @@ type BlockHead struct {
 	ConsensusData    uint64
 	NextMiner        string
 	Program          ProgramInfo
-	
-	Hash             string
+
+	Hash string
 }
 
 type BlockInfo struct {
-	Hash      string
-	BlockData *BlockHead
-	Transactions []Transactions
+	Hash         string
+	BlockData    *BlockHead
+	Transactions []*Transactions
 }
 
 type TxInfo struct {
@@ -103,8 +126,8 @@ type NodeInfo struct {
 	Services uint64 // The services the node supplied
 	Relay    bool   // The relay capability of the node (merge into capbility flag)
 	Height   uint64 // The node latest block height
-	TxnCnt	  uint64 // The transactions be transmit by this node
-	RxTxnCnt  uint64 // The transaction received by this node
+	TxnCnt   uint64 // The transactions be transmit by this node
+	RxTxnCnt uint64 // The transaction received by this node
 }
 
 type ConsensusInfo struct {
