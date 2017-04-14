@@ -68,7 +68,9 @@ func getBlock(req *http.Request, cmd map[string]interface{}) map[string]interfac
 		trans[i].UTXOInputs = block.Transactions[i].UTXOInputs
 		trans[i].BalanceInputs = block.Transactions[i].BalanceInputs
 		trans[i].Outputs = block.Transactions[i].Outputs
+		trans[i].Programs = make([]*ProgramInfo, len(block.Transactions[i].Programs))
 		for n := 0; n < len(block.Transactions[i].Programs); n++ {
+			trans[i].Programs[n] = new(ProgramInfo)
 			trans[i].Programs[n].Code = ToHexString(block.Transactions[i].Programs[n].Code)
 			trans[i].Programs[n].Parameter = ToHexString(block.Transactions[i].Programs[n].Parameter)
 		}
