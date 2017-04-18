@@ -65,6 +65,7 @@ type Noder interface {
 	GetHeight() uint64
 	GetConnectionCnt() uint
 	GetTxnPool(bool) map[common.Uint256]*transaction.Transaction
+	CleanTxnPool(txHashes []*common.Uint256) error
 	AppendTxnPool(*transaction.Transaction) bool
 	ExistedID(id common.Uint256) bool
 	ReqNeighborList()

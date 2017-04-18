@@ -2,10 +2,12 @@ package node
 
 import (
 	"DNA/common"
+	"DNA/common/log"
 	"DNA/core/transaction"
 	msg "DNA/net/message"
 	. "DNA/net/protocol"
 	"sync"
+	"fmt"
 )
 
 type TXNPool struct {
@@ -46,7 +48,36 @@ func (txnPool *TXNPool) GetTxnPool(cleanPool bool) map[common.Uint256]*transacti
 	if cleanPool == true {
 		txnPool.init()
 	}
-	return list
+	return DeepCopy(list)
+}
+
+func DeepCopy(mapIn map[common.Uint256]*transaction.Transaction) map[common.Uint256]*transaction.Transaction {
+	reply := make( map[common.Uint256]*transaction.Transaction)
+	for k, v := range mapIn {
+		reply[k] =v
+	}
+	return reply
+}
+
+// Attention: clean the trasaction Pool with committed transactions.
+func (txnPool *TXNPool) CleanTxnPool(txHashes []*common.Uint256) error{
+	txnPool.Lock()
+	defer txnPool.Unlock()
+
+	txsNum := len(txHashes)
+	txInPoolNum := len(txnPool.list)
+	cleaned :=0
+	for _, txHash := range txHashes {
+		if _,ok:= txnPool.list[*txHash]; ok{
+			delete(txnPool.list,*txHash)
+			cleaned ++
+		}
+	}
+	if len(txHashes) - cleaned != 1{
+		log.Fatal(fmt.Sprintf("The Transactions num Unmatched. Expect %d, got %d .\n",len(txHashes),cleaned))
+	}
+	log.Debug(fmt.Sprintf("[CleanTxnPool], Requested %d clean, %d transactions cleaned from localNode.TransPool and remains %d still in TxPool",txsNum,cleaned,txInPoolNum-cleaned))
+	return nil
 }
 
 func (txnPool *TXNPool) init() {
