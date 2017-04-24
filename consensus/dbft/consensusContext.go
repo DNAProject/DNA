@@ -105,9 +105,13 @@ func (cxt *ConsensusContext) MakeHeader() *ledger.Block {
 			ConsensusData:    cxt.Nonce,
 			NextMiner:        cxt.NextMiner,
 		}
+		tlist := []*tx.Transaction{}
+		for _, t := range cxt.Transactions {
+			tlist = append(tlist, t)
+		}
 		cxt.header = &ledger.Block{
 			Blockdata:    blockData,
-			Transactions: []*tx.Transaction{},
+			Transactions: tlist,
 		}
 	}
 	return cxt.header
@@ -129,12 +133,18 @@ func (cxt *ConsensusContext) MakePayload(message ConsensusMessage) *msg.Consensu
 
 func (cxt *ConsensusContext) MakePrepareRequest() *msg.ConsensusPayload {
 	log.Trace()
+
+	tlist := []*tx.Transaction{}
+	for _, t := range cxt.Transactions {
+		tlist = append(tlist, t)
+	}
+
 	preReq := &PrepareRequest{
-		Nonce:                  cxt.Nonce,
-		NextMiner:              cxt.NextMiner,
-		TransactionHashes:      cxt.TransactionHashes,
-		BookkeepingTransaction: cxt.Transactions[cxt.TransactionHashes[0]],
-		Signature:              cxt.Signatures[cxt.MinerIndex],
+		Nonce:             cxt.Nonce,
+		NextMiner:         cxt.NextMiner,
+		TransactionHashes: cxt.TransactionHashes,
+		Transactions:      tlist,
+		Signature:         cxt.Signatures[cxt.MinerIndex],
 	}
 	preReq.msgData.Type = PrepareRequestMsg
 	return cxt.MakePayload(preReq)

@@ -20,8 +20,8 @@ import (
 	msg "DNA/net/message"
 	"errors"
 	"fmt"
-	"time"
 	"sync"
+	"time"
 )
 
 var GenBlockTime = (2 * time.Second)
@@ -433,7 +433,11 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	ds.context.NextMiner = message.NextMiner
 	ds.context.TransactionHashes = message.TransactionHashes
 	ds.context.Transactions = make(map[Uint256]*tx.Transaction)
+	for i := 0; i < len(message.TransactionHashes); i++ {
+		ds.context.Transactions[message.TransactionHashes[i]] = message.Transactions[i]
+	}
 
+	// verify the block without tx
 	_, err = va.VerifySignature(ds.context.MakeHeader(), ds.context.Miners[payload.MinerIndex], message.Signature)
 	if err != nil {
 		log.Warn("PrepareRequestReceived VerifySignature failed.", err)
@@ -447,17 +451,17 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 		//check weather local txnpool has all transactions from request.
 		mempool := ds.localNet.GetTxnPool(false)
 		requesttxs := []Uint256{}
-		txsProcessList := make([]*tx.Transaction,0,len(message.TransactionHashes))
+		txsProcessList := make([]*tx.Transaction, 0, len(message.TransactionHashes))
 		for _, hash := range ds.context.TransactionHashes[1:] {
 			if v, ok := mempool[hash]; ok {
-				txsProcessList = append(txsProcessList,v)
+				txsProcessList = append(txsProcessList, v)
 				continue
-			}else{
-				requesttxs =append(requesttxs,hash)
+			} else {
+				requesttxs = append(requesttxs, hash)
 			}
 		}
 
-		if len(requesttxs)>0 {
+		if len(requesttxs) > 0 {
 			//ds.localNet.SynchronizeTxnPool(requestTransaction)
 			//TODO: tx net sync request
 			return
@@ -465,8 +469,8 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 
 		//verify single transaction.
 		var wg sync.WaitGroup
-		var se chan error = make(chan error,len(txsProcessList))
-		for _, transaction:= range txsProcessList {
+		var se chan error = make(chan error, len(txsProcessList))
+		for _, transaction := range txsProcessList {
 			wg.Add(1)
 			go func(t *tx.Transaction, ts []*tx.Transaction) {
 				err := va.VerifyTransaction(t, ledger.DefaultLedger, ts)
@@ -478,13 +482,13 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 			}(transaction, txsProcessList)
 		}
 		wg.Wait()
-		if len(se)>0{
+		if len(se) > 0 {
 			ds.RequestChangeView()
 			return
 		}
 
 		//verify the transaction Pool :check weather has duplicate utxo inputs
-		if ! va.VerifyTransactionPoolWhenResponse(txsProcessList){
+		if !va.VerifyTransactionPoolWhenResponse(txsProcessList) {
 			ds.RequestChangeView()
 			return
 		}
@@ -492,15 +496,10 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 		//add transaction to context and start the response process.
 		for _, transaction := range txsProcessList {
 			if err := ds.AddTransaction(transaction, false); err != nil {
-				log.Warn(fmt.Sprintf("[AddTransaction] TX Verfiy failed: %v err=", transaction.Hash(),err))
+				log.Warn(fmt.Sprintf("[AddTransaction] TX Verfiy failed: %v err=", transaction.Hash(), err))
 				ds.RequestChangeView()
 			}
 		}
-	}
-
-	if err := ds.AddTransaction(message.BookkeepingTransaction, true); err != nil {
-		log.Warn("PrepareRequestReceived AddTransaction failed", err)
-		return
 	}
 
 	//TODO: LocalNode allow hashes (add Except method)
