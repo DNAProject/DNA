@@ -213,7 +213,7 @@ func CheckDuplicateInputInTxPool(tx *tx.Transaction, txPool []*tx.Transaction) e
 	return nil
 }
 
-func IsDoubleSpend(tx *tx.Transaction, ledger *ledger.Ledger) error {
+func IsDoubleSpend(tx *tx.Transaction, ledger *ledger.Ledger) bool {
 	return ledger.IsDoubleSpend(tx)
 }
 
