@@ -264,7 +264,31 @@ func (bd *LevelDBStore) InitLedgerStore(l *Ledger) error {
 }
 
 func (bd *LevelDBStore) IsDoubleSpend(tx tx.Transaction) bool {
-	// TODO: IsDoubleSpend Check
+	if len(tx.UTXOInputs) == 0 {
+		return false
+	}
+
+	unspentprefix := []byte{byte(IX_Unspent)}
+	for i := 0; i < len(tx.UTXOInputs); i++ {
+		txhash := tx.UTXOInputs[i].ReferTxID
+		unspentvalue, err_get := bd.Get(append(unspentprefix, txhash.ToArray()...))
+		if err_get != nil {
+			return true
+		}
+
+		unspents, _ := GetUint16Array(unspentvalue)
+		findflag := false
+		for k := 0; k < len(unspents); k++ {
+			if unspents[k] == tx.UTXOInputs[i].ReferTxOutputIndex {
+				findflag = true
+				break
+			}
+		}
+
+		if !findflag {
+			return true
+		}
+	}
 
 	return false
 }
