@@ -88,6 +88,7 @@ func NewNode() *node {
 	n := node{
 		state: INIT,
 		chF:   make(chan func() error),
+		memPool:common.NewMemPool(MAXBUFLEN, 1024),
 	}
 	runtime.SetFinalizer(&n, rmNode)
 	go n.backend()
