@@ -30,7 +30,7 @@ type ILedgerStore interface {
 
 	Close() error
 
-	InitLevelDBStoreWithGenesisBlock( genesisblock * Block  )
+	InitLevelDBStoreWithGenesisBlock( genesisblock * Block  ) (uint32, error)
 
 	GetQuantityIssued(assetid Uint256) (Fixed64, error)
 

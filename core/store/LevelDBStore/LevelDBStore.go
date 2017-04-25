@@ -17,6 +17,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/util"
 	"sync"
 )
 
@@ -63,14 +64,146 @@ func NewLevelDBStore(file string) (*LevelDBStore, error) {
 		header_index:         map[uint32]Uint256{},
 		block_cache:          map[Uint256]*Block{},
 		current_block_height: 0,
+		stored_header_count:  0,
 		disposed:             false,
 	}, nil
 }
 
-func (bd *LevelDBStore) InitLevelDBStoreWithGenesisBlock(genesisblock *Block) {
+func (bd *LevelDBStore) InitLevelDBStoreWithGenesisBlock(genesisblock *Block) (uint32, error) {
+
 	hash := genesisblock.Hash()
 	bd.header_index[0] = hash
-	bd.persist(genesisblock)
+	log.Debug(fmt.Sprintf("listhash genesis: %x\n", hash))
+
+	prefix := []byte{byte(CFG_Version)}
+	version, err := bd.Get(prefix)
+	if err != nil {
+		version = []byte{0x00}
+	}
+
+	if version[0] == 0x01 {
+		// Get Current Block
+		currentblockprefix := []byte{byte(SYS_CurrentBlock)}
+		data, err := bd.Get(currentblockprefix)
+		if err != nil {
+			return 0, err
+		}
+
+		r := bytes.NewReader(data)
+		var blockhash Uint256
+		blockhash.Deserialize(r)
+		bd.current_block_height, err = serialization.ReadUint32(r)
+		current_header_height := bd.current_block_height
+		////////////////////////////////////////////////
+
+		// Get Current Header
+		currentheaderprefix := []byte{byte(SYS_CurrentHeader)}
+		data, err = bd.Get(currentheaderprefix)
+		if err != nil {
+			return 0, err
+		}
+
+		r = bytes.NewReader(data)
+		var headerhash Uint256
+		headerhash.Deserialize(r)
+		headerheight, err := serialization.ReadUint32(r)
+		current_header_height = headerheight
+
+		log.Debug(fmt.Sprintf("blockhash: %x\n", blockhash.ToArray()))
+		log.Debug(fmt.Sprintf("blockheight: %d\n", current_header_height))
+		////////////////////////////////////////////////
+
+		var listhash Uint256
+		iter := bd.db.NewIterator(util.BytesPrefix([]byte{byte(IX_HeaderHashList)}), nil)
+		for iter.Next() {
+			rk := bytes.NewReader(iter.Key())
+			// read prefix
+			_, _ = serialization.ReadBytes(rk, 1)
+			startnum, err := serialization.ReadUint32(rk)
+			if err != nil {
+				return 0, err
+			}
+			log.Debug(fmt.Sprintf("start index: %d\n", startnum))
+
+			r = bytes.NewReader(iter.Value())
+			listnum, err := serialization.ReadVarUint(r, 0)
+			if err != nil {
+				return 0, err
+			}
+
+			for i := 0; i < int(listnum); i++ {
+				listhash.Deserialize(r)
+				bd.header_index[startnum+uint32(i)] = listhash
+				bd.stored_header_count++
+				//log.Debug( fmt.Sprintf( "listhash %d: %x\n", startnum+uint32(i), listhash ) )
+			}
+		}
+
+		if bd.stored_header_count == 0 {
+			iter = bd.db.NewIterator(util.BytesPrefix([]byte{byte(DATA_BlockHash)}), nil)
+			for iter.Next() {
+				rk := bytes.NewReader(iter.Key())
+				// read prefix
+				_, _ = serialization.ReadBytes(rk, 1)
+				listheight, err := serialization.ReadUint32(rk)
+				if err != nil {
+					return 0, err
+				}
+				//log.Debug(fmt.Sprintf( "DATA_BlockHash block height: %d\n", listheight ))
+
+				r := bytes.NewReader(iter.Value())
+				listhash.Deserialize(r)
+				//log.Debug(fmt.Sprintf( "DATA_BlockHash block hash: %x\n", listhash ))
+
+				bd.header_index[listheight] = listhash
+			}
+		} else if current_header_height >= bd.stored_header_count {
+			hash = headerhash
+			for {
+				if hash == bd.header_index[bd.stored_header_count-1] {
+					break
+				}
+
+				header, err := bd.GetHeader(hash)
+				if err != nil {
+					return 0, err
+				}
+
+				//log.Debug(fmt.Sprintf( "header height: %d\n", header.Blockdata.Height ))
+				//log.Debug(fmt.Sprintf( "header hash: %x\n", hash ))
+
+				bd.header_index[header.Blockdata.Height] = hash
+				hash = header.Blockdata.PrevBlockHash
+			}
+		}
+
+		return current_header_height, nil
+
+	} else {
+		// batch delete old data
+		batch := new(leveldb.Batch)
+		iter := bd.db.NewIterator(nil, nil)
+		for iter.Next() {
+			batch.Delete(iter.Key())
+		}
+		iter.Release()
+
+		err := bd.db.Write(batch, nil)
+		if err != nil {
+			return 0, err
+		}
+
+		// persist genesis block
+		bd.persist(genesisblock)
+
+		// put version to db
+		err = bd.Put(prefix, []byte{0x01})
+		if err != nil {
+			return 0, err
+		}
+
+		return 0, nil
+	}
 }
 
 func NewDBByOptions(file string, o *opt.Options) (*LevelDBStore, error) {
