@@ -2,10 +2,12 @@ package validation
 
 import (
 	"DNA/common"
+	"DNA/common/log"
 	"DNA/core/ledger"
 	tx "DNA/core/transaction"
 	"DNA/core/transaction/payload"
 	"errors"
+	"fmt"
 	"math"
 )
 
@@ -51,15 +53,13 @@ func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.T
 		return err
 	}
 
-	if Tx.TxType == tx.IssueAsset {
-		results, err := Tx.GetTransactionResults()
-		if err != nil {
-			return errors.New("[VerifyTransaction], GetTransactionResults failed.")
-		}
-
-		for _, v := range results {
+	//check by payload.
+	switch Tx.TxType {
+	case tx.IssueAsset:
+		results := Tx.GetMergedAssetIDValueFromOutputs()
+		for k, _ := range results {
 			//Get the Asset amount when RegisterAsseted.
-			trx, err := tx.TxStore.GetTransaction(v.AssetId)
+			trx, err := tx.TxStore.GetTransaction(k)
 			if err != nil {
 				return errors.New("[VerifyTransaction], AssetId does exist.")
 			}
@@ -73,18 +73,21 @@ func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.T
 			if AssetReg.Amount < common.Fixed64(0) {
 				continue
 			} else {
-				quantity_issued, err = tx.TxStore.GetQuantityIssued(v.AssetId)
+				quantity_issued, err = tx.TxStore.GetQuantityIssued(k)
 				if err != nil {
 					return errors.New("[VerifyTransaction], GetQuantityIssued failed.")
 				}
 			}
 
-			//calc the amounts in txPool
+			//calc the amounts in txPool which are also IssueAsset
 			var txPoolAmounts common.Fixed64
 			for _, t := range TxPool {
-				for _, outputs := range t.Outputs {
-					if outputs.AssetID == v.AssetId {
-						txPoolAmounts = txPoolAmounts + outputs.Value * -1
+				if t.TxType == tx.IssueAsset {
+					outputResult := t.GetMergedAssetIDValueFromOutputs()
+					for txidInPool, txValueInPool := range outputResult {
+						if txidInPool == k {
+							txPoolAmounts = txPoolAmounts + txValueInPool
+						}
 					}
 				}
 			}
@@ -92,32 +95,41 @@ func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.T
 			//calc weather out off the amount when Registed.
 			//AssetReg.Amount : amount when RegisterAsset of this assedID
 			//quantity_issued : amount has been issued of this assedID
-			//txPoolAmounts   : amount in transactionPool of this assedID
-
-			// TODO: check this after the function TxStore.GetQuantityIssued works
+			//txPoolAmounts   : amount in transactionPool of this assedID of issue transaction.
 			if AssetReg.Amount-quantity_issued < txPoolAmounts {
 				return errors.New("[VerifyTransaction], Amount check error.")
 			}
 		}
+	case tx.TransferAsset:
+		results, err := Tx.GetTransactionResults()
+		if err != nil {
+			return err
+		}
+		for k, v := range results {
+			if v != 0 {
+				log.Debug(fmt.Sprintf("AssetID %x in Transfer transactions %x , Input/output UTXO not equal.", k, Tx.Hash()))
+				return errors.New(fmt.Sprintf("AssetID %x in Transfer transactions %x , Input/output UTXO not equal.", k, Tx.Hash()))
+			}
+		}
+	default:
 	}
 
 	return nil
 }
 
-
 //Use for verify request, only response validate/invalidate.
-func VerifyTransactionPoolWhenResponse (txPool  []*tx.Transaction)bool{
+func VerifyTransactionPoolWhenResponse(txPool []*tx.Transaction) bool {
 	if len(txPool) == 0 {
 		return true
 	}
 
 	utxoMap := make(map[string]bool, 0)
-	for _, t := range txPool{
-		for _, u := range t.UTXOInputs{
+	for _, t := range txPool {
+		for _, u := range t.UTXOInputs {
 			utxo := u.ToString()
 			if _, ok := utxoMap[utxo]; ok {
 				return false
-			}else{
+			} else {
 				utxoMap[utxo] = true
 			}
 		}
@@ -128,29 +140,29 @@ func VerifyTransactionPoolWhenResponse (txPool  []*tx.Transaction)bool{
 
 //Use for request by miner.
 //remove the invalidate transaction from process context and tell the caller which should be removed.
-func VerifyTransactionPoolWhenRequest(txPool  map[common.Uint256]*tx.Transaction)(txs []common.Uint256,NewPool map[common.Uint256]*tx.Transaction){
+func VerifyTransactionPoolWhenRequest(txPool map[common.Uint256]*tx.Transaction) (txs []common.Uint256, NewPool map[common.Uint256]*tx.Transaction) {
 	if len(txPool) == 0 {
-		return nil,txPool
+		return nil, txPool
 	}
 
-	errorTxs :=  []common.Uint256{}
+	errorTxs := []common.Uint256{}
 	utxoMap := make(map[string]common.Uint256, 0)
-	for k, t := range txPool{
-		for _, u := range t.UTXOInputs{
+	for k, t := range txPool {
+		for _, u := range t.UTXOInputs {
 			utxo := u.ToString()
 			if v, ok := utxoMap[utxo]; ok {
-				delete(txPool,v)
-				delete(txPool,k)
-				errorTxs = append(errorTxs,k)
-				errorTxs = append(errorTxs,v)
+				delete(txPool, v)
+				delete(txPool, k)
+				errorTxs = append(errorTxs, k)
+				errorTxs = append(errorTxs, v)
 				continue
-			}else{
+			} else {
 				utxoMap[utxo] = k
 			}
 		}
 	}
 
-	return errorTxs,txPool
+	return errorTxs, txPool
 }
 
 func CheckMemPool(tx *tx.Transaction, TxPool []*tx.Transaction) error {
