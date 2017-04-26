@@ -97,17 +97,20 @@ func (bd *LevelDBStore) InitLevelDBStoreWithGenesisBlock(genesisblock *Block) (u
 		////////////////////////////////////////////////
 
 		// Get Current Header
+		var headerhash Uint256
 		currentheaderprefix := []byte{byte(SYS_CurrentHeader)}
 		data, err = bd.Get(currentheaderprefix)
-		if err != nil {
-			return 0, err
-		}
+		if err == nil {
+			r = bytes.NewReader(data)
+			headerhash.Deserialize(r)
 
-		r = bytes.NewReader(data)
-		var headerhash Uint256
-		headerhash.Deserialize(r)
-		headerheight, err := serialization.ReadUint32(r)
-		current_header_height = headerheight
+			headerheight, err_get := serialization.ReadUint32(r)
+			if err_get != nil {
+				return 0, err_get
+			}
+
+			current_header_height = headerheight
+		}
 
 		log.Debug(fmt.Sprintf("blockhash: %x\n", blockhash.ToArray()))
 		log.Debug(fmt.Sprintf("blockheight: %d\n", current_header_height))
