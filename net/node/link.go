@@ -74,18 +74,22 @@ func (node *node) rx() error {
 	from := conn.RemoteAddr().String()
 
 	for {
-		buf := make([]byte, MAXBUFLEN)
-		len, err := conn.Read(buf[0:(MAXBUFLEN - 1)])
-		buf[MAXBUFLEN-1] = 0 //Prevent overflow
+		buf := node.memPool.Get()
+		size := node.memPool.BlockSize - 1
+		len, err := conn.Read(buf[0:(size)])
+		buf[size] = 0 //Prevent overflow
 		switch err {
 		case nil:
 			unpackNodeBuf(node, buf[0:len])
 			//go handleNodeMsg(node, buf, len)
+			node.memPool.Put(buf)
 			break
 		case io.EOF:
+			node.memPool.Put(buf)
 			//log.Debug("Reading EOF of network conn")
 			break
 		default:
+			node.memPool.Put(buf)
 			log.Error("Read connetion error ", err)
 			goto disconnect
 		}

@@ -45,6 +45,7 @@ type node struct {
 	eventQueue                   // The event queue to notice notice other modules
 	TXNPool                      // Unconfirmed transaction pool
 	idCache                      // The buffer to store the id of the items which already be processed
+	memPool    *common.MemPool
 	/*
 	 * |--|--|--|--|--|--|isSyncFailed|isSyncHeaders|
 	 */
@@ -87,6 +88,7 @@ func NewNode() *node {
 	n := node{
 		state: INIT,
 		chF:   make(chan func() error),
+		memPool:common.NewMemPool(MAXBUFLEN, 1024),
 	}
 	runtime.SetFinalizer(&n, rmNode)
 	go n.backend()
