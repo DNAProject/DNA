@@ -263,7 +263,7 @@ func (bd *LevelDBStore) InitLedgerStore(l *Ledger) error {
 	return nil
 }
 
-func (bd *LevelDBStore) IsDoubleSpend(tx tx.Transaction) bool {
+func (bd *LevelDBStore) IsDoubleSpend(tx *tx.Transaction) bool {
 	if len(tx.UTXOInputs) == 0 {
 		return false
 	}
