@@ -9,7 +9,7 @@ DNA is the golang implementation of a decentralized and distributed network prot
 * 可扩展通用智能合约平台 / Extendable Generalduty Lightweight Smart Contract
 * 跨链协议 / Crosschain Interactive Protocol
 * 抗量子攻击 / Quantum-Resistant Cryptography (optional module)
-* 国密算法支持SM系列支持 / China National Crypto Standard (optional module)
+* 国密算法支持SM系列 / China National Crypto Standard (optional module)
 * 零配置组网出块 / Zero Configuration Kickoff Networks (Ongoing)
 * 高度优化交易处理速度 ／ High Optimization of TPS
 * 分布式数据存储IPFS集成方案 ／ IPFS Dentralizaed Storing & Sharing files solution integration (TBD)
@@ -174,11 +174,51 @@ $ cat node[1234]/config.json
 
 ## Getting Started
 
-Execute the seed node program first then other nodes. Just run:
+Start the seed node program firstly then other nodes. Just run:
 
 ```shell
 $ ./node
 ```
+
+## Testing DNA in an open environment
+
+We also provide an open testing environment, it suppots below operation:
+
+1. make some transactions :
+```
+./nodectl test -ip 139.196.113.85 -port 10331 -tx perf -num 10
+```
+
+2. register, issue, transfer assert :
+```
+./nodectl test -ip 139.196.113.85 -port 10331 -tx full
+```
+
+3. look up block's information :
+```
+./nodectl info -ip 139.196.113.85 -port 10331 -height 10
+```
+
+4. look up transaction's information :
+```
+./nodectl info -ip 139.196.113.85 -port 10331 -txhash d438896f07786b74281bc70259b0caaccb87460171104ea17473b5e802033a98
+```
+
+......
+
+Run `./nodectl --h` for more details.
+
+Some other avaliable nodes for testing:
+```
+IP               PORT
+----------------------
+139.196.113.85:  10331
+139.196.113.101: 10331
+139.196.227.195: 10331
+139.196.227.195: 20331
+```
+
+`Notice: Above nodes intended be used for public testing only, the data saved on the testing chain maybe reset at anytime. Keep in mind to backup the data by youself to avoid data losting.`
 
 # Contributing
 
