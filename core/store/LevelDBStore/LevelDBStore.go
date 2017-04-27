@@ -29,8 +29,8 @@ type LevelDBStore struct {
 	header_index map[uint32]Uint256
 	block_cache  map[Uint256]*Block
 
-	current_block_height uint32
-	stored_header_count  uint32
+	current_Block_Height uint32
+	stored_Header_Count  uint32
 
 	mu sync.RWMutex
 
@@ -63,8 +63,8 @@ func NewLevelDBStore(file string) (*LevelDBStore, error) {
 		it:                   nil,
 		header_index:         map[uint32]Uint256{},
 		block_cache:          map[Uint256]*Block{},
-		current_block_height: 0,
-		stored_header_count:  0,
+		current_Block_Height: 0,
+		stored_Header_Count:  0,
 		disposed:             false,
 	}, nil
 }
@@ -83,66 +83,66 @@ func (bd *LevelDBStore) InitLevelDBStoreWithGenesisBlock(genesisblock *Block) (u
 
 	if version[0] == 0x01 {
 		// Get Current Block
-		currentblockprefix := []byte{byte(SYS_CurrentBlock)}
-		data, err := bd.Get(currentblockprefix)
+		currentBlockPrefix := []byte{byte(SYS_CurrentBlock)}
+		data, err := bd.Get(currentBlockPrefix)
 		if err != nil {
 			return 0, err
 		}
 
 		r := bytes.NewReader(data)
-		var blockhash Uint256
-		blockhash.Deserialize(r)
-		bd.current_block_height, err = serialization.ReadUint32(r)
-		current_header_height := bd.current_block_height
+		var blockHash Uint256
+		blockHash.Deserialize(r)
+		bd.current_Block_Height, err = serialization.ReadUint32(r)
+		current_header_height := bd.current_Block_Height
 		////////////////////////////////////////////////
 
 		// Get Current Header
-		var headerhash Uint256
+		var headerHash Uint256
 		currentheaderprefix := []byte{byte(SYS_CurrentHeader)}
 		data, err = bd.Get(currentheaderprefix)
 		if err == nil {
 			r = bytes.NewReader(data)
-			headerhash.Deserialize(r)
+			headerHash.Deserialize(r)
 
-			headerheight, err_get := serialization.ReadUint32(r)
+			headerHeight, err_get := serialization.ReadUint32(r)
 			if err_get != nil {
 				return 0, err_get
 			}
 
-			current_header_height = headerheight
+			current_header_height = headerHeight
 		}
 
-		log.Debug(fmt.Sprintf("blockhash: %x\n", blockhash.ToArray()))
+		log.Debug(fmt.Sprintf("blockHash: %x\n", blockHash.ToArray()))
 		log.Debug(fmt.Sprintf("blockheight: %d\n", current_header_height))
 		////////////////////////////////////////////////
 
-		var listhash Uint256
+		var listHash Uint256
 		iter := bd.db.NewIterator(util.BytesPrefix([]byte{byte(IX_HeaderHashList)}), nil)
 		for iter.Next() {
 			rk := bytes.NewReader(iter.Key())
 			// read prefix
 			_, _ = serialization.ReadBytes(rk, 1)
-			startnum, err := serialization.ReadUint32(rk)
+			startNum, err := serialization.ReadUint32(rk)
 			if err != nil {
 				return 0, err
 			}
-			log.Debug(fmt.Sprintf("start index: %d\n", startnum))
+			log.Debug(fmt.Sprintf("start index: %d\n", startNum))
 
 			r = bytes.NewReader(iter.Value())
-			listnum, err := serialization.ReadVarUint(r, 0)
+			listNum, err := serialization.ReadVarUint(r, 0)
 			if err != nil {
 				return 0, err
 			}
 
-			for i := 0; i < int(listnum); i++ {
-				listhash.Deserialize(r)
-				bd.header_index[startnum+uint32(i)] = listhash
-				bd.stored_header_count++
-				//log.Debug( fmt.Sprintf( "listhash %d: %x\n", startnum+uint32(i), listhash ) )
+			for i := 0; i < int(listNum); i++ {
+				listHash.Deserialize(r)
+				bd.header_index[startNum+uint32(i)] = listHash
+				bd.stored_Header_Count++
+				//log.Debug( fmt.Sprintf( "listHash %d: %x\n", startNum+uint32(i), listHash ) )
 			}
 		}
 
-		if bd.stored_header_count == 0 {
+		if bd.stored_Header_Count == 0 {
 			iter = bd.db.NewIterator(util.BytesPrefix([]byte{byte(DATA_BlockHash)}), nil)
 			for iter.Next() {
 				rk := bytes.NewReader(iter.Key())
@@ -155,15 +155,15 @@ func (bd *LevelDBStore) InitLevelDBStoreWithGenesisBlock(genesisblock *Block) (u
 				//log.Debug(fmt.Sprintf( "DATA_BlockHash block height: %d\n", listheight ))
 
 				r := bytes.NewReader(iter.Value())
-				listhash.Deserialize(r)
-				//log.Debug(fmt.Sprintf( "DATA_BlockHash block hash: %x\n", listhash ))
+				listHash.Deserialize(r)
+				//log.Debug(fmt.Sprintf( "DATA_BlockHash block hash: %x\n", listHash ))
 
-				bd.header_index[listheight] = listhash
+				bd.header_index[listheight] = listHash
 			}
-		} else if current_header_height >= bd.stored_header_count {
-			hash = headerhash
+		} else if current_header_height >= bd.stored_Header_Count {
+			hash = headerHash
 			for {
-				if hash == bd.header_index[bd.stored_header_count-1] {
+				if hash == bd.header_index[bd.stored_Header_Count-1] {
 					break
 				}
 
@@ -271,15 +271,15 @@ func (bd *LevelDBStore) IsDoubleSpend(tx *tx.Transaction) bool {
 		return false
 	}
 
-	unspentprefix := []byte{byte(IX_Unspent)}
+	unspentPrefix := []byte{byte(IX_Unspent)}
 	for i := 0; i < len(tx.UTXOInputs); i++ {
 		txhash := tx.UTXOInputs[i].ReferTxID
-		unspentvalue, err_get := bd.Get(append(unspentprefix, txhash.ToArray()...))
+		unspentValue, err_get := bd.Get(append(unspentPrefix, txhash.ToArray()...))
 		if err_get != nil {
 			return true
 		}
 
-		unspents, _ := GetUint16Array(unspentvalue)
+		unspents, _ := GetUint16Array(unspentValue)
 		findflag := false
 		for k := 0; k < len(unspents); k++ {
 			if unspents[k] == tx.UTXOInputs[i].ReferTxOutputIndex {
@@ -329,7 +329,7 @@ func (bd *LevelDBStore) GetCurrentBlockHash() Uint256 {
 	bd.mu.RLock()
 	defer bd.mu.RUnlock()
 
-	return bd.header_index[bd.current_block_height]
+	return bd.header_index[bd.current_Block_Height]
 }
 
 func (bd *LevelDBStore) GetContract(hash []byte) ([]byte, error) {
@@ -566,16 +566,16 @@ func (bd *LevelDBStore) persist(b *Block) error {
 	quantities := make(map[Uint256]Fixed64)
 	///////////////////////////////////////////////////////////////
 	// Get Unspents for every tx
-	unspentprefix := []byte{byte(IX_Unspent)}
+	unspentPrefix := []byte{byte(IX_Unspent)}
 	for i := 0; i < len(b.Transactions); i++ {
 		txhash := b.Transactions[i].Hash()
-		unspentvalue, err_get := bd.Get(append(unspentprefix, txhash.ToArray()...))
+		unspentValue, err_get := bd.Get(append(unspentPrefix, txhash.ToArray()...))
 
 		if err_get != nil {
-			unspentvalue = []byte{}
+			unspentValue = []byte{}
 		}
 
-		unspents[txhash], err_get = GetUint16Array(unspentvalue)
+		unspents[txhash], err_get = GetUint16Array(unspentValue)
 		if err_get != nil {
 			return err_get
 		}
@@ -671,13 +671,13 @@ func (bd *LevelDBStore) persist(b *Block) error {
 
 			// if get unspent by utxo
 			if _, ok := unspents[txhash]; !ok {
-				unspentvalue, err_get := bd.Get(append(unspentprefix, txhash.ToArray()...))
+				unspentValue, err_get := bd.Get(append(unspentPrefix, txhash.ToArray()...))
 
 				if err_get != nil {
 					return err_get
 				}
 
-				unspents[txhash], err_get = GetUint16Array(unspentvalue)
+				unspents[txhash], err_get = GetUint16Array(unspentValue)
 				if err_get != nil {
 					return err_get
 				}
@@ -731,7 +731,7 @@ func (bd *LevelDBStore) persist(b *Block) error {
 	}
 
 	// save hash with height
-	bd.current_block_height = b.Blockdata.Height
+	bd.current_Block_Height = b.Blockdata.Height
 
 	// generate key with SYS_CurrentHeader prefix
 	currentblockkey := bytes.NewBuffer(nil)
@@ -746,7 +746,7 @@ func (bd *LevelDBStore) persist(b *Block) error {
 	batch.Put(currentblockkey.Bytes(), currentblock.Bytes())
 
 	//bh := b.Blockdata.Hash()
-	//bd.header_index[bd.current_block_height] = &bh
+	//bd.header_index[bd.current_Block_Height] = &bh
 
 	err = bd.db.Write(batch, nil)
 	if err != nil {
@@ -761,12 +761,12 @@ func (bd *LevelDBStore) onAddHeader(header *Header, batch *leveldb.Batch) {
 
 	hash := header.Blockdata.Hash()
 	bd.header_index[header.Blockdata.Height] = hash
-	for header.Blockdata.Height-bd.stored_header_count >= 2000 {
+	for header.Blockdata.Height-bd.stored_Header_Count >= 2000 {
 		hashbuffer := new(bytes.Buffer)
 		serialization.WriteVarUint(hashbuffer, uint64(2000))
 		var hasharray []byte
 		for i := 0; i < 2000; i++ {
-			index := bd.stored_header_count + uint32(i)
+			index := bd.stored_Header_Count + uint32(i)
 			//fmt.Println("index:",index)
 			thash := bd.header_index[index]
 			thehash := thash.ToArray()
@@ -780,11 +780,11 @@ func (bd *LevelDBStore) onAddHeader(header *Header, batch *leveldb.Batch) {
 		hhlprefix := bytes.NewBuffer(nil)
 		// add block header prefix.
 		hhlprefix.WriteByte(byte(IX_HeaderHashList))
-		serialization.WriteUint32(hhlprefix, bd.stored_header_count)
+		serialization.WriteUint32(hhlprefix, bd.stored_Header_Count)
 		//fmt.Printf( "%x\n", hhlprefix )
 
 		batch.Put(hhlprefix.Bytes(), hashbuffer.Bytes())
-		bd.stored_header_count += 2000
+		bd.stored_Header_Count += 2000
 	}
 
 	//////////////////////////////////////////////////////////////
@@ -830,12 +830,12 @@ func (bd *LevelDBStore) persistBlocks(ledger *Ledger) {
 	defer bd.mu.Unlock()
 
 	for !bd.disposed {
-		if uint32(len(bd.header_index)) < bd.current_block_height+1 {
-			log.Warn("[persistBlocks]: warn, header_index.count < current_block_height + 1")
+		if uint32(len(bd.header_index)) < bd.current_Block_Height+1 {
+			log.Warn("[persistBlocks]: warn, header_index.count < current_Block_Height + 1")
 			break
 		}
 
-		hash := bd.header_index[bd.current_block_height+1]
+		hash := bd.header_index[bd.current_Block_Height+1]
 
 		block, ok := bd.block_cache[hash]
 		if !ok {
@@ -932,14 +932,14 @@ func (bd *LevelDBStore) GetUnspent(txid Uint256, index uint16) (*tx.TxOutput, er
 }
 
 func (bd *LevelDBStore) ContainsUnspent(txid Uint256, index uint16) (bool, error) {
-	unspentprefix := []byte{byte(IX_Unspent)}
-	unspentvalue, err_get := bd.Get(append(unspentprefix, txid.ToArray()...))
+	unspentPrefix := []byte{byte(IX_Unspent)}
+	unspentValue, err_get := bd.Get(append(unspentPrefix, txid.ToArray()...))
 
 	if err_get != nil {
 		return false, err_get
 	}
 
-	unspentarray, err_get := GetUint16Array(unspentvalue)
+	unspentarray, err_get := GetUint16Array(unspentValue)
 	if err_get != nil {
 		return false, err_get
 	}
@@ -971,5 +971,5 @@ func (bd *LevelDBStore) GetHeight() uint32 {
 	bd.mu.RLock()
 	defer bd.mu.RUnlock()
 
-	return bd.current_block_height
+	return bd.current_Block_Height
 }
