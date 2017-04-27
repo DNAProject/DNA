@@ -11,45 +11,35 @@ import (
 	"math"
 )
 
-//Verfiy the transcation for following points
-//- Well format
-//- No duplicated inputs
-//- inputs/outputs balance
-//- Transcation contracts pass
-func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.Transaction) error {
+// VerifyTransaction verifys received single transaction
+func VerifyTransaction(Tx *tx.Transaction) error {
 
-	err := CheckDuplicateInput(Tx)
-	if err != nil {
+	if err := CheckDuplicateInput(Tx); err != nil {
 		return err
 	}
 
-	err = IsDoubleSpend(Tx, ledger)
-	if err != nil {
+	if err := CheckAssetPrecision(Tx); err != nil {
 		return err
 	}
 
-	//this func is changed to can process by Goroutine ,so move out this func individually in below.
-	//if CheckMemPool(Tx, TxPool) {
-	//	return fmt.Errorf("There is duplicated Tx Input with Tx Pool.")
-	//}
-
-	err = CheckAssetPrecision(Tx)
-	if err != nil {
+	if err := CheckTransactionBalance(Tx); err != nil {
 		return err
 	}
 
-	err = CheckTransactionBalance(Tx)
-	if err != nil {
+	if err := CheckAttributeProgram(Tx); err != nil {
 		return err
 	}
 
-	err = CheckAttributeProgram(Tx)
-	if err != nil {
+	if err := CheckTransactionContracts(Tx); err != nil {
 		return err
 	}
 
-	err = CheckTransactionContracts(Tx)
-	if err != nil {
+	return nil
+}
+
+// VerifyTransactionWithTxPool verifys a transaction with current transaction pool in memory
+func VerifyTransactionWithTxPool(Tx *tx.Transaction, TxPool []*tx.Transaction) error {
+	if err := CheckDuplicateInputInTxPool(Tx, TxPool); err != nil {
 		return err
 	}
 
@@ -60,9 +50,6 @@ func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.T
 		for k, _ := range results {
 			//Get the Asset amount when RegisterAsseted.
 			trx, err := tx.TxStore.GetTransaction(k)
-			if err != nil {
-				return errors.New("[VerifyTransaction], AssetId does exist.")
-			}
 			if trx.TxType != tx.RegisterAsset {
 				return errors.New("[VerifyTransaction], TxType is illegal.")
 			}
@@ -113,10 +100,19 @@ func VerifyTransaction(Tx *tx.Transaction, ledger *ledger.Ledger, TxPool []*tx.T
 		}
 	default:
 	}
-
 	return nil
 }
 
+// VerifyTransactionWithLedger verifys a transaction with history transaction in ledger
+func VerifyTransactionWithLedger(Tx *tx.Transaction, ledger *ledger.Ledger) error {
+	if err := IsDoubleSpend(Tx, ledger); err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: unused if do tx verification in txpool
+/*
 //Use for verify request, only response validate/invalidate.
 func VerifyTransactionPoolWhenResponse(txPool []*tx.Transaction) bool {
 	if len(txPool) == 0 {
@@ -164,6 +160,7 @@ func VerifyTransactionPoolWhenRequest(txPool map[common.Uint256]*tx.Transaction)
 
 	return errorTxs, txPool
 }
+*/
 
 func CheckMemPool(tx *tx.Transaction, TxPool []*tx.Transaction) error {
 	if len(tx.UTXOInputs) == 0 {
@@ -189,6 +186,27 @@ func CheckDuplicateInput(tx *tx.Transaction) error {
 		for j := 0; j < i; j++ {
 			if utxoin.ReferTxID == tx.UTXOInputs[j].ReferTxID && utxoin.ReferTxOutputIndex == tx.UTXOInputs[j].ReferTxOutputIndex {
 				return errors.New("invalid transaction")
+			}
+		}
+	}
+	return nil
+}
+
+func CheckDuplicateInputInTxPool(tx *tx.Transaction, txPool []*tx.Transaction) error {
+	// TODO: Optimize performance with incremental checking and deal with the duplicated tx
+	var txInputs, txPoolInputs []string
+	for _, t := range tx.UTXOInputs {
+		txInputs = append(txInputs, t.ToString())
+	}
+	for _, t := range txPool {
+		for _, u := range t.UTXOInputs {
+			txPoolInputs = append(txPoolInputs, u.ToString())
+		}
+	}
+	for _, i := range txInputs {
+		for _, j := range txPoolInputs {
+			if i == j {
+				return errors.New("Duplicated UTXO inputs found in tx pool")
 			}
 		}
 	}
