@@ -11,10 +11,17 @@ type ErrCoder interface {
 type ErrCode int16
 
 const (
-	ErrNoCode			ErrCode = -2
-	ErrNoError                      ErrCode = 0
-	ErrUnknown                      ErrCode = -1
-	ErrDuplicatedTx 		ErrCode = 1
+	ErrNoCode                    ErrCode = -2
+	ErrNoError                   ErrCode = 0
+	ErrUnknown                   ErrCode = -1
+	ErrDuplicatedTx              ErrCode = 1
+	ErrCheckDuplicatedUTXOInput  ErrCode = 2
+	ErrCheckExceedTheRegAmount   ErrCode = 3
+	ErrCheckTransactionBalance   ErrCode = 4
+	ErrCheckTransactionContracts ErrCode = 5
+	ErrCheckAssetPrecision       ErrCode = 6
+	ErrCheckAttributeProgram     ErrCode = 7
+	ErrCheckDoubleSpend          ErrCode = 8
 )
 
 func (err ErrCode) Error() string {
@@ -33,8 +40,7 @@ func (err ErrCode) Error() string {
 	return fmt.Sprintf("Unknown error? Error code = %d", err)
 }
 
-
-func ErrerCode(err error) ErrCode{
+func ErrerCode(err error) ErrCode {
 	if err, ok := err.(ErrCoder); ok {
 		return err.GetErrCode()
 	}
