@@ -62,37 +62,6 @@ func NewDbftService(client cl.Client, logDictionary string, localNet net.Neter) 
 func (ds *DbftService) AddTransaction(TX *tx.Transaction, needVerify bool) error {
 	log.Debug()
 
-	//check whether the new TX already exist in ledger
-	if ledger.DefaultLedger.Blockchain.ContainsTransaction(TX.Hash()) {
-		log.Warn(fmt.Sprintf("[AddTransaction] TX already Exist: %v", TX.Hash()))
-		ds.RequestChangeView()
-		return errors.New("TX already Exist.")
-	}
-
-	//verify the TX
-	if needVerify {
-		if err := va.VerifyTransaction(TX); err != nil {
-			log.Warn(fmt.Sprintf("[AddTransaction] TX Verfiy failed: %v", TX.Hash()))
-			ds.RequestChangeView()
-			return errors.New("TX Verfiy failed.")
-		}
-
-		if err := va.VerifyTransactionWithTxPool(TX, ds.context.GetTransactionList()); err != nil {
-			log.Warn(fmt.Sprintf("[AddTransaction] TX Verfiy with Txpool failed: %v", TX.Hash()))
-			ds.RequestChangeView()
-			return errors.New("TX Verfiy with txpool failed.")
-		}
-
-		if err := va.VerifyTransactionWithLedger(TX, ledger.DefaultLedger); err != nil {
-			log.Warn(fmt.Sprintf("[AddTransaction] TX Verfiy with Ledger failed: %v", TX.Hash()))
-			ds.RequestChangeView()
-			return errors.New("TX Verfiy with ledger failed.")
-		}
-	}
-
-	//check the TX policy
-	//checkPolicy :=  ds.CheckPolicy(TX)
-
 	//set TX to current context
 	ds.context.Transactions[TX.Hash()] = TX
 
@@ -463,6 +432,7 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 				if err := ds.AddTransaction(v, false); err != nil {
 					log.Warn(fmt.Sprintf("[AddTransaction] TX Verfiy failed: %v err=", v.Hash(), err))
 					ds.RequestChangeView()
+					return
 				}
 			} else {
 				// TODO sync tx
@@ -473,6 +443,7 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 
 	if err := ds.AddTransaction(message.BookkeepingTransaction, true); err != nil {
 		log.Warn("PrepareRequestReceived AddTransaction failed", err)
+		ds.RequestChangeView()
 		return
 	}
 

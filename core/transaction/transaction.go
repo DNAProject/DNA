@@ -385,7 +385,7 @@ func (tx *Transaction) Verify() error {
 }
 
 func (tx *Transaction) GetReference() (map[*UTXOTxInput]*TxOutput, error) {
-	if tx.TxType == RegisterAsset {
+	if tx.TxType == RegisterAsset || len(tx.UTXOInputs) == 0 {
 		return nil, nil
 	}
 	//UTXO input /  Outputs
@@ -402,7 +402,7 @@ func (tx *Transaction) GetReference() (map[*UTXOTxInput]*TxOutput, error) {
 	return reference, nil
 }
 func (tx *Transaction) GetTransactionResults() (TransactionResult, error) {
-	var result TransactionResult
+	result := TransactionResult{}
 	outputResult := tx.GetMergedAssetIDValueFromOutputs()
 	InputResult, err := tx.GetMergedAssetIDValueFromReference()
 	if err != nil {
@@ -413,7 +413,7 @@ func (tx *Transaction) GetTransactionResults() (TransactionResult, error) {
 		if inputValue, ok := InputResult[outputAssetid]; ok {
 			result[outputAssetid] = inputValue - outputValue
 		} else {
-			result[outputAssetid] = outputValue * Fixed64(-1)
+			result[outputAssetid] = outputValue * -1
 		}
 	}
 	return result, nil

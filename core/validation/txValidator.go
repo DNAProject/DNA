@@ -6,38 +6,47 @@ import (
 	"DNA/core/ledger"
 	tx "DNA/core/transaction"
 	"DNA/core/transaction/payload"
+	DNAerrors "DNA/errors"
 	"errors"
 	"fmt"
 	"math"
 )
 
 // VerifyTransaction verifys received single transaction
-func VerifyTransaction(Tx *tx.Transaction) error {
+func VerifyTransactionCanConcurrency(Tx *tx.Transaction) (error, DNAerrors.ErrCode) {
+	//check whether the new TX already exist in ledger
+	if ledger.DefaultLedger.Blockchain.ContainsTransaction(Tx.Hash()) {
+		return errors.New(fmt.Sprintf("[VerifyTransactionCanConcurrency] TX already Exist: %v", Tx.Hash())), DNAerrors.ErrDuplicatedTx
+	}
 
-	if err := CheckDuplicateInput(Tx); err != nil {
-		return err
+	if err := CheckDuplicateUTXOinput(Tx); err != nil {
+		return err, DNAerrors.ErrCheckDuplicatedUTXOInput
 	}
 
 	if err := CheckAssetPrecision(Tx); err != nil {
-		return err
+		return err, DNAerrors.ErrCheckAssetPrecision
 	}
 
 	if err := CheckTransactionBalance(Tx); err != nil {
-		return err
+		return err, DNAerrors.ErrCheckTransactionBalance
 	}
 
 	if err := CheckAttributeProgram(Tx); err != nil {
-		return err
+		return err, DNAerrors.ErrCheckAttributeProgram
 	}
 
 	if err := CheckTransactionContracts(Tx); err != nil {
-		return err
+		return err, DNAerrors.ErrCheckTransactionContracts
 	}
 
-	return nil
+	//check with UTXO in db
+	if ok := IsDoubleSpend(Tx, ledger.DefaultLedger); ok {
+		return errors.New(fmt.Sprintf("[VerifyTransactionCanConcurrency] UTXO double spend: %v", Tx.Hash())), DNAerrors.ErrCheckDoubleSpend
+	}
+	return nil, 0
 }
 
-// VerifyTransactionWithTxPool verifys a transaction with current transaction pool in memory
+// VerifyTransactionWithTxPool verifys a transaction with current transaction pool in memory which CAN NOT Concurrency.
 func VerifyTransactionWithTxPool(Tx *tx.Transaction, TxPool []*tx.Transaction) error {
 	if err := CheckDuplicateInputInTxPool(Tx, TxPool); err != nil {
 		return err
@@ -66,15 +75,12 @@ func VerifyTransactionWithTxPool(Tx *tx.Transaction, TxPool []*tx.Transaction) e
 				}
 			}
 
-			//calc the amounts in txPool which are also IssueAsset
+			//calc the amounts in txPool
 			var txPoolAmounts common.Fixed64
 			for _, t := range TxPool {
-				if t.TxType == tx.IssueAsset {
-					outputResult := t.GetMergedAssetIDValueFromOutputs()
-					for txidInPool, txValueInPool := range outputResult {
-						if txidInPool == k {
-							txPoolAmounts = txPoolAmounts + txValueInPool
-						}
+				for _, outputs := range t.Outputs {
+					if outputs.AssetID == k {
+						txPoolAmounts = txPoolAmounts + outputs.Value*-1
 					}
 				}
 			}
@@ -82,20 +88,9 @@ func VerifyTransactionWithTxPool(Tx *tx.Transaction, TxPool []*tx.Transaction) e
 			//calc weather out off the amount when Registed.
 			//AssetReg.Amount : amount when RegisterAsset of this assedID
 			//quantity_issued : amount has been issued of this assedID
-			//txPoolAmounts   : amount in transactionPool of this assedID of issue transaction.
+			//txPoolAmounts   : amount in transactionPool of this assedID
 			if AssetReg.Amount-quantity_issued < txPoolAmounts {
 				return errors.New("[VerifyTransaction], Amount check error.")
-			}
-		}
-	case tx.TransferAsset:
-		results, err := Tx.GetTransactionResults()
-		if err != nil {
-			return err
-		}
-		for k, v := range results {
-			if v != 0 {
-				log.Debug(fmt.Sprintf("AssetID %x in Transfer transactions %x , Input/output UTXO not equal.", k, Tx.Hash()))
-				return errors.New(fmt.Sprintf("AssetID %x in Transfer transactions %x , Input/output UTXO not equal.", k, Tx.Hash()))
 			}
 		}
 	default:
@@ -103,82 +98,7 @@ func VerifyTransactionWithTxPool(Tx *tx.Transaction, TxPool []*tx.Transaction) e
 	return nil
 }
 
-// VerifyTransactionWithLedger verifys a transaction with history transaction in ledger
-func VerifyTransactionWithLedger(Tx *tx.Transaction, ledger *ledger.Ledger) error {
-	if !IsDoubleSpend(Tx, ledger) {
-		return errors.New("[IsDoubleSpend] faild.")
-	}
-	return nil
-}
-
-// TODO: unused if do tx verification in txpool
-/*
-//Use for verify request, only response validate/invalidate.
-func VerifyTransactionPoolWhenResponse(txPool []*tx.Transaction) bool {
-	if len(txPool) == 0 {
-		return true
-	}
-
-	utxoMap := make(map[string]bool, 0)
-	for _, t := range txPool {
-		for _, u := range t.UTXOInputs {
-			utxo := u.ToString()
-			if _, ok := utxoMap[utxo]; ok {
-				return false
-			} else {
-				utxoMap[utxo] = true
-			}
-		}
-	}
-
-	return true
-}
-
-//Use for request by miner.
-//remove the invalidate transaction from process context and tell the caller which should be removed.
-func VerifyTransactionPoolWhenRequest(txPool map[common.Uint256]*tx.Transaction) (txs []common.Uint256, NewPool map[common.Uint256]*tx.Transaction) {
-	if len(txPool) == 0 {
-		return nil, txPool
-	}
-
-	errorTxs := []common.Uint256{}
-	utxoMap := make(map[string]common.Uint256, 0)
-	for k, t := range txPool {
-		for _, u := range t.UTXOInputs {
-			utxo := u.ToString()
-			if v, ok := utxoMap[utxo]; ok {
-				delete(txPool, v)
-				delete(txPool, k)
-				errorTxs = append(errorTxs, k)
-				errorTxs = append(errorTxs, v)
-				continue
-			} else {
-				utxoMap[utxo] = k
-			}
-		}
-	}
-
-	return errorTxs, txPool
-}
-*/
-
-func CheckMemPool(tx *tx.Transaction, TxPool []*tx.Transaction) error {
-	if len(tx.UTXOInputs) == 0 {
-		return nil
-	}
-	for _, poolTx := range TxPool {
-		for _, poolInput := range poolTx.UTXOInputs {
-			for _, txInput := range tx.UTXOInputs {
-				if poolInput.Equals(txInput) {
-					return errors.New("There is duplicated Tx Input with Tx Pool.")
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func CheckDuplicateInput(tx *tx.Transaction) error {
+func CheckDuplicateUTXOinput(tx *tx.Transaction) error {
 	if len(tx.UTXOInputs) == 0 {
 		return nil
 	}
@@ -234,6 +154,17 @@ func CheckAssetPrecision(Tx *tx.Transaction) error {
 }
 
 func CheckTransactionBalance(Tx *tx.Transaction) error {
+	results, err := Tx.GetTransactionResults()
+	if err != nil {
+		return err
+	}
+	for k, v := range results {
+		if v != 0 {
+			log.Debug(fmt.Sprintf("AssetID %x in Transfer transactions %x , Input/output UTXO not equal.", k, Tx.Hash()))
+			return errors.New(fmt.Sprintf("AssetID %x in Transfer transactions %x , Input/output UTXO not equal.", k, Tx.Hash()))
+		}
+	}
+	//TODO: below could be deleted by later.
 	if len(Tx.AssetInputAmount) != len(Tx.AssetOutputAmount) {
 		return errors.New("The number of asset is not same between inputs and outputs.")
 	}

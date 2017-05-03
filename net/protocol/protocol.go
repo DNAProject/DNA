@@ -5,6 +5,7 @@ import (
 	"DNA/core/ledger"
 	"DNA/core/transaction"
 	"DNA/crypto"
+	"DNA/errors"
 	"DNA/events"
 	"bytes"
 	"encoding/binary"
@@ -101,6 +102,9 @@ type Noder interface {
 	StopRetryTimer()
 	GetNeighborNoder() []Noder
 	GetNbrNodeCnt() uint32
+
+	GetTransactionPendingReason(hash common.Uint256) errors.ErrCode
+	ClearTransactionsPendingPool()
 }
 
 type JsonNoder interface {
