@@ -2,7 +2,6 @@ package message
 
 import (
 	"DNA/common/log"
-	"DNA/core/ledger"
 	. "DNA/net/protocol"
 	"encoding/hex"
 	"errors"
@@ -51,7 +50,7 @@ func NewVerack() ([]byte, error) {
  */
 // TODO The process should be adjusted based on above table
 func (msg verACK) Handle(node Noder) error {
-	log.Trace()
+	log.Debug()
 
 	t := time.Now()
 	s := node.GetState()
@@ -73,15 +72,6 @@ func (msg verACK) Handle(node Noder) error {
 	// but it doesn't matter to access the invalid
 	// node which will trigger a warning
 	node.ReqNeighborList()
-
-	if uint64(ledger.DefaultLedger.Blockchain.BlockHeight) < node.GetHeight() {
-		buf, err := NewBlocksReq(node)
-		if err != nil {
-			log.Error("failed build a new blockReq")
-		} else {
-			go node.Tx(buf)
-		}
-	}
 
 	return nil
 }

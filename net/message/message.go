@@ -1,9 +1,7 @@
 package message
 
 import (
-	"DNA/common"
 	"DNA/common/log"
-	"DNA/core/ledger"
 	. "DNA/net/protocol"
 	"bytes"
 	"crypto/sha256"
@@ -11,7 +9,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"strings"
 )
 
 type Messager interface {
@@ -206,13 +203,6 @@ func HandleNodeMsg(node Noder, buf []byte, len int) error {
 		return err
 	}
 
-	heights, _ := node.LocalNode().GetNeighborHeights()
-	if common.CompareHeight(uint64(ledger.DefaultLedger.Blockchain.BlockHeight), heights) == false {
-		if strings.Compare(s, "consensus") == 0 {
-			log.Info("sync up block havn't finished, height is ", uint64(ledger.DefaultLedger.Blockchain.BlockHeight), " ,others height are: ", heights)
-			return errors.New("sync up block havn't finished")
-		}
-	}
 	msg := AllocMsg(s, len)
 	if msg == nil {
 		fmt.Println(err.Error())
@@ -301,7 +291,7 @@ func (hdr msgHdr) Serialization() ([]byte, error) {
 }
 
 func (hdr msgHdr) Handle(n Noder) error {
-	log.Trace()
+	log.Debug()
 	// TBD
 	return nil
 }
