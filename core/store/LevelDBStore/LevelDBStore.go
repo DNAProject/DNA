@@ -28,7 +28,7 @@ type LevelDBStore struct {
 
 	headerIndex map[uint32]Uint256
 	blockCache  map[Uint256]*Block
-  	headerCache map[Uint256]*Header
+	headerCache map[Uint256]*Header
 
 	currentBlockHeight uint32
 	storedHeaderCount  uint32
@@ -64,7 +64,7 @@ func NewLevelDBStore(file string) (*LevelDBStore, error) {
 		it:                 nil,
 		headerIndex:        map[uint32]Uint256{},
 		blockCache:         map[Uint256]*Block{},
-    		headerCache:         map[Uint256]*Header{},
+		headerCache:        map[Uint256]*Header{},
 		currentBlockHeight: 0,
 		storedHeaderCount:  0,
 		disposed:           false,
@@ -899,14 +899,14 @@ func (bd *LevelDBStore) persistBlocks(ledger *Ledger) {
 		bd.persist(block)
 
 		// PersistCompleted event
-		ledger.Blockchain.BCEvents.Notify(events.EventBlockPersistCompleted, block)
+		ledger.Blockchain.BCEvents.Notify(events.EventBlockSaveCompleted, block)
 
 		delete(bd.blockCache, hash)
 	}
 
 }
 
-func (bd *LevelDBStore) SaveBlock(b *Block, ledger *Ledger) error {
+func (bd *LevelDBStore) SaveBlock(b *Block, ledger *Ledger) bool {
 	log.Debug("SaveBlock()")
 
 	bd.mu.Lock()
@@ -918,16 +918,17 @@ func (bd *LevelDBStore) SaveBlock(b *Block, ledger *Ledger) error {
 
 	log.Info("len(bd.headerIndex) is ", len(bd.headerIndex), " ,b.Blockdata.Height is ", b.Blockdata.Height)
 	if b.Blockdata.Height >= (uint32(len(bd.headerIndex)) + 1) {
-		//return false,NewDetailErr(errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - headerIndex.count >= 1, block height:%d, headerIndex.count:%d",b.Blockdata.Height, uint32(len(bd.headerIndex)) )),ErrDuplicatedBlock,"")
-		return errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - headerIndex.count >= 1, block height:%d, headerIndex.count:%d", b.Blockdata.Height, uint32(len(bd.headerIndex))))
+		log.Debug(fmt.Sprintf("WARNING: [SaveBlock] block height - headerIndex.count >= 1, block height:%d, headerIndex.count:%d", b.Blockdata.Height, uint32(len(bd.headerIndex))))
+		return false
 	}
 
+	flag := false
 	if b.Blockdata.Height == uint32(len(bd.headerIndex)) {
 		//Block verify
 		err := validation.VerifyBlock(b, ledger, false)
 		if err != nil {
 			log.Debug("VerifyBlock() error!")
-			return err
+			return false
 		}
 
 		batch := new(leveldb.Batch)
@@ -937,19 +938,18 @@ func (bd *LevelDBStore) SaveBlock(b *Block, ledger *Ledger) error {
 		//log.Debug("batch dump: ", batch.Dump())
 		err = bd.db.Write(batch, nil)
 		if err != nil {
-			return err
+			log.Debug(err)
+			return false
 		}
-	} else {
-		return errors.New("[SaveBlock] block height != headerIndex")
+
+		flag = true
 	}
 
 	if b.Blockdata.Height < uint32(len(bd.headerIndex)) {
 		go bd.persistBlocks(ledger)
-	} else {
-		return errors.New("[SaveBlock] block height < headerIndex")
 	}
 
-	return nil
+	return flag
 }
 
 func (bd *LevelDBStore) GetQuantityIssued(assetId Uint256) (Fixed64, error) {

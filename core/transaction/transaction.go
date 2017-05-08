@@ -43,7 +43,7 @@ type Payload interface {
 //Transaction is used for carry information or action to Ledger
 //validated transaction will be added to block and updates state correspondingly
 
-var TxStore ILedgerStore
+var TxStore ITxStore
 
 type Transaction struct {
 	TxType         TransactionType

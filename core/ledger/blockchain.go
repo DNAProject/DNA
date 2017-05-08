@@ -7,6 +7,7 @@ import (
 	"DNA/crypto"
 	. "DNA/errors"
 	"DNA/events"
+	"fmt"
 	"sync"
 )
 
@@ -14,6 +15,8 @@ type Blockchain struct {
 	BlockHeight uint32
 	BCEvents    *events.Event
 	mutex       sync.Mutex
+
+	blockSaveCompletedSubscriber events.Subscriber
 }
 
 func NewBlockchain(height uint32) *Blockchain {
@@ -37,23 +40,32 @@ func NewBlockchainWithGenesisBlock() (*Blockchain, error) {
 		return nil, NewDetailErr(err, ErrNoCode, "[Blockchain], InitLevelDBStoreWithGenesisBlock failed.")
 	}
 	blockchain := NewBlockchain(height)
+	blockchain.blockSaveCompletedSubscriber = blockchain.BCEvents.Subscribe(events.EventBlockSaveCompleted, blockchain.BlockSaveCompleted)
+
 	return blockchain, nil
 }
 
-func (bc *Blockchain) AddBlock(block *Block) error {
+func (bc *Blockchain) BlockSaveCompleted(v interface{}) {
+	log.Debug()
+	if block, ok := v.(*Block); ok {
+		bc.BCEvents.Notify(events.EventBlockPersistCompleted, block)
+		log.Info(fmt.Sprintf("[BlockSaveCompleted] persist block: %d", block.Hash()))
+	}
+}
+
+func (bc *Blockchain) AddBlock(block *Block) bool {
 	log.Debug()
 	bc.mutex.Lock()
 	defer bc.mutex.Unlock()
 
-	err := bc.SaveBlock(block)
-	if err != nil {
-		return err
+	if !bc.SaveBlock(block) {
+		return false
 	}
 
 	// Need atomic oepratoion
 	bc.BlockHeight = bc.BlockHeight + 1
 
-	return nil
+	return true
 }
 
 //
@@ -73,16 +85,15 @@ func (bc *Blockchain) GetHeader(hash Uint256) (*Header, error) {
 	return header, nil
 }
 
-func (bc *Blockchain) SaveBlock(block *Block) error {
+func (bc *Blockchain) SaveBlock(block *Block) bool {
 	log.Debug()
 	log.Info("block hash ", block.Hash())
-	err := DefaultLedger.Store.SaveBlock(block, DefaultLedger)
-	if err != nil {
-		log.Warn("Save block failure ,err= ", err)
-		return err
+	if !DefaultLedger.Store.SaveBlock(block, DefaultLedger) {
+		log.Warn("Save block failure.")
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func (bc *Blockchain) ContainsTransaction(hash Uint256) bool {
