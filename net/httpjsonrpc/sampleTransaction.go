@@ -6,8 +6,11 @@ import (
 	"DNA/common/log"
 	. "DNA/core/asset"
 	"DNA/core/contract"
+	"DNA/core/ledger"
 	"DNA/core/signature"
 	"DNA/core/transaction"
+	"DNA/core/validation"
+	"errors"
 	"strconv"
 )
 
@@ -96,11 +99,22 @@ func SignTx(admin *client.Account, tx *transaction.Transaction) {
 	tx.SetPrograms(transactionContractContext.GetPrograms())
 }
 
-func SendTx(tx *transaction.Transaction) {
+func SendTx(tx *transaction.Transaction) error {
+	if err := validation.VerifyTransaction(tx); err != nil {
+		log.Warn("Transaction verification failed")
+		return errors.New("Transaction verification failed")
+	}
+	if err := validation.VerifyTransactionWithLedger(tx, ledger.DefaultLedger); err != nil {
+		log.Warn("Transaction verification with ledger failed")
+		return errors.New("Transaction verification with ledger failed")
+	}
 	if !node.AppendTxnPool(tx) {
 		log.Warn("Can NOT add the transaction to TxnPool")
+		return errors.New("Add to transaction pool failed")
 	}
 	if err := node.Xmit(tx); err != nil {
 		log.Error("Xmit Tx Error")
+		return errors.New("Xmit transaction failed")
 	}
+	return nil
 }

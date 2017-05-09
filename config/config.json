@@ -3,7 +3,7 @@
     "Magic": 7630401,
     "CoinVersion": 23,
     "SeedList": [
-      "192.168.33.11:20338"
+      "127.0.0.1:20338"
     ],
     "HttpJsonPort": 20336,
     "HttpLocalPort": 20337,
@@ -13,6 +13,7 @@
     "IsTLS": false,
     "CertPath": "./sample-cert.pem",
     "KeyPath": "./sample-cert-key.pem",
-    "CAPath": "./sample-ca.pem"
+    "CAPath": "./sample-ca.pem",
+    "MinerCount": 4
   }
 }
