@@ -23,6 +23,10 @@ import (
 	"time"
 )
 
+const (
+	INVDELAYTIME = 20 * time.Millisecond
+)
+
 var GenBlockTime = (2 * time.Second)
 
 type DbftService struct {
@@ -119,10 +123,6 @@ func (ds *DbftService) AddTransaction(TX *tx.Transaction, needVerify bool) error
 			}
 			payload := ds.context.MakePrepareResponse(ds.context.Signatures[ds.context.MinerIndex])
 			ds.SignAndRelay(payload)
-			err = ds.CheckSignatures()
-			if err != nil {
-				return NewDetailErr(err, ErrNoCode, "[DbftService] ,CheckSignatures failed.")
-			}
 		} else {
 			ds.RequestChangeView()
 			return errors.New("No valid Next Miner.")
@@ -221,10 +221,26 @@ func (ds *DbftService) CheckSignatures() error {
 
 		block.Transactions = ds.context.GetTXByHashes()
 
-		if err := ds.localNet.Xmit(block); err != nil {
-			log.Info(fmt.Sprintf("[CheckSignatures] Xmit block Error: %s, blockHash: %d", err.Error(), block.Hash()))
+		hash := block.Hash()
+		if !ledger.DefaultLedger.BlockInLedger(hash) {
+			// save block
+			if err := ledger.DefaultLedger.Blockchain.AddBlock(block); err != nil {
+				log.Warn("Block saving error: ", hash)
+				return err
+			}
+
+			// wait peers for saving block
+			t := time.NewTimer(INVDELAYTIME)
+			select {
+			case <-t.C:
+				// broadcast block hash
+				if err := ds.localNet.Xmit(hash); err != nil {
+					log.Warn("Block hash transmitting error: ", hash)
+					return err
+				}
+			}
+			ds.context.State |= BlockSent
 		}
-		ds.context.State |= BlockSent
 	}
 	return nil
 }
