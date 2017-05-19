@@ -11,6 +11,7 @@ type ILedgerStore interface {
 	//TODO: define the state store func
 	SaveBlock(b *Block, ledger *Ledger) error
 	GetBlock(hash Uint256) (*Block, error)
+	BlockInCache(hash Uint256) bool
 	GetBlockHash(height uint32) (Uint256, error)
 	InitLedgerStore(ledger *Ledger) error
 	IsDoubleSpend(tx *tx.Transaction) bool
