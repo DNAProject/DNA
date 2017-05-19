@@ -895,6 +895,15 @@ func (bd *ChainStore) SaveBlock(b *Block, ledger *Ledger) error {
 	return nil
 }
 
+func (bd *ChainStore) BlockInCache(hash Uint256) bool {
+	bd.mu.RLock()
+	defer bd.mu.RUnlock()
+	if _, ok := bd.blockCache[hash]; ok {
+		return true
+	}
+	return false
+}
+
 func (bd *ChainStore) GetQuantityIssued(assetId Uint256) (Fixed64, error) {
 	log.Debug(fmt.Sprintf("GetQuantityIssued Hash: %x\n", assetId))
 
