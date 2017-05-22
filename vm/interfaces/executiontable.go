@@ -1,5 +1,5 @@
 package interfaces
 
-type IScriptTable interface {
-	GetScript(script_hash []byte) ([]byte)
+type ICodeTable interface {
+	GetCode(scriptHash []byte) ([]byte)
 }

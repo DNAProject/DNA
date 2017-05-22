@@ -18,11 +18,18 @@ type FunctionCode struct {
 
 	// Contract return type list
 	ReturnTypes []ContractParameterType
+
+	codeHash *Uint160
 }
 
 // method of SerializableData
 func (fc *FunctionCode) Serialize(w io.Writer) error {
-	err := serialization.WriteVarBytes(w,ContractParameterTypeToByte(fc.ParameterTypes))
+	err := serialization.WriteVarBytes(w,ContractParameterTypeToByte(fc.ReturnTypes))
+	if err != nil {
+		return err
+	}
+
+	err = serialization.WriteVarBytes(w,ContractParameterTypeToByte(fc.ParameterTypes))
 	if err != nil {
 		return err
 	}
@@ -37,11 +44,17 @@ func (fc *FunctionCode) Serialize(w io.Writer) error {
 
 // method of SerializableData
 func (fc *FunctionCode) Deserialize(r io.Reader) error {
-	p,err := serialization.ReadVarBytes(r)
+	returnTypes,err := serialization.ReadVarBytes(r)
 	if err != nil {
 		return err
 	}
-	fc.ParameterTypes = ByteToContractParameterType(p)
+	fc.ReturnTypes = ByteToContractParameterType(returnTypes)
+
+	parameterTypes,err := serialization.ReadVarBytes(r)
+	if err != nil {
+		return err
+	}
+	fc.ParameterTypes = ByteToContractParameterType(parameterTypes)
 
 	fc.Code,err = serialization.ReadVarBytes(r)
 	if err != nil {
@@ -71,12 +84,14 @@ func (fc *FunctionCode) GetReturnTypes() []ContractParameterType {
 
 // method of ICode
 // Get the hash of the smart contract
-func (fc *FunctionCode) CodeHash() Uint160 {
-	hash,err := ToCodeHash(fc.Code)
-	if err != nil {
-		log.Debug( fmt.Sprintf("[FunctionCode] ToCodeHash err=%s",err) )
-		return Uint160{0}
+func (fc *FunctionCode) CodeHash() *Uint160 {
+	if fc.codeHash == nil {
+		hash, err := ToCodeHash(fc.Code)
+		if err != nil {
+			log.Debug( fmt.Sprintf("[FunctionCode] ToCodeHash err=%s",err) )
+			return &Uint160{0}
+		}
+		fc.codeHash = &hash
 	}
-
-	return hash
+	return fc.codeHash
 }

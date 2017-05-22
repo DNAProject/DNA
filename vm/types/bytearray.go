@@ -2,6 +2,7 @@ package types
 
 import (
 	"math/big"
+	"DNA/vm/interfaces"
 )
 
 type ByteArray struct {
@@ -14,7 +15,7 @@ func NewByteArray(value []byte) *ByteArray {
 	return &ba
 }
 
-func (ba *ByteArray) Equals(other StackItem) bool {
+func (ba *ByteArray) Equals(other StackItemInterface) bool {
 	if _, ok := other.(*ByteArray); !ok {
 		return false
 	}
@@ -34,7 +35,7 @@ func (ba *ByteArray) Equals(other StackItem) bool {
 }
 
 func (ba *ByteArray) GetBigInteger() *big.Int {
-	var bi big.Int
+	bi := new(big.Int)
 	return bi.SetBytes(ba.value)
 }
 
@@ -51,10 +52,10 @@ func (ba *ByteArray) GetByteArray() []byte {
 	return ba.value
 }
 
-func (ba *ByteArray) GetInterface() {
-
+func (ba *ByteArray) GetInterface() interfaces.IInteropInterface {
+	return nil
 }
 
-func (ba *ByteArray) GetArray() []StackItem {
-	return []StackItem{ba}
+func (ba *ByteArray) GetArray() []StackItemInterface {
+	return []StackItemInterface{ba}
 }

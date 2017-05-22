@@ -22,6 +22,9 @@ type ILedgerStore interface {
 
 	GetTransaction(hash Uint256) (*tx.Transaction, error)
 
+	GetContract(hash []byte) ([]byte, error)
+	GetStorage(key []byte) ([]byte, error)
+
 	SaveAsset(assetid Uint256, asset *Asset) error
 	GetAsset(hash Uint256) (*Asset, error)
 
@@ -31,9 +34,7 @@ type ILedgerStore interface {
 	GetHeight() uint32
 	GetHeaderHashByHeight(height uint32) Uint256
 
-	Close() error
-
-	InitLevelDBStoreWithGenesisBlock(genesisblock *Block) (uint32, error)
+	InitLedgerStoreWithGenesisBlock(genesisblock *Block) (uint32, error)
 
 	GetQuantityIssued(assetid Uint256) (Fixed64, error)
 
