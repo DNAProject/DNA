@@ -52,6 +52,7 @@ type node struct {
 	syncFlag      uint8
 	TxNotifyChan  chan int
 	flightHeights []uint32
+	lastContact   time.Time
 }
 
 func (node node) DumpInfo() {
@@ -103,9 +104,9 @@ func InitNode(pubKey *crypto.PubKey) Noder {
 	n.link.port = uint16(Parameters.NodePort)
 	n.relay = true
 	rand.Seed(time.Now().UTC().UnixNano())
-	// Fixme replace with the real random number
-	n.id = uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
-	fmt.Printf("Init node ID to 0x%0x \n", n.id)
+	//id is the first 8 bytes of public key
+	n.id = ReadNodeID()
+	fmt.Printf("Init node ID to 0x%x \n", n.id)
 	n.nbrNodes.init()
 	n.local = n
 	n.publicKey = pubKey
@@ -262,11 +263,11 @@ func (node node) GetTime() int64 {
 	return t.UnixNano()
 }
 
-func (node node) GetMinerAddr() *crypto.PubKey {
+func (node node) GetBookKeeperAddr() *crypto.PubKey {
 	return node.publicKey
 }
 
-func (node node) GetMinersAddrs() ([]*crypto.PubKey, uint64) {
+func (node node) GetBookKeepersAddrs() ([]*crypto.PubKey, uint64) {
 	pks := make([]*crypto.PubKey, 1)
 	pks[0] = node.publicKey
 	var i uint64
@@ -274,7 +275,7 @@ func (node node) GetMinersAddrs() ([]*crypto.PubKey, uint64) {
 	//TODO read lock
 	for _, n := range node.nbrNodes.List {
 		if n.GetState() == ESTABLISH {
-			pktmp := n.GetMinerAddr()
+			pktmp := n.GetBookKeeperAddr()
 			pks = append(pks, pktmp)
 			i++
 		}
@@ -282,7 +283,7 @@ func (node node) GetMinersAddrs() ([]*crypto.PubKey, uint64) {
 	return pks, i
 }
 
-func (node *node) SetMinerAddr(pk *crypto.PubKey) {
+func (node *node) SetBookKeeperAddr(pk *crypto.PubKey) {
 	node.publicKey = pk
 }
 
@@ -358,4 +359,12 @@ func (node *node) RemoveFlightHeight(height uint32) {
 	for _, h := range node.flightHeights {
 		log.Debug("after flight height ", h)
 	}
+}
+
+func (node *node) SetLastContact() {
+	node.lastContact = time.Now()
+}
+
+func (node node) GetLastContact() time.Time {
+	return node.lastContact
 }
