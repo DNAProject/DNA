@@ -39,6 +39,8 @@ const (
 	MAXCHANBUF       = 512
 	PROTOCOLVERSION  = 0
 	PERIODUPDATETIME = 3 // Time to update and sync information with other nodes
+	HEARTBEAT        = 2
+	KEEPALIVETIMEOUT = 3
 )
 
 // The node state
@@ -87,9 +89,9 @@ type Noder interface {
 
 	Xmit(interface{}) error
 	SynchronizeTxnPool()
-	GetMinerAddr() *crypto.PubKey
-	GetMinersAddrs() ([]*crypto.PubKey, uint64)
-	SetMinerAddr(pk *crypto.PubKey)
+	GetBookKeeperAddr() *crypto.PubKey
+	GetBookKeepersAddrs() ([]*crypto.PubKey, uint64)
+	SetBookKeeperAddr(pk *crypto.PubKey)
 	GetNeighborHeights() ([]uint64, uint64)
 	SyncNodeHeight()
 	CleanSubmittedTransactions(block *ledger.Block) error
@@ -105,6 +107,8 @@ type Noder interface {
 	StoreFlightHeight(height uint32)
 	GetFlightHeightCnt() int
 	RemoveFlightHeight(height uint32)
+	SetLastContact()
+	GetLastContact() time.Time
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {
