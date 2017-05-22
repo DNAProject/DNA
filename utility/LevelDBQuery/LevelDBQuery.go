@@ -45,12 +45,12 @@ func DumpDB() {
 		fd.Write( []byte(fmt.Sprintf( "Block hash: %x\n", h.ToArray() )) )
 		fd.Write( []byte(fmt.Sprintf( "Block timestamp: %d\n", block.Blockdata.Timestamp )) )
 		fd.Write( []byte(fmt.Sprintf( "Block transactionsRoot :%x\n", block.Blockdata.TransactionsRoot )) )
-		fd.Write( []byte(fmt.Sprintf( "Tx Len: %d\n", len(block.Transcations) )) )
+		fd.Write( []byte(fmt.Sprintf( "Tx Len: %d\n", len(block.Transactions) )) )
 
-		for k:=0; k<len(block.Transcations); k++ {
-			txhash := block.Transcations[k].Hash()
+		for k:=0; k<len(block.Transactions); k++ {
+			txhash := block.Transactions[k].Hash()
 			fd.Write( []byte(fmt.Sprintf( "Tx hash: %x\n", txhash.ToArray() )) )
-			fd.Write( []byte(fmt.Sprintf( "Tx Type: %x\n", block.Transcations[k].TxType )) )
+			fd.Write( []byte(fmt.Sprintf( "Tx Type: %x\n", block.Transactions[k].TxType )) )
 		}
 
 		fd.Write( []byte("\n") )

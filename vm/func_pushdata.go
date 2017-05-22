@@ -5,7 +5,7 @@ func opPushData(e *ExecutionEngine) (VMState, error) {
 	if err != nil {
 		return FAULT, err
 	}
-	err = pushData(e, data)
+	err = PushData(e, data)
 	if err != nil {
 		return FAULT, err
 	}

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"bytes"
 )
 
 //for different transaction types with different payload format
@@ -26,6 +27,7 @@ const (
 	TransferAsset TransactionType = 0x10
 	Record        TransactionType = 0x11
 	DeployCode    TransactionType = 0xd0
+	InvokeCode    TransactionType = 0xd1
 )
 
 //Payload define the func for loading the payload data
@@ -203,6 +205,10 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 		tx.Payload = new(payload.BookKeeping)
 	} else if tx.TxType == Record {
 		tx.Payload = new(payload.Record)
+	} else if tx.TxType == DeployCode {
+		tx.Payload = new(payload.DeployCode)
+	} else if tx.TxType == InvokeCode {
+		tx.Payload = new(payload.InvokeCode)
 	}
 	tx.Payload.Deserialize(r)
 	//attributes
@@ -333,6 +339,8 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 
 	case TransferAsset:
 	case Record:
+	case DeployCode:
+	case InvokeCode:
 	default:
 	}
 	sort.Sort(byProgramHashes(hashs))
@@ -359,6 +367,12 @@ func (tx *Transaction) GenerateAssetMaps() {
 
 func (tx *Transaction) GetMessage() []byte {
 	return sig.GetHashForSigning(tx)
+}
+
+func (tx *Transaction) ToArray() ([]byte) {
+	b := new(bytes.Buffer)
+	tx.Serialize(b)
+	return b.Bytes()
 }
 
 func (tx *Transaction) Hash() Uint256 {
