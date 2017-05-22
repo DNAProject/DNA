@@ -14,7 +14,7 @@ import (
 
 //SignableData describe the data need be signed.
 type SignableData interface {
-	interfaces.ISignableObject
+	interfaces.ICodeContainer
 
 	//Get the the SignableData's program hashes
 	GetProgramHashes() ([]common.Uint160, error)

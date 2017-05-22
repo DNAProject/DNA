@@ -9,6 +9,8 @@ import (
 	"crypto/sha256"
 	"errors"
 	"io"
+	"fmt"
+	"bytes"
 )
 
 type Blockdata struct {
@@ -128,6 +130,7 @@ func (bd *Blockdata) GetProgramHashes() ([]Uint160, error) {
 		if err != nil {
 			return programHashes, err
 		}
+		fmt.Printf("prev_header.Blockdata.NextMiner:%x\n", prev_header.Blockdata.NextMiner)
 		programHashes = append(programHashes, prev_header.Blockdata.NextMiner)
 		return programHashes, nil
 	}
@@ -158,3 +161,10 @@ func (bd *Blockdata) GetMessage() []byte {
 	//return sig.GetHashData(bd)
 	return  sig.GetHashForSigning(bd)
 }
+
+func (bd *Blockdata) ToArray() ([]byte) {
+	b := new(bytes.Buffer)
+	bd.Serialize(b)
+	return b.Bytes()
+}
+

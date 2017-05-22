@@ -7,6 +7,7 @@ import (
 )
 
 type DeployCode struct {
+	InitCode        []byte
 	Code 		*FunctionCode
 	Name 		string
 	CodeVersion 	string
@@ -23,7 +24,12 @@ func (dc *DeployCode) Data() []byte {
 
 func (dc *DeployCode) Serialize(w io.Writer) error {
 
-	err := dc.Code.Serialize(w)
+	err := serialization.WriteVarBytes(w,dc.InitCode)
+	if err != nil {
+		return err
+	}
+
+	err = dc.Code.Serialize(w)
 	if err != nil {
 		return err
 	}
@@ -57,7 +63,17 @@ func (dc *DeployCode) Serialize(w io.Writer) error {
 }
 
 func (dc *DeployCode) Deserialize(r io.Reader) error {
-	err := dc.Code.Deserialize(r)
+
+	initCode, err:= serialization.ReadVarBytes(r)
+	if err !=nil{
+		return err
+	}
+	dc.InitCode = initCode
+
+	dc.Code = new(FunctionCode)
+
+	err = dc.Code.Deserialize(r)
+
 	if err != nil {
 		return err
 	}

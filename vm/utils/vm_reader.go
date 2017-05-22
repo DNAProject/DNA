@@ -3,6 +3,9 @@ package utils
 import (
 	"bytes"
 	"encoding/binary"
+	"strconv"
+	"strings"
+
 )
 
 type VmReader struct {
@@ -15,6 +18,10 @@ func NewVmReader(b []byte) *VmReader {
 	vmreader.reader = bytes.NewReader(b)
 	vmreader.BaseStream = b
 	return &vmreader
+}
+
+func (r *VmReader) Reader() *bytes.Reader{
+	return r.reader
 }
 
 func (r *VmReader) ReadByte() (byte,error) {
@@ -50,7 +57,7 @@ func (r *VmReader) ReadInt16() int16 {
 	b := r.ReadBytes(2)
 	bytesBuffer := bytes.NewBuffer(b)
 	var vi int16
-	binary.Read(bytesBuffer, binary.BigEndian, &vi)
+	binary.Read(bytesBuffer, binary.LittleEndian, &vi)
 	return vi
 
 }
@@ -59,7 +66,7 @@ func (r *VmReader) ReadInt32() int32 {
 	b := r.ReadBytes(4)
 	bytesBuffer := bytes.NewBuffer(b)
 	var vi int32
-	binary.Read(bytesBuffer, binary.BigEndian, &vi)
+	binary.Read(bytesBuffer, binary.LittleEndian, &vi)
 	return vi
 }
 
@@ -103,6 +110,20 @@ func (r *VmReader) ReadVarInt(max uint64) uint64 {
 func (r *VmReader) ReadVarString() string{
 	bs := r.ReadVarBytes(0X7fffffc7)
 	return string(bs)
-	//return Encoding.UTF8.GetString(reader.ReadVarBytes());
+	////b := r.ReadBytes(252)
+	//
+	//bytes := [4]byte{1,2,3,4}
+	//str := convert(bytes[:])
+	//fmt.Println(str)
+	//return hex.EncodeToString(bs[:])
+
+}
+
+func convert( b []byte ) string {
+	s := make([]string,len(b))
+	for i := range b {
+		s[i] = strconv.Itoa(int(b[i]))
+	}
+	return strings.Join(s,",")
 }
 
