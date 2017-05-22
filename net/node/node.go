@@ -1,7 +1,7 @@
 package node
 
 import (
-	"DNA/common"
+	. "DNA/common"
 	"DNA/common/log"
 	. "DNA/config"
 	"DNA/core/ledger"
@@ -9,6 +9,7 @@ import (
 	"DNA/crypto"
 	. "DNA/net/message"
 	. "DNA/net/protocol"
+	"bytes"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -51,6 +52,7 @@ type node struct {
 	syncFlag      uint8
 	TxNotifyChan  chan int
 	flightHeights []uint32
+	lastContact   time.Time
 }
 
 func (node node) DumpInfo() {
@@ -102,9 +104,9 @@ func InitNode(pubKey *crypto.PubKey) Noder {
 	n.link.port = uint16(Parameters.NodePort)
 	n.relay = true
 	rand.Seed(time.Now().UTC().UnixNano())
-	// Fixme replace with the real random number
-	n.id = uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
-	fmt.Printf("Init node ID to 0x%0x \n", n.id)
+	//id is the first 8 bytes of public key
+	n.id = ReadNodeID()
+	fmt.Printf("Init node ID to 0x%x \n", n.id)
 	n.nbrNodes.init()
 	n.local = n
 	n.publicKey = pubKey
@@ -188,55 +190,51 @@ func (node *node) UpdateTime(t time.Time) {
 	node.time = t
 }
 
-func (node *node) Xmit(inv common.Inventory) error {
+func (node *node) Xmit(message interface{}) error {
 	log.Debug()
 	var buffer []byte
 	var err error
-
-	if inv.Type() == common.TRANSACTION {
+	switch message.(type) {
+	case *transaction.Transaction:
 		log.Info("****TX transaction message*****\n")
-		transaction, ret := inv.(*transaction.Transaction)
-		if ret {
-			//transaction.Serialize(tmpBuffer)
-			buffer, err = NewTxn(transaction)
-			if err != nil {
-				log.Warn("Error New Tx message ", err.Error())
-				return err
-			}
-		}
-		node.txnCnt++
-	} else if inv.Type() == common.BLOCK {
-		log.Info("****TX block message****\n")
-		block, isBlock := inv.(*ledger.Block)
-		// FiXME, should be moved to higher layer
-		if isBlock == false {
-			log.Warn("Wrong block be Xmit")
-			return errors.New("Wrong block be Xmit")
-		}
-
-		err := ledger.DefaultLedger.Blockchain.AddBlock(block)
+		txn := message.(*transaction.Transaction)
+		buffer, err = NewTxn(txn)
 		if err != nil {
-			log.Error("Add block error before Xmit")
-			return errors.New("Add block error before Xmit")
-		}
-		buffer, err = NewBlock(block)
-		if err != nil {
-			log.Warn("Error New Block message ", err.Error())
+			log.Error("Error New Tx message: ", err)
 			return err
 		}
-	} else if inv.Type() == common.CONSENSUS {
-		log.Info("*****TX consensus message****\n")
-		payload, ret := inv.(*ConsensusPayload)
-		if ret {
-			buffer, err = NewConsensus(payload)
-			if err != nil {
-				log.Warn("Error New consensus message ", err.Error())
-				return err
-			}
+		node.txnCnt++
+	case *ledger.Block:
+		log.Info("****TX block message****\n")
+		block := message.(*ledger.Block)
+		buffer, err = NewBlock(block)
+		if err != nil {
+			log.Error("Error New Block message: ", err)
+			return err
 		}
-	} else {
-		log.Info("Unknown Xmit message type")
-		return errors.New("Unknow Xmit message type\n")
+	case *ConsensusPayload:
+		log.Info("*****TX consensus message****\n")
+		consensusPayload := message.(*ConsensusPayload)
+		buffer, err = NewConsensus(consensusPayload)
+		if err != nil {
+			log.Error("Error New consensus message: ", err)
+			return err
+		}
+	case Uint256:
+		log.Info("*****TX block hash message****\n")
+		hash := message.(Uint256)
+		buf := bytes.NewBuffer([]byte{})
+		hash.Serialize(buf)
+		// construct inv message
+		invPayload := NewInvPayload(BLOCK, 1, buf.Bytes())
+		buffer, err = NewInv(invPayload)
+		if err != nil {
+			log.Error("Error New inv message")
+			return err
+		}
+	default:
+		log.Warn("Unknown Xmit message type")
+		return errors.New("Unknown Xmit message type")
 	}
 
 	node.nbrNodes.Broadcast(buffer)
@@ -265,11 +263,11 @@ func (node node) GetTime() int64 {
 	return t.UnixNano()
 }
 
-func (node node) GetMinerAddr() *crypto.PubKey {
+func (node node) GetBookKeeperAddr() *crypto.PubKey {
 	return node.publicKey
 }
 
-func (node node) GetMinersAddrs() ([]*crypto.PubKey, uint64) {
+func (node node) GetBookKeepersAddrs() ([]*crypto.PubKey, uint64) {
 	pks := make([]*crypto.PubKey, 1)
 	pks[0] = node.publicKey
 	var i uint64
@@ -277,7 +275,7 @@ func (node node) GetMinersAddrs() ([]*crypto.PubKey, uint64) {
 	//TODO read lock
 	for _, n := range node.nbrNodes.List {
 		if n.GetState() == ESTABLISH {
-			pktmp := n.GetMinerAddr()
+			pktmp := n.GetBookKeeperAddr()
 			pks = append(pks, pktmp)
 			i++
 		}
@@ -285,14 +283,14 @@ func (node node) GetMinersAddrs() ([]*crypto.PubKey, uint64) {
 	return pks, i
 }
 
-func (node *node) SetMinerAddr(pk *crypto.PubKey) {
+func (node *node) SetBookKeeperAddr(pk *crypto.PubKey) {
 	node.publicKey = pk
 }
 
 func (node node) SyncNodeHeight() {
 	for {
 		heights, _ := node.GetNeighborHeights()
-		if common.CompareHeight(uint64(ledger.DefaultLedger.Blockchain.BlockHeight), heights) {
+		if CompareHeight(uint64(ledger.DefaultLedger.Blockchain.BlockHeight), heights) {
 			break
 		}
 		<-time.After(5 * time.Second)
@@ -357,8 +355,16 @@ func (node *node) RemoveFlightHeight(height uint32) {
 	for _, h := range node.flightHeights {
 		log.Debug("flight height ", h)
 	}
-	node.flightHeights = common.SliceRemove(node.flightHeights, height)
+	node.flightHeights = SliceRemove(node.flightHeights, height)
 	for _, h := range node.flightHeights {
 		log.Debug("after flight height ", h)
 	}
+}
+
+func (node *node) SetLastContact() {
+	node.lastContact = time.Now()
+}
+
+func (node node) GetLastContact() time.Time {
+	return node.lastContact
 }

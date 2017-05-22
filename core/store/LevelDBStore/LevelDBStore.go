@@ -684,7 +684,7 @@ func (bd *LevelDBStore) persist(b *Block) error {
 	nLen := len(b.Transactions)
 	for i := 0; i < nLen; i++ {
 
-		// now support RegisterAsset / IssueAsset / TransferAsset and Miner TX ONLY.
+		// now support RegisterAsset / IssueAsset / TransferAsset and BookKeeper TX ONLY.
 		if b.Transactions[i].TxType == tx.RegisterAsset ||
 			b.Transactions[i].TxType == tx.IssueAsset ||
 			b.Transactions[i].TxType == tx.TransferAsset ||
@@ -881,10 +881,8 @@ func (bd *LevelDBStore) onAddHeader(header *Header, batch *leveldb.Batch) {
 }
 
 func (bd *LevelDBStore) persistBlocks(ledger *Ledger) {
-
 	bd.mu.Lock()
 	defer bd.mu.Unlock()
-
 	for !bd.disposed {
 		if uint32(len(bd.headerIndex)) < bd.currentBlockHeight+1 {
 			log.Warn("[persistBlocks]: warn, headerIndex.count < currentBlockHeight + 1")
@@ -952,6 +950,15 @@ func (bd *LevelDBStore) SaveBlock(b *Block, ledger *Ledger) error {
 	}
 
 	return nil
+}
+
+func (db *LevelDBStore) BlockInCache(hash Uint256) bool {
+	db.mu.RLock()
+	defer db.mu.RUnlock()
+	if _, ok := db.blockCache[hash]; ok {
+		return true
+	}
+	return false
 }
 
 func (bd *LevelDBStore) GetQuantityIssued(assetId Uint256) (Fixed64, error) {
