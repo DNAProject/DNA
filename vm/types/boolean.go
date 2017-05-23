@@ -2,6 +2,7 @@ package types
 
 import (
 	"math/big"
+	"DNA/vm/interfaces"
 )
 
 type Boolean struct {
@@ -14,7 +15,7 @@ func NewBoolean(value bool) *Boolean{
 	return &b
 }
 
-func (b *Boolean) Equals(other StackItem) bool{
+func (b *Boolean) Equals(other StackItemInterface) bool{
 	if _, ok := other.(*Boolean); !ok {
 		return false
 	}
@@ -24,7 +25,7 @@ func (b *Boolean) Equals(other StackItem) bool{
 	return true
 }
 
-func (b *Boolean) GetBigInteger() *big.Int{
+func (b *Boolean) GetBigInteger() *big.Int {
 	if b.value {
 		return big.NewInt(1)
 	}
@@ -35,17 +36,17 @@ func (b *Boolean) GetBoolean() bool{
 	return b.value
 }
 
-func (b *Boolean) GetByteArray() []byte{
+func (b *Boolean) GetByteArray() []byte {
 	if b.value {
 		return []byte{1}
 	}
 	return []byte{0}
 }
 
-func (b *Boolean) GetInterface(){
-
+func (b *Boolean) GetInterface() interfaces.IInteropInterface {
+	return nil
 }
 
-func (b *Boolean) GetArray() []StackItem {
-	return []StackItem{b}
+func (b *Boolean) GetArray() []StackItemInterface {
+	return []StackItemInterface{b}
 }

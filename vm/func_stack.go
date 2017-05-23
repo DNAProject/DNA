@@ -1,8 +1,12 @@
 package vm
 
+import (
+	. "DNA/vm/errors"
+)
+
 func opToAltStack(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
 	e.altStack.Push(e.evaluationStack.Pop())
 	return NONE, nil
@@ -10,7 +14,7 @@ func opToAltStack(e *ExecutionEngine) (VMState, error) {
 
 func opFromAltStack(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
 	e.evaluationStack.Push(e.altStack.Pop())
 	return NONE, nil
@@ -18,9 +22,13 @@ func opFromAltStack(e *ExecutionEngine) (VMState, error) {
 
 func opXDrop(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
-	n := int(AssertStackItem(e.evaluationStack.Pop()).GetBigInteger().Int64())
+	x := e.evaluationStack.Pop().GetStackItem()
+	if x == nil {
+		return FAULT, ErrBadType
+	}
+	n := int(x.GetBigInteger().Int64())
 	if n < 0 {
 		return FAULT, nil
 	}
@@ -30,11 +38,18 @@ func opXDrop(e *ExecutionEngine) (VMState, error) {
 
 func opXSwap(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
-	n := int(AssertStackItem(e.evaluationStack.Pop()).GetBigInteger().Int64())
+	x := e.evaluationStack.Pop().GetStackItem()
+	if x == nil {
+		return FAULT, ErrBadType
+	}
+	n := int(x.GetBigInteger().Int64())
 	if n < 0 || n > e.evaluationStack.Count()-1 {
-		return FAULT, nil
+		return FAULT, ErrBadValue
+	}
+	if n == 0 {
+		return NONE, ErrBadValue
 	}
 	e.evaluationStack.Swap(0, n)
 	return NONE, nil
@@ -42,24 +57,29 @@ func opXSwap(e *ExecutionEngine) (VMState, error) {
 
 func opXTuck(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
-	n := int(AssertStackItem(e.evaluationStack.Pop()).GetBigInteger().Int64())
+	x := e.evaluationStack.Pop().GetStackItem()
+	if x == nil {
+		return FAULT, ErrBadType
+	}
+	n := int(x.GetBigInteger().Int64())
+
 	if n < 0 || n > e.evaluationStack.Count()-1 {
-		return FAULT, nil
+		return FAULT, ErrBadValue
 	}
 	e.evaluationStack.Insert(n, e.evaluationStack.Peek(0))
 	return NONE, nil
 }
 
 func opDepth(e *ExecutionEngine) (VMState, error) {
-	pushData(e, e.evaluationStack.Count())
+	PushData(e, e.evaluationStack.Count())
 	return NONE, nil
 }
 
 func opDrop(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
 	e.evaluationStack.Pop()
 	return NONE, nil
@@ -67,7 +87,7 @@ func opDrop(e *ExecutionEngine) (VMState, error) {
 
 func opDup(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
 	e.evaluationStack.Push(e.evaluationStack.Peek(0))
 	return NONE, nil
@@ -75,7 +95,7 @@ func opDup(e *ExecutionEngine) (VMState, error) {
 
 func opNip(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 2 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
 	x2 := e.evaluationStack.Pop()
 	e.evaluationStack.Pop()
@@ -85,7 +105,7 @@ func opNip(e *ExecutionEngine) (VMState, error) {
 
 func opOver(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 2 {
-		return FAULT, nil
+		return FAULT, ErrLittleLen
 	}
 	x2 := e.evaluationStack.Pop()
 	x1 := e.evaluationStack.Peek(0)
@@ -98,11 +118,12 @@ func opPick(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 2 {
 		return FAULT, nil
 	}
-	n := int(AssertStackItem(e.evaluationStack.Pop()).GetBigInteger().Int64())
-	if n < 0 {
-		return FAULT, nil
+	x := e.evaluationStack.Pop().GetStackItem()
+	if x == nil {
+		return FAULT, ErrBadType
 	}
-	if e.evaluationStack.Count() < n+1 {
+	n := int(x.GetBigInteger().Int64())
+	if n < 0 {
 		return FAULT, nil
 	}
 	e.evaluationStack.Push(e.evaluationStack.Peek(n))
@@ -111,17 +132,21 @@ func opPick(e *ExecutionEngine) (VMState, error) {
 
 func opRoll(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 2 {
-		return FAULT, nil
+		return FAULT, ErrOverLen
 	}
-	n := int(AssertStackItem(e.evaluationStack.Pop()).GetBigInteger().Int64())
+	x := e.evaluationStack.Pop().GetStackItem()
+	if x == nil {
+		return FAULT, ErrBadType
+	}
+	n := int(x.GetBigInteger().Int64())
 	if n < 0 {
-		return FAULT, nil
+		return FAULT, ErrBadType
 	}
 	if n == 0 {
 		return NONE, nil
 	}
 	if e.evaluationStack.Count() < n+1 {
-		return FAULT, nil
+		return FAULT, ErrBadType
 	}
 	e.evaluationStack.Push(e.evaluationStack.Remove(n))
 	return NONE, nil
@@ -163,11 +188,11 @@ func opTuck(e *ExecutionEngine) (VMState, error) {
 	return NONE, nil
 }
 
-func pushData(e *ExecutionEngine, data interface{}) error {
-	d, err := NewStackItem(data)
-	if err == nil {
-		e.evaluationStack.Push(d)
-		return nil
+func PushData(e *ExecutionEngine, data interface{}) error {
+	d, err := NewStackItemInterface(data)
+	if err != nil {
+		return err
 	}
-	return err
+	e.evaluationStack.Push(NewStackItem(d))
+	return nil
 }

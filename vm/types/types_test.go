@@ -9,10 +9,10 @@ func TestTypes(t *testing.T) {
 	i := NewInteger(big.NewInt(1))
 	ba := NewByteArray([]byte{1})
 	b := NewBoolean(false)
-	a1 := NewArray([]StackItem{i})
+	a1 := NewArray([]StackItemInterface{i})
 	//a2 := NewArray([]StackItem{ba})
 	t.Log(i.GetByteArray())
 	t.Log(ba.GetBoolean())
 	t.Log(b.Equals(NewBoolean(false)))
-	t.Log(a1.Equals(NewArray([]StackItem{NewInteger(big.NewInt(1))})))
+	t.Log(a1.Equals(NewArray([]StackItemInterface{NewInteger(big.NewInt(1))})))
 }

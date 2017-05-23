@@ -12,6 +12,7 @@ import (
 	"DNA/vm"
 	"io"
 	"time"
+	"bytes"
 )
 
 type Block struct {
@@ -110,6 +111,12 @@ func (b *Block) FromTrimmedData(r io.Reader) error {
 
 func (b *Block) GetMessage() []byte {
 	return sig.GetHashForSigning(b)
+}
+
+func (b *Block) ToArray() ([]byte) {
+	bf := new(bytes.Buffer)
+	b.Serialize(bf)
+	return bf.Bytes()
 }
 
 func (b *Block) GetProgramHashes() ([]Uint160, error) {
