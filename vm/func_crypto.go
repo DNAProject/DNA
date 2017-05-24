@@ -10,8 +10,8 @@ func opHash(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 1 {
 		return FAULT, nil
 	}
-	x := AssertStackItem(e.evaluationStack.Pop()).GetByteArray()
-	err := pushData(e, Hash(x, e))
+	x := e.evaluationStack.Pop().GetStackItem().GetByteArray()
+	err := PushData(e, Hash(x, e))
 	if err != nil {
 		return FAULT, err
 	}
@@ -22,10 +22,11 @@ func opCheckSig(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 2 {
 		return FAULT, nil
 	}
-	pubkey := AssertStackItem(e.evaluationStack.Pop()).GetByteArray()
-	signature := AssertStackItem(e.evaluationStack.Pop()).GetByteArray()
-	ver, err := e.crypto.VerifySignature(e.scriptContainer.GetMessage(), signature, pubkey)
-	err = pushData(e, ver)
+	pubkey := e.evaluationStack.Pop().GetStackItem().GetByteArray()
+	signature := e.evaluationStack.Pop().GetStackItem().GetByteArray()
+
+	ver, err := e.crypto.VerifySignature(e.codeContainer.GetMessage(), signature, pubkey)
+	err = PushData(e, ver)
 	if err != nil {
 		return FAULT, err
 	}
@@ -36,7 +37,7 @@ func opCheckMultiSig(e *ExecutionEngine) (VMState, error) {
 	if e.evaluationStack.Count() < 4 {
 		return FAULT, nil
 	}
-	n := int(AssertStackItem(e.evaluationStack.Pop()).GetBigInteger().Int64())
+	n := int(e.evaluationStack.Pop().GetStackItem().GetBigInteger().Int64())
 	if n < 1 {
 		return FAULT, nil
 	}
@@ -44,16 +45,13 @@ func opCheckMultiSig(e *ExecutionEngine) (VMState, error) {
 		return FAULT, nil
 	}
 	e.opCount += n
-	if e.opCount > e.maxSteps {
-		return FAULT, nil
-	}
 
 	pubkeys := make([][]byte, n)
 	for i := 0; i < n; i++ {
-		pubkeys[i] = AssertStackItem(e.evaluationStack.Pop()).GetByteArray()
+		pubkeys[i] = e.evaluationStack.Pop().GetStackItem().GetByteArray()
 	}
 
-	m := int(AssertStackItem(e.evaluationStack.Pop()).GetBigInteger().Int64())
+	m := int(e.evaluationStack.Pop().GetStackItem().GetBigInteger().Int64())
 	if m < 1 || m > n {
 		return FAULT, nil
 	}
@@ -63,10 +61,10 @@ func opCheckMultiSig(e *ExecutionEngine) (VMState, error) {
 
 	signatures := make([][]byte, m)
 	for i := 0; i < m; i++ {
-		signatures[i] = AssertStackItem(e.evaluationStack.Pop()).GetByteArray()
+		signatures[i] = e.evaluationStack.Pop().GetStackItem().GetByteArray()
 	}
 
-	message := e.scriptContainer.GetMessage()
+	message := e.codeContainer.GetMessage()
 	fSuccess := true
 
 	for i, j := 0, 0; fSuccess && i < m && j < n; {
@@ -79,7 +77,7 @@ func opCheckMultiSig(e *ExecutionEngine) (VMState, error) {
 			fSuccess = false
 		}
 	}
-	err := pushData(e, fSuccess)
+	err := PushData(e, fSuccess)
 	if err != nil {
 		return FAULT, err
 	}

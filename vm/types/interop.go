@@ -15,12 +15,12 @@ func NewInteropInterface(value interfaces.IInteropInterface) *InteropInterface {
 	return &ii
 }
 
-func (ii *InteropInterface) Equals() bool {
+func (ii *InteropInterface) Equals(other StackItemInterface) bool {
 	return false
 }
 
-func (ii *InteropInterface) GetBigInteger() big.Int {
-	return big.Int{}
+func (ii *InteropInterface) GetBigInteger() *big.Int {
+	return nil
 }
 
 func (ii *InteropInterface) GetBoolean() bool {
@@ -34,9 +34,10 @@ func (ii *InteropInterface) GetByteArray() []byte {
 	return ii._object.ToArray()
 }
 
-func (ii *InteropInterface) GetInterface() {
+func (ii *InteropInterface) GetInterface()interfaces.IInteropInterface {
+	return ii._object
 }
 
-func (ii *InteropInterface) GetArray() []StackItem {
-	return []StackItem{}
+func (ii *InteropInterface) GetArray() []StackItemInterface {
+	return []StackItemInterface{}
 }

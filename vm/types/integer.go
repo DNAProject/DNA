@@ -2,6 +2,7 @@ package types
 
 import (
 	"math/big"
+	"DNA/vm/interfaces"
 )
 
 type Integer struct {
@@ -14,7 +15,7 @@ func NewInteger(value *big.Int) *Integer{
 	return &i
 }
 
-func (i *Integer) Equals(other StackItem) bool{
+func (i *Integer) Equals(other StackItemInterface) bool{
 	if _, ok := other.(*Integer); !ok {
 		return false
 	}
@@ -40,10 +41,10 @@ func (i *Integer) GetByteArray() []byte{
 	return i.value.Bytes()
 }
 
-func (i *Integer) GetInterface() {
-
+func (i *Integer) GetInterface() interfaces.IInteropInterface {
+	return nil
 }
 
-func (i *Integer) GetArray() []StackItem {
-	return []StackItem{i}
+func (i *Integer) GetArray() []StackItemInterface {
+	return []StackItemInterface{i}
 }

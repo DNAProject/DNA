@@ -2,55 +2,49 @@ package vm
 
 import (
 	"DNA/vm/interfaces"
-	"DNA/vm/utils"
 	"io"
 	_ "math/big"
 	_ "sort"
+	. "DNA/vm/errors"
+	"DNA/common/log"
 )
 
-const MAXSTEPS int = 1200
-
-func NewExecutionEngine(container interfaces.IScriptContainer, crypto interfaces.ICrypto, maxSteps int, table interfaces.IScriptTable, service *InteropService) *ExecutionEngine {
+func NewExecutionEngine(container interfaces.ICodeContainer, crypto interfaces.ICrypto, table interfaces.ICodeTable, service IInteropService) *ExecutionEngine {
 	var engine ExecutionEngine
 
 	engine.crypto = crypto
 	engine.table = table
 
-	engine.scriptContainer = container
-	engine.invocationStack = utils.NewRandAccessStack()
+	engine.codeContainer = container
+	engine.invocationStack = NewRandAccessStack()
 	engine.opCount = 0
 
-	engine.evaluationStack = utils.NewRandAccessStack()
-	engine.altStack = utils.NewRandAccessStack()
+	engine.evaluationStack = NewRandAccessStack()
+	engine.altStack = NewRandAccessStack()
 	engine.state = BREAK
 
 	engine.context = nil
 	engine.opCode = 0
 
-	engine.maxSteps = maxSteps
-
-	if service != nil {
-		engine.service = service
-	}
-
 	engine.service = NewInteropService()
 
+	if service != nil {
+		engine.service.MergeMap(service.GetServiceMap())
+	}
 	return &engine
 }
 
 type ExecutionEngine struct {
 	crypto  interfaces.ICrypto
-	table   interfaces.IScriptTable
+	table   interfaces.ICodeTable
 	service *InteropService
 
-	scriptContainer interfaces.IScriptContainer
-	invocationStack *utils.RandomAccessStack
+	codeContainer interfaces.ICodeContainer
+	invocationStack *RandomAccessStack
 	opCount         int
 
-	maxSteps int
-
-	evaluationStack *utils.RandomAccessStack
-	altStack        *utils.RandomAccessStack
+	evaluationStack *RandomAccessStack
+	altStack        *RandomAccessStack
 	state           VMState
 
 	context *ExecutionContext
@@ -63,43 +57,49 @@ func (e *ExecutionEngine) GetState() VMState {
 	return e.state
 }
 
-func (e *ExecutionEngine) GetEvaluationStack() *utils.RandomAccessStack {
+func (e *ExecutionEngine) GetEvaluationStack() *RandomAccessStack {
 	return e.evaluationStack
 }
 
 func (e *ExecutionEngine) GetExecuteResult() bool {
-	return AssertStackItem(e.evaluationStack.Pop()).GetBoolean()
+	return e.evaluationStack.Pop().GetStackItem().GetBoolean()
 }
 
-func (e *ExecutionEngine) ExecutingScript() []byte {
-	context := AssertExecutionContext(e.invocationStack.Peek(0))
+func (e *ExecutionEngine) ExecutingCode() []byte {
+	context := e.invocationStack.Peek(0).GetExecutionContext()
 	if context != nil {
-		return context.Script
+		return context.Code
 	}
 	return nil
 }
 
-func (e *ExecutionEngine) CallingScript() []byte {
-	if e.invocationStack.Count() > 1 {
-		context := AssertExecutionContext(e.invocationStack.Peek(1))
-		if context != nil {
-			return context.Script
-		}
-		return nil
-	}
-	return nil
-}
 
-func (e *ExecutionEngine) EntryScript() []byte {
-	context := AssertExecutionContext(e.invocationStack.Peek(e.invocationStack.Count() - 1))
+func (e *ExecutionEngine) CurrentContext() *ExecutionContext {
+	context := e.invocationStack.Peek(0).GetExecutionContext()
 	if context != nil {
-		return context.Script
+		return context
 	}
 	return nil
 }
 
-func (e *ExecutionEngine) LoadScript(script []byte, pushOnly bool) {
-	e.invocationStack.Push(NewExecutionContext(script, pushOnly, nil))
+func (e *ExecutionEngine) CallingContext() *ExecutionContext {
+	context := e.invocationStack.Peek(1).GetExecutionContext()
+	if context !=  nil {
+		return context
+	}
+	return nil
+}
+
+func (e *ExecutionEngine) EntryContext() *ExecutionContext {
+	context := e.invocationStack.Peek(e.invocationStack.Count() - 1).GetExecutionContext()
+	if context != nil {
+		return context
+	}
+	return nil
+}
+
+func (e *ExecutionEngine) LoadCode(script []byte, pushOnly bool) {
+	e.invocationStack.Push(NewExecutionContext(e, script, pushOnly, nil))
 }
 
 func (e *ExecutionEngine) Execute() {
@@ -114,38 +114,42 @@ func (e *ExecutionEngine) Execute() {
 
 func (e *ExecutionEngine) StepInto() {
 	if e.invocationStack.Count() == 0 {
-		e.state = VMState(e.state | HALT)
-	}
-	if e.state&HALT == HALT || e.state&FAULT == FAULT {
+		e.state = HALT
 		return
 	}
-	context := AssertExecutionContext(e.invocationStack.Pop())
-	if context.InstructionPointer >= len(context.Script) {
-		e.opCode = RET
+	context := e.CurrentContext()
+	if context == nil {
+		e.state = FAULT
+		return
 	}
-	for {
-		opCode, err := context.OpReader.ReadByte()
-		if err == io.EOF && opCode == 0 {
+	var opCode OpCode
+
+	if context.GetInstructionPointer() >= len(context.Code) {
+		opCode = RET
+	} else {
+		o, err := context.OpReader.ReadByte()
+		if err == io.EOF {
+			e.state = FAULT
 			return
 		}
-		e.opCount++
-		state, err := e.ExecuteOp(OpCode(opCode), context)
-		if state == VMState(HALT) {
-			e.state = VMState(e.state | HALT)
-			return
-		}
+		opCode = OpCode(o)
+	}
+	e.opCount++
+	state, err := e.ExecuteOp(opCode, context)
+	if state == HALT || state == FAULT {
+		e.state = state
+		log.Error(err)
+		return
 	}
 }
 
 func (e *ExecutionEngine) ExecuteOp(opCode OpCode, context *ExecutionContext) (VMState, error) {
 	if opCode > PUSH16 && opCode != RET && context.PushOnly {
-		return FAULT, nil
+		return FAULT, ErrBadValue
 	}
-	if opCode > PUSH16 && e.opCount > e.maxSteps {
-		return FAULT, nil
-	}
+
 	if opCode >= PUSHBYTES1 && opCode <= PUSHBYTES75 {
-		err := pushData(e, context.OpReader.ReadBytes(int(opCode)))
+		err := PushData(e, context.OpReader.ReadBytes(int(opCode)))
 		if err != nil {
 			return FAULT, err
 		}
@@ -155,13 +159,9 @@ func (e *ExecutionEngine) ExecuteOp(opCode OpCode, context *ExecutionContext) (V
 	e.context = context
 	opExec := OpExecList[opCode]
 	if opExec.Exec == nil {
-		return FAULT, nil
+		return FAULT, ErrNotSupportOpCode
 	}
-	state, err := opExec.Exec(e)
-	if err != nil {
-		return state, err
-	}
-	return NONE, nil
+	return opExec.Exec(e)
 }
 
 func (e *ExecutionEngine) StepOut() {
