@@ -29,7 +29,7 @@ const (
 	MAXBLKHDRCNT  = 2000
 	MAXINVHDRCNT  = 500
 	DIVHASHLEN    = 5
-	MINCONNCNT    = 4
+	MINCONNCNT    = 3
 	MAXREQBLKONCE = 16
 )
 const (
@@ -39,6 +39,8 @@ const (
 	MAXCHANBUF       = 512
 	PROTOCOLVERSION  = 0
 	PERIODUPDATETIME = 3 // Time to update and sync information with other nodes
+	HEARTBEAT        = 2
+	KEEPALIVETIMEOUT = 3
 )
 
 // The node state
@@ -105,6 +107,9 @@ type Noder interface {
 	StoreFlightHeight(height uint32)
 	GetFlightHeightCnt() int
 	RemoveFlightHeight(height uint32)
+	SetLastContact()
+	GetLastContact() time.Time
+	SetHeight(height uint64)
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {
