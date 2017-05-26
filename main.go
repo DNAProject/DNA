@@ -10,6 +10,7 @@ import (
 	"DNA/core/transaction"
 	"DNA/crypto"
 	"DNA/net"
+	"DNA/net/apiServer"
 	"DNA/net/httpjsonrpc"
 	"DNA/net/protocol"
 	"fmt"
@@ -21,7 +22,7 @@ import (
 
 const (
 	DefaultBookKeeperCount = 4
-	DefaultMultiCoreNum  = 4
+	DefaultMultiCoreNum    = 4
 )
 
 func init() {
@@ -29,7 +30,7 @@ func init() {
 	log.CreatePrintLog(path)
 
 	var coreNum int
-	if (config.Parameters.MultiCoreNum > DefaultMultiCoreNum) {
+	if config.Parameters.MultiCoreNum > DefaultMultiCoreNum {
 		coreNum = int(config.Parameters.MultiCoreNum)
 	} else {
 		coreNum = DefaultMultiCoreNum
@@ -127,6 +128,7 @@ func main() {
 	}
 	go httpjsonrpc.StartRPCServer()
 	go httpjsonrpc.StartLocalServer()
+	apiServer.StartServers()
 
 	time.Sleep(2 * time.Second)
 	for {
