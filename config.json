@@ -5,8 +5,11 @@
     "SeedList": [
       "127.0.0.1:20338"
     ],
+    "HttpRestPort": 20334,
+    "HttpWsPort": 20335,
     "HttpJsonPort": 20336,
     "HttpLocalPort": 20337,
+    "HttpServers": "http,ws,rpc,local",
     "NodePort": 20338,
     "BookKeeperName": "c1",
     "PrintLevel": 0,
