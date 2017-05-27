@@ -17,13 +17,16 @@ func VerifySignableData(signableData sig.SignableData) (bool,error) {
 		return false,err
 	}
 
+	if len(hashes) == 0 {
+		return false, errors.New("The number of data hashes is empty")
+	}
+
 	programs := signableData.GetPrograms()
 	Length := len(hashes)
 	if Length != len(programs) {
 		return false,errors.New("The number of data hashes is different with number of programs.")
 	}
 
-	programs = signableData.GetPrograms()
 	for i := 0; i < len(programs); i++ {
 		temp,_ := ToCodeHash(programs[i].Code)
 		if hashes[i] != temp {
@@ -32,9 +35,9 @@ func VerifySignableData(signableData sig.SignableData) (bool,error) {
 		//execute program on VM
 		var cryptos interfaces.ICrypto
 		cryptos = new(vm.ECDsaCrypto)
-		se := vm.NewExecutionEngine(signableData, cryptos, 1200, nil, nil)
-		se.LoadScript(programs[i].Code, false)
-		se.LoadScript(programs[i].Parameter, true)
+		se := vm.NewExecutionEngine(signableData, cryptos, nil, nil)
+		se.LoadCode(programs[i].Code, false)
+		se.LoadCode(programs[i].Parameter, true)
 		se.Execute()
 
 		if se.GetState() != vm.HALT {

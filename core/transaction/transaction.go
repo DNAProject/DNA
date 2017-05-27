@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"bytes"
 )
 
 //for different transaction types with different payload format
@@ -26,6 +27,7 @@ const (
 	TransferAsset TransactionType = 0x10
 	Record        TransactionType = 0x11
 	DeployCode    TransactionType = 0xd0
+	InvokeCode    TransactionType = 0xd1
 )
 
 //Payload define the func for loading the payload data
@@ -203,6 +205,10 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 		tx.Payload = new(payload.BookKeeping)
 	} else if tx.TxType == Record {
 		tx.Payload = new(payload.Record)
+	} else if tx.TxType == DeployCode {
+		tx.Payload = new(payload.DeployCode)
+	} else if tx.TxType == InvokeCode {
+		tx.Payload = new(payload.InvokeCode)
 	}
 	tx.Payload.Deserialize(r)
 	//attributes
@@ -279,15 +285,7 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 	}
 	hashs := []Uint160{}
 	uniqHashes := []Uint160{}
-	// add inputUTXO's transaction
-	referenceWithUTXO_Output, err := tx.GetReference()
-	if err != nil {
-		return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetProgramHashes failed.")
-	}
-	for _, output := range referenceWithUTXO_Output {
-		programHash := output.ProgramHash
-		hashs = append(hashs, programHash)
-	}
+
 	for _, attribute := range tx.Attributes {
 		if attribute.Usage == Script {
 			dataHash, err := Uint160ParseFromBytes(attribute.Date)
@@ -312,9 +310,6 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 		hashs = append(hashs, astHash)
 	case IssueAsset:
 		result := tx.GetMergedAssetIDValueFromOutputs()
-		if err != nil {
-			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetTransactionResults failed.")
-		}
 		for k, _ := range result {
 			tx, err := TxStore.GetTransaction(k)
 			if err != nil {
@@ -332,7 +327,23 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 			}
 		}
 	case TransferAsset:
-	case Record:
+		// add inputUTXO's transaction
+		referenceWithUTXO_Output, err := tx.GetReference()
+		if err != nil {
+			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetProgramHashes failed.")
+		}
+		for _, output := range referenceWithUTXO_Output {
+			programHash := output.ProgramHash
+			hashs = append(hashs, programHash)
+		}
+	case Record, DeployCode, InvokeCode:
+		for _, v := range tx.Programs {
+			signatureRedeemScriptHashToCodeHash, err := ToCodeHash(v.Code)
+			if err != nil {
+				return nil, NewDetailErr(err, ErrNoCode, "[Contract],CreateSignatureContract failed.")
+			}
+			hashs= append(hashs,signatureRedeemScriptHashToCodeHash)
+		}
 	default:
 	}
 	//remove dupilicated hashes
@@ -368,6 +379,13 @@ func (tx *Transaction) GenerateAssetMaps() {
 func (tx *Transaction) GetMessage() []byte {
 	return sig.GetHashForSigning(tx)
 }
+
+func (tx *Transaction) ToArray() ([]byte) {
+	b := new(bytes.Buffer)
+	tx.Serialize(b)
+	return b.Bytes()
+}
+
 
 func (tx *Transaction) Hash() Uint256 {
 	if tx.hash == nil {

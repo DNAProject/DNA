@@ -42,6 +42,7 @@ var (
 		RET:      {RET, "RET", opRet},
 		APPCALL:  {APPCALL, "APPCALL", opAppCall},
 		SYSCALL:  {SYSCALL, "SYSCALL", opSysCall},
+		TAILCALL:  {TAILCALL, "TAILCALL", opAppCall},
 
 		//Stack ops
 		TOALTSTACK:   {TOALTSTACK, "TOALTSTACK", opToAltStack},

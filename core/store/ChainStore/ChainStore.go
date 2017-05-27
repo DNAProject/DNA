@@ -16,8 +16,11 @@ import (
 	"DNA/events"
 	"bytes"
 	"errors"
-	"fmt"
 	"sync"
+	"DNA/smartcontract"
+	"DNA/vm"
+	"DNA/vm/interfaces"
+	"fmt"
 )
 
 const (
@@ -280,14 +283,27 @@ func (bd *ChainStore) GetCurrentBlockHash() Uint256 {
 }
 
 func (bd *ChainStore) GetContract(hash []byte) ([]byte, error) {
-	prefix := []byte{byte(DATA_Contract)}
+	prefix := []byte{byte(ST_Contract)}
+
 	bData, err_get := bd.st.Get(append(prefix, hash...))
 	if err_get != nil {
-		//TODO: implement error process
 		return nil, err_get
 	}
 
 	log.Debug("GetContract Data: ", bData)
+
+	return bData, nil
+}
+
+func (bd *ChainStore) GetStorage(key []byte) ([]byte, error) {
+	prefix := []byte{byte(ST_Storage)}
+	bData, err_get := bd.st.Get(append(prefix, key...))
+
+	if err_get != nil {
+		return nil, err_get
+	}
+
+	log.Debug("GetStorage Data: ", bData)
 
 	return bData, nil
 }
@@ -391,7 +407,7 @@ func (bd *ChainStore) GetHeader(hash Uint256) (*Header, error) {
 	h.Blockdata = new(Blockdata)
 	h.Blockdata.Program = new(program.Program)
 
-	prefix := []byte{byte(DATA_Header)}
+	prefix := []byte{byte(DATA_Block)}
 	log.Debug("GetHeader Data:", hash.ToArray())
 	data, err_get := bd.st.Get(append(prefix, hash.ToArray()...))
 	//log.Debug( "Get Header Data: %x\n",  data )
@@ -530,7 +546,7 @@ func (bd *ChainStore) GetBlock(hash Uint256) (*Block, error) {
 	b.Blockdata = new(Blockdata)
 	b.Blockdata.Program = new(program.Program)
 
-	prefix := []byte{byte(DATA_Header)}
+	prefix := []byte{byte(DATA_Block)}
 	bHash, err_get := bd.st.Get(append(prefix, hash.ToArray()...))
 	if err_get != nil {
 		//TODO: implement error process
@@ -565,6 +581,7 @@ func (bd *ChainStore) GetBlock(hash Uint256) (*Block, error) {
 func (bd *ChainStore) persist(b *Block) error {
 	unspents := make(map[Uint256][]uint16)
 	quantities := make(map[Uint256]Fixed64)
+	writeSet := make(map[string]map[string]string)
 	///////////////////////////////////////////////////////////////
 	// Get Unspents for every tx
 	unspentPrefix := []byte{byte(IX_Unspent)}
@@ -590,7 +607,7 @@ func (bd *ChainStore) persist(b *Block) error {
 	// generate key with DATA_Header prefix
 	bhhash := bytes.NewBuffer(nil)
 	// add block header prefix.
-	bhhash.WriteByte(byte(DATA_Header))
+	bhhash.WriteByte(byte(DATA_Block))
 	// calc block hash
 	blockHash := b.Hash()
 	blockHash.Serialize(bhhash)
@@ -634,7 +651,9 @@ func (bd *ChainStore) persist(b *Block) error {
 			b.Transactions[i].TxType == tx.IssueAsset ||
 			b.Transactions[i].TxType == tx.TransferAsset ||
 			b.Transactions[i].TxType == tx.Record ||
-			b.Transactions[i].TxType == tx.BookKeeping {
+			b.Transactions[i].TxType == tx.BookKeeping ||
+			b.Transactions[i].TxType == tx.DeployCode ||
+			b.Transactions[i].TxType == tx.InvokeCode {
 			err = bd.SaveTransaction(b.Transactions[i], b.Blockdata.Height)
 			if err != nil {
 				return err
@@ -659,6 +678,51 @@ func (bd *ChainStore) persist(b *Block) error {
 				}
 			}
 		}
+		if b.Transactions[i].TxType == tx.DeployCode {
+			deployCode := b.Transactions[i].Payload.(*payload.DeployCode)
+
+			// BATCH PUT Code index by Code Hashxx
+			codehashUint160 := deployCode.Code.CodeHash()
+			codehash := codehashUint160.ToArray()
+			bd.st.BatchPut(append([]byte{byte(ST_Contract)},[]byte(codehash)...), deployCode.Code.GetCode())
+
+			if deployCode.InitCode != nil {
+				stateMachine := smartcontract.NewStateMachine()
+				var cryptos interfaces.ICrypto
+				cryptos = new(vm.ECDsaCrypto)
+				se := vm.NewExecutionEngine(b.Transactions[i], cryptos, nil, stateMachine)
+				se.LoadCode(deployCode.Code.Code, false)
+				se.LoadCode(deployCode.InitCode, true)
+				se.Execute()
+				writeSet = stateMachine.RWSet.GetChangeSet()
+				log.Fatal("Contract Execute Result:", se.GetEvaluationStack().Pop().GetStackItem().GetBigInteger())
+			}
+
+		}
+
+		if b.Transactions[i].TxType == tx.InvokeCode {
+			invokeCode := b.Transactions[i].Payload.(*payload.InvokeCode)
+			stateMachine := smartcontract.NewStateMachine()
+			codeTable := smartcontract.NewCachedCodeTable()
+			var cryptos interfaces.ICrypto
+			cryptos = new(vm.ECDsaCrypto)
+			se := vm.NewExecutionEngine(b.Transactions[i], cryptos, codeTable, stateMachine)
+			se.LoadCode(invokeCode.Code, false)
+			se.Execute()
+			writeSet = stateMachine.RWSet.GetChangeSet()
+			log.Fatal("Contract Execute Result:", se.GetEvaluationStack().Pop().GetStackItem().GetBigInteger())
+
+		}
+
+		for pkey,pvalue := range writeSet {
+			if pkey == string(byte(ST_Storage)) {
+				for kkey,kvalue := range pvalue {
+					fmt.Printf("level db store:%x\n", append([]byte(pkey),[]byte(kkey)...))
+					bd.st.BatchPut(append([]byte(pkey),[]byte(kkey)...), []byte(kvalue))
+				}
+			}
+		}
+		//fmt.Println(writeSet)
 
 		// init unspent in tx
 		for index := 0; index < len(b.Transactions[i].Outputs); index++ {
@@ -785,7 +849,7 @@ func (bd *ChainStore) addHeader(header *Header) {
 	// generate key with DATA_Header prefix
 	headerKey := bytes.NewBuffer(nil)
 	// add header prefix.
-	headerKey.WriteByte(byte(DATA_Header))
+	headerKey.WriteByte(byte(DATA_Block))
 	// contact block hash
 	blockHash := header.Blockdata.Hash()
 	blockHash.Serialize(headerKey)
