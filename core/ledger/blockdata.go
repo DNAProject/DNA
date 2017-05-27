@@ -158,3 +158,7 @@ func (bd *Blockdata) GetMessage() []byte {
 	//return sig.GetHashData(bd)
 	return sig.GetHashForSigning(bd)
 }
+
+func (bd *Blockdata) ToArray() ([]byte) {
+	return []byte{}
+}

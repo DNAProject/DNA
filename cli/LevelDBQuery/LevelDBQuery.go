@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"os"
 	"fmt"
+	"DNA/core/store/ChainStore"
 )
 
 const (
@@ -45,12 +46,12 @@ func DumpDB() {
 		fd.Write( []byte(fmt.Sprintf( "Block hash: %x\n", h.ToArray() )) )
 		fd.Write( []byte(fmt.Sprintf( "Block timestamp: %d\n", block.Blockdata.Timestamp )) )
 		fd.Write( []byte(fmt.Sprintf( "Block transactionsRoot :%x\n", block.Blockdata.TransactionsRoot )) )
-		fd.Write( []byte(fmt.Sprintf( "Tx Len: %d\n", len(block.Transcations) )) )
+		fd.Write( []byte(fmt.Sprintf( "Tx Len: %d\n", len(block.Transactions) )) )
 
-		for k:=0; k<len(block.Transcations); k++ {
-			txhash := block.Transcations[k].Hash()
+		for k:=0; k<len(block.Transactions); k++ {
+			txhash := block.Transactions[k].Hash()
 			fd.Write( []byte(fmt.Sprintf( "Tx hash: %x\n", txhash.ToArray() )) )
-			fd.Write( []byte(fmt.Sprintf( "Tx Type: %x\n", block.Transcations[k].TxType )) )
+			fd.Write( []byte(fmt.Sprintf( "Tx Type: %x\n", block.Transactions[k].TxType )) )
 		}
 
 		fd.Write( []byte("\n") )
@@ -73,12 +74,12 @@ func GetBlock(hash string) {
 	if err == nil {
 		fmt.Printf( "hash: %s\n", hash )
 		fmt.Printf( "height: %d\n", block.Blockdata.Height )
-		fmt.Printf( "Tx Len: %d\n", len(block.Transcations) )
+		fmt.Printf( "Tx Len: %d\n", len(block.Transactions) )
 
-		for k:=0; k<len(block.Transcations); k++ {
-			txhash := block.Transcations[k].Hash()
+		for k:=0; k<len(block.Transactions); k++ {
+			txhash := block.Transactions[k].Hash()
 			fmt.Printf( "Tx hash: %x\n", txhash.ToArray() )
-			fmt.Printf( "Tx Type: %x\n", block.Transcations[k].TxType )
+			fmt.Printf( "Tx Type: %x\n", block.Transactions[k].TxType )
 			fmt.Printf( "\n" )
 		}
 	} else {
@@ -115,7 +116,6 @@ func GetAsset(assetid string) {
 	asset,err := ledger.DefaultLedger.Store.GetAsset(uhash)
 	if err == nil {
 		fmt.Printf( "txid: %s\n", assetid )
-		asset.ID
 		fmt.Printf( "asset.TxType: %x\n", asset.AssetType )
 		fmt.Printf( "asset.Name: %s\n", asset.Name )
 		fmt.Printf( "asset.RecordType: %x\n", asset.RecordType )
@@ -130,7 +130,7 @@ func main() {
 	log.CreatePrintLog(path)
 
 	ledger.DefaultLedger = new(ledger.Ledger)
-	ledger.DefaultLedger.Store = store.NewLedgerStore()
+	ledger.DefaultLedger.Store = ChainStore.NewLedgerStore()
 	ledger.DefaultLedger.Store.InitLedgerStore(ledger.DefaultLedger)
 
 	args := os.Args

@@ -5,6 +5,7 @@ import (
 	. "DNA/errors"
 	"DNA/common/log"
 	"errors"
+	"DNA/common"
 )
 
 
@@ -12,7 +13,8 @@ type ECDsaCrypto struct  {
 }
 
 func (c * ECDsaCrypto) Hash160( message []byte ) []byte {
-	return []byte{}
+	temp, _ := common.ToCodeHash(message)
+	return temp.ToArray()
 }
 
 func (c * ECDsaCrypto) Hash256( message []byte ) []byte {

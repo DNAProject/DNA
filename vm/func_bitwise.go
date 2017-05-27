@@ -1,12 +1,18 @@
 package vm
 
+import (
+	. "DNA/vm/errors"
+)
+
 func opInvert(e *ExecutionEngine) (VMState, error) {
-	if e.evaluationStack.Count() < 1 {
-		return FAULT, nil
+	if Count(e) < 1 {
+		return FAULT, ErrLittleLen
 	}
-	x := e.evaluationStack.Pop()
-	i := AssertStackItem(x).GetBigInteger()
-	err := pushData(e, i.Not(i))
+	i, err := PopBigInt(e)
+	if err != nil {
+		return FAULT, err
+	}
+	err = PushData(e, i.Not(i))
 	if err != nil {
 		return FAULT, err
 	}
@@ -14,14 +20,20 @@ func opInvert(e *ExecutionEngine) (VMState, error) {
 }
 
 func opEqual(e *ExecutionEngine) (VMState, error) {
-	if e.evaluationStack.Count() < 2 {
-		return FAULT, nil
+	if Count(e) < 2 {
+		return FAULT, ErrLittleLen
 	}
-	x2 := e.evaluationStack.Pop()
-	x1 := e.evaluationStack.Pop()
-	b1 := AssertStackItem(x1)
-	b2 := AssertStackItem(x2)
-	err := pushData(e, b1.Equals(b2))
+	x := PopStackItem(e)
+	if x == nil {
+		return FAULT, ErrBadType
+	}
+	b1 := x
+	x = PopStackItem(e)
+	if x == nil {
+		return FAULT, ErrBadType
+	}
+	b2 := x
+	err := PushData(e, b1.Equals(b2))
 	if err != nil {
 		return FAULT, err
 	}

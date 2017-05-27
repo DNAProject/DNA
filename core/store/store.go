@@ -1,5 +1,10 @@
 package store
 
+type IDBCache interface {
+	Get(key []byte) ([]byte, error)
+	Commit()
+}
+
 type IIterator interface {
 	Next() bool
 	Prev() bool

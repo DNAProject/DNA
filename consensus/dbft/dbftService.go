@@ -353,11 +353,13 @@ func (ds *DbftService) GetUnverifiedTxs(txs []*tx.Transaction) []*tx.Transaction
 func VerifyTxs(txs []*tx.Transaction) error {
 	for _, t := range txs {
 		//TODO verify tx with transaction pool
-		if err := va.VerifyTransaction(t); err != nil {
-			return errors.New("Transaction verification failed")
-		}
-		if err := va.VerifyTransactionWithLedger(t, ledger.DefaultLedger); err != nil {
-			return errors.New("Transaction verification with ledger failed")
+		if t.TxType != tx.BookKeeping {
+			if err := va.VerifyTransaction(t); err != nil {
+				return errors.New(fmt.Sprintf("Transaction verification failed, error:%v", err))
+			}
+			if err := va.VerifyTransactionWithLedger(t, ledger.DefaultLedger); err != nil {
+				return errors.New(fmt.Sprintf("Transaction verification with ledger failed, error:%v", err))
+			}
 		}
 	}
 	return nil

@@ -1,29 +1,64 @@
 package vm
 
-import "DNA/vm/utils"
+import (
+	"DNA/vm/utils"
+	"io"
+	"DNA/vm/types"
+)
 
 type ExecutionContext struct {
-	Script             []byte
+	Code               []byte
 	OpReader           *utils.VmReader
 	PushOnly           bool
 	BreakPoints        []uint
 	InstructionPointer int
+	CodeHash           []byte
+	engine             *ExecutionEngine
 }
 
-func NewExecutionContext(script []byte, pushOnly bool, breakPoints []uint) *ExecutionContext {
+func NewExecutionContext(engine *ExecutionEngine, code []byte, pushOnly bool, breakPoints []uint) *ExecutionContext {
 	var executionContext ExecutionContext
-	executionContext.Script = script
-	executionContext.OpReader = utils.NewVmReader(script)
+	executionContext.Code = code
+	executionContext.OpReader = utils.NewVmReader(code)
 	executionContext.PushOnly = pushOnly
 	executionContext.BreakPoints = breakPoints
-	executionContext.InstructionPointer = executionContext.OpReader.Position()
+	executionContext.InstructionPointer = 0
+	executionContext.engine = engine
 	return &executionContext
 }
 
+func (ec *ExecutionContext) GetInstructionPointer() int {
+	return ec.OpReader.Position()
+}
+
+func (ec *ExecutionContext) SetInstructionPointer(offset int64) {
+	ec.OpReader.Seek(offset, io.SeekStart)
+}
+
+func (ec *ExecutionContext) GetCodeHash() []byte {
+	if ec.CodeHash == nil {
+		ec.CodeHash = ec.engine.crypto.Hash160(ec.Code)
+	}
+	return ec.CodeHash
+}
+
 func (ec *ExecutionContext) NextInstruction() OpCode {
-	return OpCode(ec.Script[ec.OpReader.Position()])
+	return OpCode(ec.Code[ec.OpReader.Position()])
 }
 
 func (ec *ExecutionContext) Clone() *ExecutionContext {
-	return NewExecutionContext(ec.Script, ec.PushOnly, ec.BreakPoints)
+	executionContext := NewExecutionContext(ec.engine, ec.Code, ec.PushOnly, ec.BreakPoints)
+	executionContext.InstructionPointer = ec.InstructionPointer
+	executionContext.SetInstructionPointer(int64(ec.GetInstructionPointer()))
+	return executionContext
 }
+
+func (ec *ExecutionContext) GetStackItem() types.StackItemInterface {
+	return nil
+}
+
+func (ec *ExecutionContext) GetExecutionContext() *ExecutionContext {
+	return ec
+}
+
+

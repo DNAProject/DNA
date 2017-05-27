@@ -278,7 +278,7 @@ func VerifyAndSendTx(txn *tx.Transaction) error {
 	hex := ToHexString(hash.ToArray())
 	// if transaction is verified unsucessfully then will not put it into transaction pool
 	if err := validation.VerifyTransaction(txn); err != nil {
-		log.Warn("Transaction verification failed", hex)
+		log.Warn("Transaction verification failed", hex, err)
 		return errors.New("Transaction verification failed")
 	}
 	if err := validation.VerifyTransactionWithLedger(txn, ledger.DefaultLedger); err != nil {
