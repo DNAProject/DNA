@@ -17,22 +17,25 @@ const (
 var Version string
 
 type Configuration struct {
-	Magic           int64    `json:"Magic"`
-	Version         int      `json:"Version"`
-	SeedList        []string `json:"SeedList"`
-	HttpJsonPort    int      `json:"HttpJsonPort"`
-	HttpLocalPort   int      `json:"HttpLocalPort"`
-	NodePort        int      `json:"NodePort"`
-	NodeType        string   `json:"NodeType"`
-	WebSocketPort   int      `json:"WebSocketPort"`
-	BookKeeperName  string   `json:"BookKeeperName"`
-	PrintLevel      int      `json:"PrintLevel"`
-	IsTLS           bool     `json:"IsTLS"`
-	CertPath        string   `json:"CertPath"`
-	KeyPath         string   `json:"KeyPath"`
-	CAPath          string   `json:"CAPath"`
-	GenBlockTime    uint     `json:"GenBlockTime"`
-	MultiCoreNum    uint     `json:"MultiCoreNum"`
+	Magic          int64    `json:"Magic"`
+	Version        int      `json:"Version"`
+	SeedList       []string `json:"SeedList"`
+	HttpRestPort   int      `json:"HttpRestPort"`
+	HttpWsPort     int      `json:"HttpWsPort"`
+	HttpJsonPort   int      `json:"HttpJsonPort"`
+	HttpLocalPort  int      `json:"HttpLocalPort"`
+	HttpServers    string   `json:"HttpServers"`
+	NodePort       int      `json:"NodePort"`
+	NodeType       string   `json:"NodeType"`
+	WebSocketPort  int      `json:"WebSocketPort"`
+	BookKeeperName string   `json:"BookKeeperName"`
+	PrintLevel     int      `json:"PrintLevel"`
+	IsTLS          bool     `json:"IsTLS"`
+	CertPath       string   `json:"CertPath"`
+	KeyPath        string   `json:"KeyPath"`
+	CAPath         string   `json:"CAPath"`
+	GenBlockTime   uint     `json:"GenBlockTime"`
+	MultiCoreNum   uint     `json:"MultiCoreNum"`
 }
 
 type ConfigFile struct {
