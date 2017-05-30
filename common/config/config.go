@@ -14,13 +14,16 @@ const (
 	DefaultConfigFilename = "./config.json"
 )
 
+var Version string
+
 type Configuration struct {
 	Magic           int64    `json:"Magic"`
-	Version		int      `json:"Version"`
+	Version         int      `json:"Version"`
 	SeedList        []string `json:"SeedList"`
 	HttpJsonPort    int      `json:"HttpJsonPort"`
 	HttpLocalPort   int      `json:"HttpLocalPort"`
 	NodePort        int      `json:"NodePort"`
+	NodeType        string   `json:"NodeType"`
 	WebSocketPort   int      `json:"WebSocketPort"`
 	BookKeeperName  string   `json:"BookKeeperName"`
 	PrintLevel      int      `json:"PrintLevel"`
@@ -29,7 +32,8 @@ type Configuration struct {
 	KeyPath         string   `json:"KeyPath"`
 	CAPath          string   `json:"CAPath"`
 	GenBlockTime    uint     `json:"GenBlockTime"`
-	BookKeeperCount uint32   `json:"BookKeeperCount"`
+	MultiCoreNum    uint     `json:"MultiCoreNum"`
+	EncryptAlg      string   `json:"EncryptAlg"`
 }
 
 type ConfigFile struct {

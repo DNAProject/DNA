@@ -17,18 +17,21 @@ import (
 	"DNA/crypto"
 
 	"github.com/urfave/cli"
+	"DNA/common/config"
 )
+
+var Version string
 
 func init() {
 	var path string = "./Log/"
 	log.CreatePrintLog(path)
-	crypto.SetAlg(crypto.P256R1)
+	crypto.SetAlg(config.Parameters.EncryptAlg)
 	//seed transaction nonce
 	rand.Seed(time.Now().UnixNano())
 
 	app := cli.NewApp()
 	app.Name = "nodectl"
-	app.Version = "1.0.1"
+	app.Version = Version
 	app.HelpName = "nodectl"
 	app.Usage = "command line tool for DNA blockchain"
 	app.UsageText = "nodectl [global options] command [command options] [args]"
