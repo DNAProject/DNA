@@ -1,8 +1,8 @@
 package node
 
 import (
-	"DNA/common/log"
 	. "DNA/common/config"
+	"DNA/common/log"
 	. "DNA/net/message"
 	. "DNA/net/protocol"
 	"crypto/tls"
@@ -73,9 +73,13 @@ func (node *node) rx() error {
 	for {
 		len, err := conn.Read(buf[0:(MAXBUFLEN - 1)])
 		buf[MAXBUFLEN-1] = 0 //Prevent overflow
+
+		if len > 0 {
+			unpackNodeBuf(node, buf[0:len])
+		}
+
 		switch err {
 		case nil:
-			unpackNodeBuf(node, buf[0:len])
 			break
 		case io.EOF:
 			break
