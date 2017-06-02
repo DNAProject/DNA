@@ -75,12 +75,15 @@ func (node *node) rx() error {
 		buf[MAXBUFLEN-1] = 0 //Prevent overflow
 		switch err {
 		case nil:
+			t := time.Now()
+			node.UpdateRXTime(t)
 			unpackNodeBuf(node, buf[0:len])
 			break
 		case io.EOF:
-			break
+			log.Error("Rx io.EOF ", err)
+			goto disconnect
 		default:
-			log.Error("Read connetion error ", err)
+			log.Error("Read connection error ", err)
 			goto disconnect
 		}
 	}
@@ -212,7 +215,7 @@ func (node *node) Connect(nodeAddr string) error {
 	} else {
 		conn, err = NonTLSDial(nodeAddr)
 		if err != nil {
-			log.Error("non TLS connect failed:", err)
+			log.Error("non TLS connect failed: ", err)
 			return nil
 		}
 	}
@@ -239,7 +242,6 @@ func NonTLSDial(nodeAddr string) (net.Conn, error) {
 	log.Debug()
 	conn, err := net.Dial("tcp", nodeAddr)
 	if err != nil {
-		log.Error("Error dialing\n", err.Error())
 		return nil, err
 	}
 	return conn, nil
@@ -255,7 +257,6 @@ func TLSDial(nodeAddr string) (net.Conn, error) {
 	cacert, err := ioutil.ReadFile(CAPath)
 	cert, err := tls.LoadX509KeyPair(CertPath, KeyPath)
 	if err != nil {
-		log.Error("ReadFile err: ", err)
 		return nil, err
 	}
 
@@ -271,7 +272,6 @@ func TLSDial(nodeAddr string) (net.Conn, error) {
 
 	conn, err := tls.Dial("tcp", nodeAddr, conf)
 	if err != nil {
-		log.Error("Dial failed: ", err)
 		return nil, err
 	}
 	return conn, nil

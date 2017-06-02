@@ -69,7 +69,7 @@ type Noder interface {
 	GetRelay() bool
 	SetState(state uint32)
 	CompareAndSetState(old, new uint32) bool
-	UpdateTime(t time.Time)
+	UpdateRXTime(t time.Time)
 	LocalNode() Noder
 	DelNbrNode(id uint64) (Noder, bool)
 	AddNbrNode(Noder)
@@ -83,6 +83,7 @@ type Noder interface {
 	DumpInfo()
 	UpdateInfo(t time.Time, version uint32, services uint64,
 		port uint16, nonce uint64, relay uint8, height uint64)
+	ConnectSeeds()
 	Connect(nodeAddr string) error
 	Tx(buf []byte)
 	GetTime() int64
@@ -114,8 +115,7 @@ type Noder interface {
 	StoreFlightHeight(height uint32)
 	GetFlightHeightCnt() int
 	RemoveFlightHeight(height uint32)
-	SetLastContact()
-	GetLastContact() time.Time
+	GetLastRXTime() time.Time
 	SetHeight(height uint64)
 	WaitForFourPeersStart()
 }

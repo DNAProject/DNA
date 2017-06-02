@@ -49,24 +49,24 @@ type node struct {
 }
 
 func (node node) DumpInfo() {
-	fmt.Printf("Node info:\n")
-	fmt.Printf("\t state = %d\n", node.state)
-	fmt.Printf("\t id = 0x%x\n", node.id)
-	fmt.Printf("\t addr = %s\n", node.addr)
-	fmt.Printf("\t conn = %v\n", node.conn)
-	fmt.Printf("\t cap = %d\n", node.cap)
-	fmt.Printf("\t version = %d\n", node.version)
-	fmt.Printf("\t services = %d\n", node.services)
-	fmt.Printf("\t port = %d\n", node.port)
-	fmt.Printf("\t relay = %v\n", node.relay)
-	fmt.Printf("\t height = %v\n", node.height)
-	fmt.Printf("\t conn cnt = %v\n", node.link.connCnt)
+	log.Info("Node info:")
+	log.Info("\t state = ", node.state)
+	log.Info(fmt.Sprintf("\t id = 0x%x", node.id))
+	log.Info("\t addr = ", node.addr)
+	log.Info("\t conn = ", node.conn)
+	log.Info("\t cap = ", node.cap)
+	log.Info("\t version = ", node.version)
+	log.Info("\t services = ", node.services)
+	log.Info("\t port = ", node.port)
+	log.Info("\t relay = ", node.relay)
+	log.Info("\t height = ", node.height)
+	log.Info("\t conn cnt = ", node.link.connCnt)
 }
 
 func (node *node) UpdateInfo(t time.Time, version uint32, services uint64,
 	port uint16, nonce uint64, relay uint8, height uint64) {
 
-	node.UpdateTime(t)
+	node.UpdateRXTime(t)
 	node.id = nonce
 	node.version = version
 	node.services = services
@@ -99,7 +99,7 @@ func InitNode(pubKey *crypto.PubKey, nodeType int) Noder {
 	rand.Seed(time.Now().UTC().UnixNano())
 	//id is the first 8 bytes of public key
 	n.id = ReadNodeID()
-	fmt.Printf("Init node ID to 0x%x \n", n.id)
+	log.Info(fmt.Sprintf("Init node ID to 0x%x", n.id))
 	n.nbrNodes.init()
 	n.local = n
 	n.publicKey = pubKey
@@ -184,7 +184,7 @@ func (node *node) SetHeight(height uint64) {
 	node.height = height
 }
 
-func (node *node) UpdateTime(t time.Time) {
+func (node *node) UpdateRXTime(t time.Time) {
 	node.time = t
 }
 
@@ -370,10 +370,6 @@ func (node *node) RemoveFlightHeight(height uint32) {
 	}
 }
 
-func (node *node) SetLastContact() {
-	node.lastContact = time.Now()
-}
-
-func (node node) GetLastContact() time.Time {
-	return node.lastContact
+func (node node) GetLastRXTime() time.Time {
+	return node.time
 }

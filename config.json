@@ -3,13 +3,14 @@
     "Magic": 7630401,
     "Version": 23,
     "SeedList": [
-      "127.0.0.1:20338"
+      "127.0.0.1:20338",
+      "127.0.0.1:30338"
     ],
     "HttpJsonPort": 20336,
     "HttpLocalPort": 20337,
     "NodePort": 20338,
     "BookKeeperName": "c1",
-    "PrintLevel": 0,
+    "PrintLevel": 1,
     "IsTLS": false,
     "CertPath": "./sample-cert.pem",
     "KeyPath": "./sample-cert-key.pem",
