@@ -9,6 +9,7 @@ import (
 
 type Record struct {
 	RecordType string
+	RecordName string
 	RecordData []byte
 }
 
@@ -23,6 +24,10 @@ func (a *Record) Serialize(w io.Writer) error {
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "[RecordDetail], RecordType serialize failed.")
 	}
+	err = serialization.WriteVarString(w, a.RecordName)
+	if err != nil {
+		return NewDetailErr(err, ErrNoCode, "[RecordDetail], RecordName serialize failed.")
+	}
 	err = serialization.WriteVarBytes(w, a.RecordData)
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "[RecordDetail], RecordData serialize failed.")
@@ -36,6 +41,10 @@ func (a *Record) Deserialize(r io.Reader) error {
 	a.RecordType, err = serialization.ReadVarString(r)
 	if err != nil {
 		return NewDetailErr(errors.New("[RecordDetail], RecordType deserialize failed."), ErrNoCode, "")
+	}
+	a.RecordName, err = serialization.ReadVarString(r)
+	if err != nil {
+		return NewDetailErr(errors.New("[RecordDetail], RecordName deserialize failed."), ErrNoCode, "")
 	}
 	a.RecordData, err = serialization.ReadVarBytes(r)
 	if err != nil {

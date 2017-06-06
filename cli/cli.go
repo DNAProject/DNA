@@ -11,11 +11,12 @@ import (
 	"DNA/cli/consensus"
 	"DNA/cli/debug"
 	"DNA/cli/info"
+	"DNA/cli/record"
 	"DNA/cli/test"
 	"DNA/cli/wallet"
+	"DNA/common/config"
 	"DNA/common/log"
 	"DNA/crypto"
-
 	"github.com/urfave/cli"
 )
 
@@ -49,6 +50,7 @@ func init() {
 		*test.NewCommand(),
 		*wallet.NewCommand(),
 		*asset.NewCommand(),
+		*record.NewCommand(),
 	}
 	sort.Sort(cli.CommandsByName(app.Commands))
 	sort.Sort(cli.FlagsByName(app.Flags))

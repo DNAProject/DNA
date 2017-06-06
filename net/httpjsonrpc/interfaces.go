@@ -5,16 +5,19 @@ import (
 	. "DNA/common"
 	"DNA/common/config"
 	"DNA/common/log"
+	"DNA/core/code"
+	"DNA/core/contract"
 	"DNA/core/ledger"
 	tx "DNA/core/transaction"
+	"DNA/core/transaction/payload"
 	"bytes"
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
-	"DNA/core/code"
-	"DNA/core/contract"
 )
 
 const (
@@ -106,7 +109,13 @@ func TransArryByteToHexString(ptx *tx.Transaction) *Transactions {
 
 	return trans
 }
-
+func getCurrentDirectory() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dir
+}
 func getBestBlockHash(params []interface{}) map[string]interface{} {
 	hash := ledger.DefaultLedger.Blockchain.CurrentBlockHash()
 	return DnaRpc(ToHexString(hash.ToArray()))
@@ -469,126 +478,123 @@ func sendSampleTransaction(params []interface{}) map[string]interface{} {
 		}
 		return DnaRpc(fmt.Sprintf("%d transaction(s) was sent", num))
 	case "c1":
-		str:= "746b00006101687400948c6c766b9472757400948c6c766b94797451948c6c766b9472756203007451948c6c766b947961748c6c766b946d748c6c766b946d6c7566"
-		rcode,_ :=HexToBytes(str)
-		fcd:= &code.FunctionCode{
+		str := "746b00006101687400948c6c766b9472757400948c6c766b94797451948c6c766b9472756203007451948c6c766b947961748c6c766b946d748c6c766b946d6c7566"
+		rcode, _ := HexToBytes(str)
+		fcd := &code.FunctionCode{
 			Code:           rcode,
 			ParameterTypes: []contract.ContractParameterType{contract.Integer, contract.Integer},
 			ReturnTypes:    []contract.ContractParameterType{contract.Integer},
 		}
-		hash:= fcd.CodeHash()
-		codeHash_H:=hash.ToArray()
-		invokeCode:=[]byte{}
-		pubTx := NewSamplePublish(fcd ,invokeCode,"testName","1.0",
-			"testUser","test@test.com","test desp")
+		hash := fcd.CodeHash()
+		codeHash_H := hash.ToArray()
+		invokeCode := []byte{}
+		pubTx := NewSamplePublish(fcd, invokeCode, "testName", "1.0",
+			"testUser", "test@test.com", "test desp")
 		fmt.Println("NewSamplePublish", pubTx)
 		pubHash := pubTx.Hash()
 		SignTx(admin, pubTx)
 		VerifyAndSendTx(pubTx)
-		log.Fatal(fmt.Sprintf("pubHash: %x",pubHash))
-
+		log.Fatal(fmt.Sprintf("pubHash: %x", pubHash))
 
 		time.Sleep(5 * time.Second)
 		log.Fatal("Transaction start.")
 		//Inovke SmartContract Return "H"
-		invokeCodeDetail :=[]byte{0x69}
+		invokeCodeDetail := []byte{0x69}
 		//invokeCodeDetail :=[]byte{0x51, 0x52, 0x69}
-		invokeX := append(invokeCodeDetail,codeHash_H...)
+		invokeX := append(invokeCodeDetail, codeHash_H...)
 		invTx := NewSampleInvoke(invokeX)
 		invHash := invTx.Hash()
 		SignTx(admin, invTx)
 		VerifyAndSendTx(invTx)
-		log.Fatal(fmt.Sprintf("invTx: %x",invTx))
+		log.Fatal(fmt.Sprintf("invTx: %x", invTx))
 		return DnaRpc(fmt.Sprintf("pubHash: %x, invHash: %x", pubHash, invHash))
 	case "c2":
-		str:= "746b00617400936c766b94797451936c766b9479937400948c6c766b9472756203007400948c6c766b947961748c6c766b946d746c768c6b946d746c768c6b946d6c7566"
-		rcode,_ :=HexToBytes(str)
-		fcd:= &code.FunctionCode{
+		str := "746b00617400936c766b94797451936c766b9479937400948c6c766b9472756203007400948c6c766b947961748c6c766b946d746c768c6b946d746c768c6b946d6c7566"
+		rcode, _ := HexToBytes(str)
+		fcd := &code.FunctionCode{
 			Code:           rcode,
 			ParameterTypes: []contract.ContractParameterType{contract.Integer, contract.Integer},
 			ReturnTypes:    []contract.ContractParameterType{contract.Integer},
 		}
-		hash:= fcd.CodeHash()
-		codeHash_H:=hash.ToArray()
-		invokeCode:=[]byte{0x51, 0x52}
-		pubTx := NewSamplePublish(fcd ,invokeCode,"testName","1.0",
-			"testUser","test@test.com","test desp")
+		hash := fcd.CodeHash()
+		codeHash_H := hash.ToArray()
+		invokeCode := []byte{0x51, 0x52}
+		pubTx := NewSamplePublish(fcd, invokeCode, "testName", "1.0",
+			"testUser", "test@test.com", "test desp")
 		pubHash := pubTx.Hash()
 		SignTx(admin, pubTx)
 		VerifyAndSendTx(pubTx)
-		log.Fatal(fmt.Sprintf("pubHash: %x",pubHash))
-
+		log.Fatal(fmt.Sprintf("pubHash: %x", pubHash))
 
 		time.Sleep(5 * time.Second)
 		log.Fatal("Transaction start.")
 		//Inovke SmartContract Return "H"
-		invokeCodeDetail :=[]byte{0x51, 0x52, 0x69}
-		invokeX := append(invokeCodeDetail,codeHash_H...)
+		invokeCodeDetail := []byte{0x51, 0x52, 0x69}
+		invokeX := append(invokeCodeDetail, codeHash_H...)
 		invTx := NewSampleInvoke(invokeX)
 		invHash := invTx.Hash()
 		SignTx(admin, invTx)
 		VerifyAndSendTx(invTx)
-		log.Fatal(fmt.Sprintf("invTx: %x",invTx))
+		log.Fatal(fmt.Sprintf("invTx: %x", invTx))
 		return DnaRpc(fmt.Sprintf("pubHash: %x, invHash: %x", pubHash, invHash))
 	case "c3":
-		str:= "746b0000617400936c766b94797451936c766b9479a07400948c6c766b9472757400948c6c766b9479642e007400936c766b94797451936c766b94797452936c766b9479617c656c00957451948c6c766b947275622e007400936c766b94797451936c766b9479617c6549007452936c766b9479957451948c6c766b9472756203007451948c6c766b947961748c6c766b946d748c6c766b946d746c768c6b946d746c768c6b946d746c768c6b946d6c7566746b00617400936c766b94797451936c766b9479937400948c6c766b9472756203007400948c6c766b947961748c6c766b946d746c768c6b946d746c768c6b946d6c7566"
-		rcode,_ :=HexToBytes(str)
-		fcd:= &code.FunctionCode{
+		str := "746b0000617400936c766b94797451936c766b9479a07400948c6c766b9472757400948c6c766b9479642e007400936c766b94797451936c766b94797452936c766b9479617c656c00957451948c6c766b947275622e007400936c766b94797451936c766b9479617c6549007452936c766b9479957451948c6c766b9472756203007451948c6c766b947961748c6c766b946d748c6c766b946d746c768c6b946d746c768c6b946d746c768c6b946d6c7566746b00617400936c766b94797451936c766b9479937400948c6c766b9472756203007400948c6c766b947961748c6c766b946d746c768c6b946d746c768c6b946d6c7566"
+		rcode, _ := HexToBytes(str)
+		fcd := &code.FunctionCode{
 			Code:           rcode,
 			ParameterTypes: []contract.ContractParameterType{contract.Integer, contract.Integer},
 			ReturnTypes:    []contract.ContractParameterType{contract.Integer},
 		}
-		hash:= fcd.CodeHash()
-		codeHash_H:=hash.ToArray()
-		invokeCode:=[]byte{0x51, 0x52,0x53}
-		pubTx := NewSamplePublish(fcd ,invokeCode,"testName","1.0",
-			"testUser","test@test.com","test desp")
+		hash := fcd.CodeHash()
+		codeHash_H := hash.ToArray()
+		invokeCode := []byte{0x51, 0x52, 0x53}
+		pubTx := NewSamplePublish(fcd, invokeCode, "testName", "1.0",
+			"testUser", "test@test.com", "test desp")
 		pubHash := pubTx.Hash()
 		SignTx(admin, pubTx)
 		VerifyAndSendTx(pubTx)
-		log.Fatal(fmt.Sprintf("pubHash: %x",pubHash))
-
+		log.Fatal(fmt.Sprintf("pubHash: %x", pubHash))
 
 		time.Sleep(5 * time.Second)
 		log.Fatal("Transaction start.")
 		//Inovke SmartContract Return "H"
-		invokeCodeDetail :=[]byte{0x53, 0x54,0x55, 0x69}
-		invokeX := append(invokeCodeDetail,codeHash_H...)
+		invokeCodeDetail := []byte{0x53, 0x54, 0x55, 0x69}
+		invokeX := append(invokeCodeDetail, codeHash_H...)
 		invTx := NewSampleInvoke(invokeX)
 		invHash := invTx.Hash()
 		SignTx(admin, invTx)
 		VerifyAndSendTx(invTx)
-		log.Fatal(fmt.Sprintf("invTx: %x",invTx))
+		log.Fatal(fmt.Sprintf("invTx: %x", invTx))
 		return DnaRpc(fmt.Sprintf("pubHash: %x, invHash: %x", pubHash, invHash))
 	case "c4":
-		str:= "746b615101480568656c6c6f6152726815416e745368617265732e53746f726167652e50757461510148617c6815416e745368617265732e53746f726167652e47657475616c7566"
-		rcode,_ :=HexToBytes(str)
-		fcd:= &code.FunctionCode{
+		str := "746b615101480568656c6c6f6152726815416e745368617265732e53746f726167652e50757461510148617c6815416e745368617265732e53746f726167652e47657475616c7566"
+		rcode, _ := HexToBytes(str)
+		fcd := &code.FunctionCode{
 			Code:           rcode,
 			ParameterTypes: []contract.ContractParameterType{contract.Integer, contract.Integer},
 			ReturnTypes:    []contract.ContractParameterType{contract.Integer},
 		}
-		hash:= fcd.CodeHash()
-		codeHash_H:=hash.ToArray()
-		invokeCode:=[]byte{0x51}
-		pubTx := NewSamplePublish(fcd ,invokeCode,"testName","1.0",
-			"testUser","test@test.com","test desp")
+		hash := fcd.CodeHash()
+		codeHash_H := hash.ToArray()
+		invokeCode := []byte{0x51}
+		pubTx := NewSamplePublish(fcd, invokeCode, "testName", "1.0",
+			"testUser", "test@test.com", "test desp")
 		pubHash := pubTx.Hash()
 		SignTx(admin, pubTx)
 		VerifyAndSendTx(pubTx)
-		log.Fatal(fmt.Sprintf("pubHash: %x",pubHash))
-		log.Fatal(fmt.Sprintf("codeHash_H%x\n",codeHash_H))
+		log.Fatal(fmt.Sprintf("pubHash: %x", pubHash))
+		log.Fatal(fmt.Sprintf("codeHash_H%x\n", codeHash_H))
 
 		time.Sleep(5 * time.Second)
 		log.Fatal("Transaction start.")
 		//Inovke SmartContract Return "2"
-		invokeCodeDetail :=[]byte{0x52,0x69}
-		invokeX := append(invokeCodeDetail,codeHash_H...)
+		invokeCodeDetail := []byte{0x52, 0x69}
+		invokeX := append(invokeCodeDetail, codeHash_H...)
 		invTx := NewSampleInvoke(invokeX)
 		invHash := invTx.Hash()
 		SignTx(admin, invTx)
 		VerifyAndSendTx(invTx)
-		log.Fatal(fmt.Sprintf("invTx: %x",invTx))
+		log.Fatal(fmt.Sprintf("invTx: %x", invTx))
 		return DnaRpc(fmt.Sprintf("pubHash: %x, invHash: %x", pubHash, invHash))
 	default:
 		return DnaRpc("Invalid transacion type")
@@ -613,4 +619,120 @@ func setDebugInfo(params []interface{}) map[string]interface{} {
 
 func getVersion(params []interface{}) map[string]interface{} {
 	return DnaRpc(config.Version)
+}
+func addTextRecord(params []interface{}) map[string]interface{} {
+	return sendRawTransaction(params)
+}
+
+func addFileRecord(params []interface{}) map[string]interface{} {
+	if len(params) < 1 {
+		return DnaRpcNil
+	}
+	var hash Uint256
+	switch params[0].(type) {
+	case string:
+		str := params[0].(string)
+		hex, err := hex.DecodeString(str)
+		if err != nil {
+			return DnaRpcInvalidParameter
+		}
+		var txn tx.Transaction
+		if err := txn.Deserialize(bytes.NewReader(hex)); err != nil {
+			return DnaRpcInvalidTransaction
+		}
+		record := txn.Payload.(*payload.Record)
+		f, err := os.OpenFile("tmprecord", os.O_WRONLY|os.O_CREATE, 0664)
+		if err != nil {
+			return DnaRpcIOError
+		}
+		defer f.Close()
+		for {
+			var n int
+			n, err = f.Write(record.RecordData)
+			if err != nil {
+				return DnaRpcIOError
+			}
+			if n == len(record.RecordData) {
+				break
+			}
+		}
+
+		refpath, err := AddFileIPFS("tmprecord", true)
+		//os.Remove("tmprecord")
+		if err != nil {
+			return DnaRpcAPIError
+		}
+		record.RecordData = []byte(refpath)
+
+		hash = txn.Hash()
+		if err := VerifyAndSendTx(&txn); err != nil {
+			return DnaRpcInternalError
+		}
+	default:
+		return DnaRpcInvalidParameter
+	}
+	return DnaRpc(ToHexString(hash.ToArray()))
+}
+
+func catRecord(params []interface{}) map[string]interface{} {
+	if len(params) < 1 {
+		return DnaRpcNil
+	}
+	switch params[0].(type) {
+	case string:
+		str := params[0].(string)
+		b, err := hex.DecodeString(str)
+		if err != nil {
+			return DnaRpcInvalidParameter
+		}
+		var hash Uint256
+		err = hash.Deserialize(bytes.NewReader(b))
+		if err != nil {
+			return DnaRpcInvalidTransaction
+		}
+		tx, err := ledger.DefaultLedger.Store.GetTransaction(hash)
+		if err != nil {
+			return DnaRpcUnknownTransaction
+		}
+		tran := TransArryByteToHexString(tx)
+		record := tran.Payload.(*RecordInfo)
+		//ref := string(record.RecordData[:])
+		return DnaRpc(record)
+	default:
+		return DnaRpcInvalidParameter
+	}
+}
+
+func getRecord(params []interface{}) map[string]interface{} {
+	if len(params) < 1 {
+		return DnaRpcNil
+	}
+	switch params[0].(type) {
+	case string:
+		str := params[0].(string)
+		hex, err := hex.DecodeString(str)
+		if err != nil {
+			return DnaRpcInvalidParameter
+		}
+		var hash Uint256
+		err = hash.Deserialize(bytes.NewReader(hex))
+		if err != nil {
+			return DnaRpcInvalidTransaction
+		}
+		tx, err := ledger.DefaultLedger.Store.GetTransaction(hash)
+		if err != nil {
+			return DnaRpcUnknownTransaction
+		}
+
+		tran := TransArryByteToHexString(tx)
+		record := tran.Payload.(*RecordInfo)
+
+		err = GetFileIPFS(string(record.RecordData[:]), record.RecordName)
+		if err != nil {
+			return DnaRpcAPIError
+		}
+		return DnaRpcSuccess
+	default:
+		return DnaRpcInvalidParameter
+	}
 }

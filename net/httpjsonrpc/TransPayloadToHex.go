@@ -74,6 +74,7 @@ func (a *TransferAssetInfo) Data() []byte {
 
 type RecordInfo struct {
 	RecordType string
+	RecordName string
 	RecordData string
 }
 
@@ -108,7 +109,8 @@ func TransPayloadToHex(p Payload) PayloadInfo {
 	case *payload.Record:
 		obj := new(RecordInfo)
 		obj.RecordType = object.RecordType
-		obj.RecordData = ToHexString(object.RecordData)
+		obj.RecordName = object.RecordName
+		obj.RecordData = string(object.RecordData[:])
 		return obj
 	}
 	return nil

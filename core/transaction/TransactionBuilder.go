@@ -3,10 +3,10 @@ package transaction
 import (
 	"DNA/common"
 	"DNA/core/asset"
+	"DNA/core/code"
 	"DNA/core/contract/program"
 	"DNA/core/transaction/payload"
 	"DNA/crypto"
-	"DNA/core/code"
 )
 
 //initial a new transaction with asset registration payload
@@ -65,10 +65,11 @@ func NewTransferAssetTransaction(inputs []*UTXOTxInput, outputs []*TxOutput) (*T
 }
 
 //initial a new transaction with record payload
-func NewRecordTransaction(recordType string, recordData []byte) (*Transaction, error) {
+func NewRecordTransaction(recordType string, recordName string, recordData []byte) (*Transaction, error) {
 	//TODO: check arguments
 	recordPayload := &payload.Record{
 		RecordType: recordType,
+		RecordName: recordName,
 		RecordData: recordData,
 	}
 
@@ -83,7 +84,7 @@ func NewRecordTransaction(recordType string, recordData []byte) (*Transaction, e
 }
 
 //initial a new transaction with publish payload
-func NewPublishTransaction(fc *code.FunctionCode, ic []byte, name string,codeversion string, author string,email string,desp string) (*Transaction, error) {
+func NewPublishTransaction(fc *code.FunctionCode, ic []byte, name string, codeversion string, author string, email string, desp string) (*Transaction, error) {
 	//TODO: check arguments
 	DeployCodePayload := &payload.DeployCode{
 		Code:        fc,
@@ -105,12 +106,11 @@ func NewPublishTransaction(fc *code.FunctionCode, ic []byte, name string,codever
 	}, nil
 }
 
-
 //initial a new transaction with invoke payload
 func NewInvokeTransaction(fc []byte) (*Transaction, error) {
 	//TODO: check arguments
 	InvokeCodePayload := &payload.InvokeCode{
-		Code:        fc,
+		Code: fc,
 	}
 
 	return &Transaction{
