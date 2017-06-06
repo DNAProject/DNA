@@ -14,7 +14,6 @@ import (
 	"DNA/cli/record"
 	"DNA/cli/test"
 	"DNA/cli/wallet"
-	"DNA/common/config"
 	"DNA/common/log"
 	"DNA/crypto"
 	"github.com/urfave/cli"
