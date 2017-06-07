@@ -3,10 +3,10 @@ package transaction
 import (
 	"DNA/common"
 	"DNA/core/asset"
+	"DNA/core/code"
 	"DNA/core/contract/program"
 	"DNA/core/transaction/payload"
 	"DNA/crypto"
-	"DNA/core/code"
 )
 
 //initial a new transaction with asset registration payload
@@ -83,7 +83,7 @@ func NewRecordTransaction(recordType string, recordData []byte) (*Transaction, e
 }
 
 //initial a new transaction with publish payload
-func NewPublishTransaction(fc *code.FunctionCode, ic []byte, name string,codeversion string, author string,email string,desp string) (*Transaction, error) {
+func NewPublishTransaction(fc *code.FunctionCode, ic []byte, name string, codeversion string, author string, email string, desp string) (*Transaction, error) {
 	//TODO: check arguments
 	DeployCodePayload := &payload.DeployCode{
 		Code:        fc,
@@ -105,12 +105,32 @@ func NewPublishTransaction(fc *code.FunctionCode, ic []byte, name string,codever
 	}, nil
 }
 
+func NewPrivacyPayloadTransaction(fromPrivKey []byte, fromPubkey *crypto.PubKey, toPubkey *crypto.PubKey, payloadType payload.EncryptedPayloadType, data []byte) (*Transaction, error) {
+	privacyPayload := &payload.PrivacyPayload{
+		PayloadType: payloadType,
+		EncryptType: payload.ECDH_AES256,
+		EncryptAttr: &payload.EcdhAes256{
+			FromPubkey: fromPubkey,
+			ToPubkey:   toPubkey,
+		},
+	}
+	privacyPayload.Payload, _ = privacyPayload.EncryptAttr.Encrypt(data, fromPrivKey)
+
+	return &Transaction{
+		TxType:        PrivacyPayload,
+		Payload:       privacyPayload,
+		Attributes:    []*TxAttribute{},
+		UTXOInputs:    []*UTXOTxInput{},
+		BalanceInputs: []*BalanceTxInput{},
+		Programs:      []*program.Program{},
+	}, nil
+}
 
 //initial a new transaction with invoke payload
 func NewInvokeTransaction(fc []byte) (*Transaction, error) {
 	//TODO: check arguments
 	InvokeCodePayload := &payload.InvokeCode{
-		Code:        fc,
+		Code: fc,
 	}
 
 	return &Transaction{

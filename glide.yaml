@@ -13,3 +13,4 @@ import:
 - package: github.com/urfave/cli
 - package: github.com/gorilla/websocket
 - package: github.com/pborman/uuid
+- package: github.com/bitly/go-simplejson
