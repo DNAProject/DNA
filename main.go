@@ -48,9 +48,9 @@ func openLocalClient(name string) Client {
 	var c Client
 
 	if fileExisted(name) {
-		c = OpenClient(name, []byte("\x12\x34\x56"))
+		c = OpenClient(name, []byte("123456"))
 	} else {
-		c = CreateClient(name, []byte("\x12\x34\x56"))
+		c = CreateClient(name, []byte("123456"))
 	}
 
 	return c
@@ -153,9 +153,9 @@ func OpenClientAndGetAccount() (clt Client, nodeType int) {
 		var sc Client
 		walletFile := "wallet.txt"
 		if fileExisted(walletFile) {
-			sc = OpenClient(walletFile, []byte("\x12\x34\x56"))
+			sc = OpenClient(walletFile, []byte("123456"))
 		} else {
-			sc = CreateClient(walletFile, []byte("\x12\x34\x56"))
+			sc = CreateClient(walletFile, []byte("123456"))
 		}
 		return sc, protocol.GetServiceFlag()
 	}
@@ -177,9 +177,9 @@ func OpenClientAndGetAccount() (clt Client, nodeType int) {
 	for i = 1; i <= DefaultBookKeeperCount; i++ {
 		w := fmt.Sprintf("wallet%d.txt", i)
 		if fileExisted(w) {
-			c[i-1] = OpenClient(w, []byte("\x12\x34\x56"))
+			c[i-1] = OpenClient(w, []byte("123456"))
 		} else {
-			c[i-1] = CreateClient(w, []byte("\x12\x34\x56"))
+			c[i-1] = CreateClient(w, []byte("123456"))
 		}
 	}
 	var n uint32
@@ -190,9 +190,9 @@ func OpenClientAndGetAccount() (clt Client, nodeType int) {
 	if isDefaultBookKeeper == false {
 		w := fmt.Sprintf("wallet%d.txt", n)
 		if fileExisted(w) {
-			c[DefaultBookKeeperCount] = OpenClient(w, []byte("\x12\x34\x56"))
+			c[DefaultBookKeeperCount] = OpenClient(w, []byte("123456"))
 		} else {
-			c[DefaultBookKeeperCount] = CreateClient(w, []byte("\x12\x34\x56"))
+			c[DefaultBookKeeperCount] = CreateClient(w, []byte("123456"))
 		}
 	}
 	return c[DefaultBookKeeperCount], protocol.GetVerifyFlag()
@@ -200,7 +200,7 @@ func OpenClientAndGetAccount() (clt Client, nodeType int) {
 
 func getBookKeeper(n uint32) *Account {
 	w := fmt.Sprintf("wallet%d.txt", n)
-	c := OpenClient(w, []byte("\x12\x34\x56"))
+	c := OpenClient(w, []byte("123456"))
 	account, err := c.GetDefaultAccount()
 	if err != nil {
 		fmt.Println("GetDefaultAccount failed.")

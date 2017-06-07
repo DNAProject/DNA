@@ -14,13 +14,13 @@ import (
 	"DNA/core/validation"
 	. "DNA/errors"
 	"DNA/events"
-	"bytes"
-	"errors"
-	"sync"
 	"DNA/smartcontract"
 	"DNA/vm"
 	"DNA/vm/interfaces"
+	"bytes"
+	"errors"
 	"fmt"
+	"sync"
 )
 
 const (
@@ -653,6 +653,7 @@ func (bd *ChainStore) persist(b *Block) error {
 			b.Transactions[i].TxType == tx.Record ||
 			b.Transactions[i].TxType == tx.BookKeeping ||
 			b.Transactions[i].TxType == tx.DeployCode ||
+			b.Transactions[i].TxType == tx.PrivacyPayload ||
 			b.Transactions[i].TxType == tx.InvokeCode {
 			err = bd.SaveTransaction(b.Transactions[i], b.Blockdata.Height)
 			if err != nil {
@@ -684,7 +685,7 @@ func (bd *ChainStore) persist(b *Block) error {
 			// BATCH PUT Code index by Code Hashxx
 			codehashUint160 := deployCode.Code.CodeHash()
 			codehash := codehashUint160.ToArray()
-			bd.st.BatchPut(append([]byte{byte(ST_Contract)},[]byte(codehash)...), deployCode.Code.GetCode())
+			bd.st.BatchPut(append([]byte{byte(ST_Contract)}, []byte(codehash)...), deployCode.Code.GetCode())
 
 			if deployCode.InitCode != nil {
 				stateMachine := smartcontract.NewStateMachine()
@@ -714,11 +715,11 @@ func (bd *ChainStore) persist(b *Block) error {
 
 		}
 
-		for pkey,pvalue := range writeSet {
+		for pkey, pvalue := range writeSet {
 			if pkey == string(byte(ST_Storage)) {
-				for kkey,kvalue := range pvalue {
-					fmt.Printf("level db store:%x\n", append([]byte(pkey),[]byte(kkey)...))
-					bd.st.BatchPut(append([]byte(pkey),[]byte(kkey)...), []byte(kvalue))
+				for kkey, kvalue := range pvalue {
+					fmt.Printf("level db store:%x\n", append([]byte(pkey), []byte(kkey)...))
+					bd.st.BatchPut(append([]byte(pkey), []byte(kkey)...), []byte(kvalue))
 				}
 			}
 		}

@@ -8,12 +8,12 @@ import (
 	sig "DNA/core/signature"
 	"DNA/core/transaction/payload"
 	. "DNA/errors"
+	"bytes"
 	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io"
 	"sort"
-	"bytes"
 )
 
 //for different transaction types with different payload format
@@ -21,13 +21,14 @@ import (
 type TransactionType byte
 
 const (
-	BookKeeping   TransactionType = 0x00
-	RegisterAsset TransactionType = 0x40
-	IssueAsset    TransactionType = 0x01
-	TransferAsset TransactionType = 0x10
-	Record        TransactionType = 0x11
-	DeployCode    TransactionType = 0xd0
-	InvokeCode    TransactionType = 0xd1
+	BookKeeping    TransactionType = 0x00
+	RegisterAsset  TransactionType = 0x40
+	IssueAsset     TransactionType = 0x01
+	TransferAsset  TransactionType = 0x10
+	Record         TransactionType = 0x11
+	DeployCode     TransactionType = 0xd0
+	InvokeCode     TransactionType = 0xd1
+	PrivacyPayload TransactionType = 0x20
 )
 
 //Payload define the func for loading the payload data
@@ -209,7 +210,10 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 		tx.Payload = new(payload.DeployCode)
 	} else if tx.TxType == InvokeCode {
 		tx.Payload = new(payload.InvokeCode)
+	} else if tx.TxType == PrivacyPayload {
+		tx.Payload = new(payload.PrivacyPayload)
 	}
+
 	tx.Payload.Deserialize(r)
 	//attributes
 
@@ -342,8 +346,9 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 			if err != nil {
 				return nil, NewDetailErr(err, ErrNoCode, "[Contract],CreateSignatureContract failed.")
 			}
-			hashs= append(hashs,signatureRedeemScriptHashToCodeHash)
+			hashs = append(hashs, signatureRedeemScriptHashToCodeHash)
 		}
+	case PrivacyPayload:
 	default:
 	}
 	//remove dupilicated hashes
@@ -380,12 +385,11 @@ func (tx *Transaction) GetMessage() []byte {
 	return sig.GetHashForSigning(tx)
 }
 
-func (tx *Transaction) ToArray() ([]byte) {
+func (tx *Transaction) ToArray() []byte {
 	b := new(bytes.Buffer)
 	tx.Serialize(b)
 	return b.Bytes()
 }
-
 
 func (tx *Transaction) Hash() Uint256 {
 	if tx.hash == nil {

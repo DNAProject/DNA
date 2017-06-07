@@ -11,6 +11,7 @@ import (
 	"DNA/cli/consensus"
 	"DNA/cli/debug"
 	"DNA/cli/info"
+	"DNA/cli/ppayload"
 	"DNA/cli/test"
 	"DNA/cli/wallet"
 	"DNA/common/log"
@@ -49,6 +50,7 @@ func init() {
 		*test.NewCommand(),
 		*wallet.NewCommand(),
 		*asset.NewCommand(),
+		*ppayload.NewCommand(),
 	}
 	sort.Sort(cli.CommandsByName(app.Commands))
 	sort.Sort(cli.FlagsByName(app.Flags))
