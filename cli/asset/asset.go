@@ -83,7 +83,7 @@ func signTransaction(signer *client.Account, tx *transaction.Transaction) error 
 		return err
 	}
 	transactionContractContext := newContractContextWithoutProgramHashes(tx)
-	if err := transactionContractContext.AddContract(transactionContract, signer.PubKey(), signature); err != nil {
+	if err := transactionContractContext.AddContract(transactionContract, signer.PubKey(), signature, false); err != nil {
 		fmt.Println("AddContract failed")
 		return err
 	}
@@ -272,10 +272,10 @@ func assetAction(c *cli.Context) error {
 		} else if transfer {
 			txHex, err = makeTransferTransaction(admin, to, asset, Fixed64(value))
 		}
-		if err != nil {
-			fmt.Println(err)
-			return nil
-		}
+	}
+	if err != nil {
+		fmt.Println(err)
+		return nil
 	}
 	resp, err := httpjsonrpc.Call(Address(), "sendrawtransaction", 0, []interface{}{txHex})
 	if err != nil {

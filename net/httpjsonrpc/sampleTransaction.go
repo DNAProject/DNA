@@ -31,6 +31,6 @@ func SignTx(admin *client.Account, tx *transaction.Transaction) {
 	}
 	transactionContract, _ := contract.CreateSignatureContract(admin.PublicKey)
 	transactionContractContext := contract.NewContractContext(tx)
-	transactionContractContext.AddContract(transactionContract, admin.PublicKey, signdate)
+	transactionContractContext.AddContract(transactionContract, admin.PublicKey, signdate, true)
 	tx.SetPrograms(transactionContractContext.GetPrograms())
 }

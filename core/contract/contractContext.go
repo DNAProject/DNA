@@ -40,11 +40,20 @@ func NewContractContext(data sig.SignableData) *ContractContext {
 	}
 }
 
-func (cxt *ContractContext) Add(contract *Contract, index int, parameter []byte) error {
+func (cxt *ContractContext) Add(contract *Contract, index int, parameter []byte, isFullNode bool) error {
 	log.Debug()
-	i := cxt.GetIndex(contract.ProgramHash)
-	if i < 0 {
-		log.Warn("Program Hash is not exist, using 0 by default")
+	if cxt.Data == nil || len(cxt.Codes) == 0 || len(cxt.Parameters) == 0 {
+		return errors.New("Invalid contract context")
+	}
+	var i int
+	if isFullNode {
+		i = cxt.GetIndex(contract.ProgramHash)
+		if i < 0 {
+			log.Error("Program Hash is not exist")
+			return errors.New("Program Hash is not exist")
+		}
+	} else {
+		//TODO support multi codes in a ContractContext when no programHash is given
 		i = 0
 	}
 	if cxt.Codes[i] == nil {
@@ -57,47 +66,25 @@ func (cxt *ContractContext) Add(contract *Contract, index int, parameter []byte)
 	return nil
 }
 
-func (cxt *ContractContext) AddContract(contract *Contract, pubkey *crypto.PubKey, parameter []byte) error {
+// AddContract adds contract and signature(or other parameters) to ContractContext.
+// If the caller is basing on a full node (has full block data in local database) the
+// last parameter 'isFullNode' should be set to true, since caller can get necessary
+// program hash from local database. Otherwise, if caller is working on a light node,
+// 'isFullNode' should be set to false, because can't get necessary program hash. At
+// this time, the caller might have to construct a ContractContext without programhash.
+func (cxt *ContractContext) AddContract(contract *Contract, pubkey *crypto.PubKey, parameter []byte, isFullNode bool) error {
 	log.Debug()
 	if contract.GetType() == MultiSigContract {
 		log.Debug()
 		// add multi sig contract
-
-		log.Debug("Multi Sig: contract.ProgramHash:", contract.ProgramHash)
-		log.Debug("Multi Sig: cxt.ProgramHashes:", cxt.ProgramHashes)
-
-		index := cxt.GetIndex(contract.ProgramHash)
-
-		log.Debug("Multi Sig: GetIndex:", index)
-
-		if index < 0 {
-			log.Error("The program hash is not exist.")
-			return errors.New("The program hash is not exist.")
-		}
-
-		log.Debug("Multi Sig: contract.Code:", cxt.Codes[index])
-
-		if cxt.Codes[index] == nil {
-			cxt.Codes[index] = contract.Code
-		}
-		log.Debug("Multi Sig: cxt.Codes[index]:", cxt.Codes[index])
-
-		if cxt.Parameters[index] == nil {
-			cxt.Parameters[index] = make([][]byte, len(contract.Parameters))
-		}
-		log.Debug("Multi Sig: cxt.Parameters[index]:", cxt.Parameters[index])
-
-		if err := cxt.Add(contract, cxt.tempParaIndex, parameter); err != nil {
+		if err := cxt.Add(contract, cxt.tempParaIndex, parameter, isFullNode); err != nil {
 			return err
 		}
-
 		cxt.tempParaIndex++
-
 		//all paramenters added, sort the parameters
 		if cxt.tempParaIndex == len(contract.Parameters) {
 			cxt.tempParaIndex = 0
 		}
-
 		//TODO: Sort the parameter according contract's PK list sequence
 		//if err := cxt.AddSignatureToMultiList(index,contract,pubkey,parameter); err != nil {
 		//	return err
@@ -123,7 +110,7 @@ func (cxt *ContractContext) AddContract(contract *Contract, pubkey *crypto.PubKe
 				}
 			}
 		}
-		return cxt.Add(contract, index, parameter)
+		return cxt.Add(contract, index, parameter, isFullNode)
 	}
 	return nil
 }
@@ -171,7 +158,7 @@ func (cxt *ContractContext) AddMultiSignatures(index int, contract *Contract, pu
 
 	//generate sorted parameter list
 	for i, paraIndex := range paraIndexs {
-		if err := cxt.Add(contract, i, paraIndex.Parameter); err != nil {
+		if err := cxt.Add(contract, i, paraIndex.Parameter, true); err != nil {
 			return err
 		}
 	}

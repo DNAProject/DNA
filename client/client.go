@@ -346,7 +346,7 @@ func (cl *ClientImpl) Sign(context *ct.ContractContext) bool {
 		if err != nil {
 			return fSuccess
 		}
-		err = context.AddContract(contract, account.PublicKey, signature)
+		err = context.AddContract(contract, account.PublicKey, signature, true)
 
 		if err != nil {
 			fSuccess = false

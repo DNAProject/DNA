@@ -141,7 +141,7 @@ func (ds *DbftService) CheckSignatures() error {
 		cxt := ct.NewContractContext(block)
 		for i, j := 0, 0; i < len(ds.context.BookKeepers) && j < ds.context.M(); i++ {
 			if ds.context.Signatures[i] != nil {
-				err := cxt.AddContract(contract, ds.context.BookKeepers[i], ds.context.Signatures[i])
+				err := cxt.AddContract(contract, ds.context.BookKeepers[i], ds.context.Signatures[i], true)
 				if err != nil {
 					log.Error("[CheckSignatures] Multi-sign add contract error:", err.Error())
 					return NewDetailErr(err, ErrNoCode, "[DbftService], CheckSignatures AddContract failed.")
