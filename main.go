@@ -11,6 +11,7 @@ import (
 	"DNA/crypto"
 	"DNA/net"
 	"DNA/net/httpjsonrpc"
+	"DNA/net/httprestful"
 	"DNA/net/protocol"
 	"fmt"
 	"os"
@@ -21,7 +22,7 @@ import (
 
 const (
 	DefaultBookKeeperCount = 4
-	DefaultMultiCoreNum  = 4
+	DefaultMultiCoreNum    = 4
 )
 
 func init() {
@@ -29,7 +30,7 @@ func init() {
 	log.CreatePrintLog(path)
 
 	var coreNum int
-	if (config.Parameters.MultiCoreNum > DefaultMultiCoreNum) {
+	if config.Parameters.MultiCoreNum > DefaultMultiCoreNum {
 		coreNum = int(config.Parameters.MultiCoreNum)
 	} else {
 		coreNum = DefaultMultiCoreNum
@@ -94,6 +95,7 @@ func main() {
 	log.Info("--Start the RPC interface")
 	go httpjsonrpc.StartRPCServer()
 	go httpjsonrpc.StartLocalServer()
+	httprestful.StartServer(noder)
 
 	time.Sleep(2 * time.Second)
 	for {
