@@ -7,10 +7,11 @@ import (
 	"DNA/core/ledger"
 	"DNA/core/transaction"
 	"DNA/crypto"
+	"DNA/events"
 	. "DNA/net/message"
 	. "DNA/net/protocol"
-	"encoding/binary"
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -43,10 +44,12 @@ type node struct {
 	/*
 	 * |--|--|--|--|--|--|isSyncFailed|isSyncHeaders|
 	 */
-	syncFlag      uint8
-	TxNotifyChan  chan int
-	flightHeights []uint32
-	lastContact   time.Time
+	syncFlag                 uint8
+	TxNotifyChan             chan int
+	flightHeights            []uint32
+	lastContact              time.Time
+	nodeDisconnectSubscriber events.Subscriber
+	tryTimes                 uint32
 }
 
 func (node *node) DumpInfo() {
@@ -93,9 +96,9 @@ func NewNode() *node {
 func InitNode(pubKey *crypto.PubKey) Noder {
 	n := NewNode()
 	n.version = PROTOCOLVERSION
-	if (Parameters.NodeType == SERVICENODENAME) {
+	if Parameters.NodeType == SERVICENODENAME {
 		n.services = uint64(SERVICENODE)
-	} else if (Parameters.NodeType == VERIFYNODENAME) {
+	} else if Parameters.NodeType == VERIFYNODENAME {
 		n.services = uint64(VERIFYNODE)
 	}
 	n.link.port = uint16(Parameters.NodePort)
@@ -117,11 +120,19 @@ func InitNode(pubKey *crypto.PubKey) Noder {
 	n.publicKey = pubKey
 	n.TXNPool.init()
 	n.eventQueue.init()
-
+	n.nodeDisconnectSubscriber = n.eventQueue.GetEvent("disconnect").Subscribe(events.EventNodeDisconnect, n.NodeDisconnect)
 	go n.initConnection()
 	go n.updateNodeInfo()
 
 	return n
+}
+
+func (n *node) NodeDisconnect(v interface{}) {
+	if node, ok := v.(*node); ok {
+		node.SetState(INACTIVITY)
+		conn := node.getConn()
+		conn.Close()
+	}
 }
 
 func rmNode(node *node) {
@@ -182,7 +193,6 @@ func (node *node) SetState(state uint32) {
 func (node *node) CompareAndSetState(old, new uint32) bool {
 	return atomic.CompareAndSwapUint32(&(node.state), old, new)
 }
-
 
 func (node *node) LocalNode() Noder {
 	return node.local
