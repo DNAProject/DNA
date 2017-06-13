@@ -69,6 +69,22 @@ func NewIssueAssetTransaction(outputs []*TxOutput) (*Transaction, error) {
 	}, nil
 }
 
+func NewIncreaseIssueAssetTransaction(assetID common.Uint256, amount common.Fixed64) (*Transaction, error) {
+
+	assetPayload := &payload.IncreaseIssueAsset{
+		AssetID: assetID,
+		Amount:  amount,
+	}
+
+	return &Transaction{
+		TxType:        IncreaseIssueAsset,
+		Payload:       assetPayload,
+		Attributes:    []*TxAttribute{},
+		BalanceInputs: []*BalanceTxInput{},
+		Programs:      []*program.Program{},
+	}, nil
+}
+
 func NewTransferAssetTransaction(inputs []*UTXOTxInput, outputs []*TxOutput) (*Transaction, error) {
 
 	//TODO: check arguments

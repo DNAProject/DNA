@@ -1,12 +1,6 @@
 package transaction
 
 import (
-	"crypto/sha256"
-	"errors"
-	"fmt"
-	"io"
-	"sort"
-
 	. "DNA/common"
 	"DNA/common/serialization"
 	"DNA/core/contract"
@@ -14,6 +8,11 @@ import (
 	sig "DNA/core/signature"
 	"DNA/core/transaction/payload"
 	. "DNA/errors"
+	"crypto/sha256"
+	"errors"
+	"fmt"
+	"io"
+	"sort"
 )
 
 //for different transaction types with different payload format
@@ -21,15 +20,16 @@ import (
 type TransactionType byte
 
 const (
-	BookKeeping    TransactionType = 0x00
-	IssueAsset     TransactionType = 0x01
-	BookKeeper     TransactionType = 0x02
-	PrivacyPayload TransactionType = 0x20
-	RegisterAsset  TransactionType = 0x40
-	TransferAsset  TransactionType = 0x80
-	Record         TransactionType = 0x81
-	DeployCode     TransactionType = 0xd0
-	DataFile       TransactionType = 0x12
+	BookKeeping        TransactionType = 0x00
+	IssueAsset         TransactionType = 0x01
+	BookKeeper         TransactionType = 0x02
+	DataFile           TransactionType = 0x12
+	PrivacyPayload     TransactionType = 0x20
+	RegisterAsset      TransactionType = 0x40
+	IncreaseIssueAsset TransactionType = 0x41
+	TransferAsset      TransactionType = 0x80
+	Record             TransactionType = 0x81
+	DeployCode         TransactionType = 0xd0
 )
 
 //Payload define the func for loading the payload data
@@ -198,6 +198,8 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 		tx.Payload = new(payload.BookKeeper)
 	case PrivacyPayload:
 		tx.Payload = new(payload.PrivacyPayload)
+	case IncreaseIssueAsset:
+		tx.Payload = new(payload.IncreaseIssueAsset)
 	case DataFile:
 		tx.Payload = new(payload.DataFile)
 	default:
@@ -313,6 +315,32 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 				return nil, NewDetailErr(errors.New("[Transaction] error"), ErrNoCode, fmt.Sprintf("[Transaction], payload is illegal", k))
 			}
 		}
+	case IncreaseIssueAsset:
+		txPayload := tx.Payload.(*payload.IncreaseIssueAsset)
+		assetTx, err := TxStore.GetTransaction(txPayload.AssetID)
+		if err != nil {
+			return nil, NewDetailErr(err, ErrNoCode, fmt.Sprintf("[Transaction], GetTransaction failed With AssetID:=%x", txPayload.AssetID))
+		}
+		if assetTx.TxType != RegisterAsset {
+			return nil, NewDetailErr(errors.New("[Transaction] error"), ErrNoCode, fmt.Sprintf("[Transaction], Transaction Type ileage With AssetID:=%x", txPayload.AssetID))
+		}
+
+		switch v1 := assetTx.Payload.(type) {
+		case *payload.RegisterAsset:
+			issuer := v1.Issuer
+			signatureRedeemScript, err := contract.CreateSignatureRedeemScript(issuer)
+			if err != nil {
+				return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetProgramHashes CreateSignatureRedeemScript failed.")
+			}
+
+			astHash, err := ToCodeHash(signatureRedeemScript)
+			if err != nil {
+				return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetProgramHashes ToCodeHash failed.")
+			}
+			hashs = append(hashs, astHash)
+		default:
+			return nil, NewDetailErr(errors.New("[Transaction] error"), ErrNoCode, fmt.Sprintf("[Transaction], payload is illegal", assetTx))
+		}
 	case DataFile:
 		issuer := tx.Payload.(*payload.DataFile).Issuer
 		signatureRedeemScript, err := contract.CreateSignatureRedeemScript(issuer)
@@ -400,7 +428,7 @@ func (tx *Transaction) Verify() error {
 }
 
 func (tx *Transaction) GetReference() (map[*UTXOTxInput]*TxOutput, error) {
-	if tx.TxType == RegisterAsset {
+	if tx.TxType == RegisterAsset || tx.TxType == IncreaseIssueAsset {
 		return nil, nil
 	}
 	//UTXO input /  Outputs
@@ -416,6 +444,7 @@ func (tx *Transaction) GetReference() (map[*UTXOTxInput]*TxOutput, error) {
 	}
 	return reference, nil
 }
+
 func (tx *Transaction) GetTransactionResults() (TransactionResult, error) {
 	var result TransactionResult
 	outputResult := tx.GetMergedAssetIDValueFromOutputs()

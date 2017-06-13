@@ -19,3 +19,4 @@ Chain/*
 node
 nodectl
 cscope*
+build/*
