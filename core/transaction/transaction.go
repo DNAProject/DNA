@@ -21,13 +21,13 @@ import (
 type TransactionType byte
 
 const (
-	BookKeeping   TransactionType = 0x00
-	BookKeeper    TransactionType = 0x02
-	RegisterAsset TransactionType = 0x40
-	IssueAsset    TransactionType = 0x01
-	TransferAsset TransactionType = 0x10
-	Record        TransactionType = 0x11
-	DeployCode    TransactionType = 0xd0
+	BookKeeping    TransactionType = 0x00
+	BookKeeper     TransactionType = 0x02
+	RegisterAsset  TransactionType = 0x40
+	IssueAsset     TransactionType = 0x01
+	TransferAsset  TransactionType = 0x10
+	Record         TransactionType = 0x11
+	DeployCode     TransactionType = 0xd0
 	PrivacyPayload TransactionType = 0x20
 )
 
@@ -52,7 +52,6 @@ type Transaction struct {
 	TxType         TransactionType
 	PayloadVersion byte
 	Payload        Payload
-	Nonce          uint64
 	Attributes     []*TxAttribute
 	UTXOInputs     []*UTXOTxInput
 	BalanceInputs  []*BalanceTxInput
@@ -102,8 +101,6 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 		return errors.New("Transaction Payload is nil.")
 	}
 	tx.Payload.Serialize(w)
-	//nonce
-	serialization.WriteVarUint(w, tx.Nonce)
 	//[]*txAttribute
 	err := serialization.WriteVarUint(w, uint64(len(tx.Attributes)))
 	if err != nil {
@@ -199,14 +196,8 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 	}
 
 	tx.Payload.Deserialize(r)
+
 	//attributes
-
-	nonce, err := serialization.ReadVarUint(r, 0)
-	if err != nil {
-		return errors.New("Parse nonce error")
-	}
-	tx.Nonce = nonce
-
 	Len, err := serialization.ReadVarUint(r, 0)
 	if err != nil {
 		return err
@@ -359,7 +350,7 @@ func (tx *Transaction) GenerateAssetMaps() {
 }
 
 func (tx *Transaction) GetMessage() []byte {
-	return sig.GetHashForSigning(tx)
+	return sig.GetHashData(tx)
 }
 
 func (tx *Transaction) Hash() Uint256 {
