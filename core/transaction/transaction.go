@@ -359,7 +359,7 @@ func (tx *Transaction) GenerateAssetMaps() {
 }
 
 func (tx *Transaction) GetMessage() []byte {
-	return sig.GetHashForSigning(tx)
+	return sig.GetHashData(tx)
 }
 
 func (tx *Transaction) Hash() Uint256 {
