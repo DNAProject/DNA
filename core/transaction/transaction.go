@@ -21,14 +21,14 @@ import (
 type TransactionType byte
 
 const (
-	BookKeeping   TransactionType = 0x00
-	BookKeeper    TransactionType = 0x02
-	RegisterAsset TransactionType = 0x40
-	IssueAsset    TransactionType = 0x01
-	TransferAsset TransactionType = 0x10
-	Record        TransactionType = 0x11
-	DeployCode    TransactionType = 0xd0
+	BookKeeping    TransactionType = 0x00
+	IssueAsset     TransactionType = 0x01
+	BookKeeper     TransactionType = 0x02
 	PrivacyPayload TransactionType = 0x20
+	RegisterAsset  TransactionType = 0x40
+	TransferAsset  TransactionType = 0x80
+	Record         TransactionType = 0x81
+	DeployCode     TransactionType = 0xd0
 )
 
 //Payload define the func for loading the payload data
