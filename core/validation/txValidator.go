@@ -206,8 +206,16 @@ func CheckTransactionPayload(Tx *tx.Transaction) error {
 		//Todo: validate bookKeeper Cert
 		_ = pld.Cert
 		return nil
+	case *payload.RegisterAsset:
+	case *payload.IssueAsset:
+	case *payload.TransferAsset:
+	case *payload.BookKeeping:
+	case *payload.PrivacyPayload:
+	case *payload.Record:
+	case *payload.DeployCode:
+	case *payload.DataFile:
 	default:
-		return nil
+		return errors.New("[txValidator],invalidate transaction payload type.")
 	}
-
+	return nil
 }

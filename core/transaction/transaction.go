@@ -29,6 +29,7 @@ const (
 	Record         TransactionType = 0x11
 	DeployCode     TransactionType = 0xd0
 	PrivacyPayload TransactionType = 0x20
+	DataFile       TransactionType = 0x12
 )
 
 //Payload define the func for loading the payload data
@@ -139,10 +140,16 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 //deserialize the Transaction
 func (tx *Transaction) Deserialize(r io.Reader) error {
 	// tx deserialize
-	tx.DeserializeUnsigned(r)
+	err := tx.DeserializeUnsigned(r)
+	if err != nil {
+		return NewDetailErr(err, ErrNoCode, "transaction Deserialize error")
+	}
 
 	// tx program
-	lens, _ := serialization.ReadVarUint(r, 0)
+	lens, err := serialization.ReadVarUint(r, 0)
+	if err != nil {
+		return NewDetailErr(err, ErrNoCode, "transaction tx program Deserialize error")
+	}
 
 	programHashes := []*program.Program{}
 	if lens > 0 {
@@ -176,27 +183,31 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 
 	//payload
 	//tx.Payload.Deserialize(r)
-	if tx.TxType == RegisterAsset {
-		// Asset Registration
+	switch tx.TxType {
+	case RegisterAsset:
 		tx.Payload = new(payload.RegisterAsset)
-	} else if tx.TxType == IssueAsset {
-		// Issue Asset
+	case IssueAsset:
 		tx.Payload = new(payload.IssueAsset)
-	} else if tx.TxType == TransferAsset {
-		// Transfer Asset
+	case TransferAsset:
 		tx.Payload = new(payload.TransferAsset)
-	} else if tx.TxType == BookKeeping {
+	case BookKeeping:
 		tx.Payload = new(payload.BookKeeping)
-	} else if tx.TxType == Record {
+	case Record:
 		tx.Payload = new(payload.Record)
-	} else if tx.TxType == BookKeeper {
+	case BookKeeper:
 		tx.Payload = new(payload.BookKeeper)
-	} else if tx.TxType == PrivacyPayload {
+	case PrivacyPayload:
 		tx.Payload = new(payload.PrivacyPayload)
+	case DataFile:
+		tx.Payload = new(payload.DataFile)
+	default:
+		return errors.New("[Transaction],invalide transaction type.")
 	}
 
-	tx.Payload.Deserialize(r)
-
+	err = tx.Payload.Deserialize(r)
+	if err != nil {
+		return NewDetailErr(err, ErrNoCode, "Payload Parse error")
+	}
 	//attributes
 	Len, err := serialization.ReadVarUint(r, 0)
 	if err != nil {
@@ -286,22 +297,34 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 		if err != nil {
 			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetTransactionResults failed.")
 		}
-		for k, _ := range result {
+		for k := range result {
 			tx, err := TxStore.GetTransaction(k)
 			if err != nil {
 				return nil, NewDetailErr(err, ErrNoCode, fmt.Sprintf("[Transaction], GetTransaction failed With AssetID:=%x", k))
 			}
 			if tx.TxType != RegisterAsset {
-				return nil, NewDetailErr(err, ErrNoCode, fmt.Sprintf("[Transaction], Transaction Type ileage With AssetID:=%x", k))
+				return nil, NewDetailErr(errors.New("[Transaction] error"), ErrNoCode, fmt.Sprintf("[Transaction], Transaction Type ileage With AssetID:=%x", k))
 			}
 
 			switch v1 := tx.Payload.(type) {
 			case *payload.RegisterAsset:
 				hashs = append(hashs, v1.Controller)
 			default:
-				return nil, NewDetailErr(err, ErrNoCode, fmt.Sprintf("[Transaction], payload is illegal", k))
+				return nil, NewDetailErr(errors.New("[Transaction] error"), ErrNoCode, fmt.Sprintf("[Transaction], payload is illegal", k))
 			}
 		}
+	case DataFile:
+		issuer := tx.Payload.(*payload.DataFile).Issuer
+		signatureRedeemScript, err := contract.CreateSignatureRedeemScript(issuer)
+		if err != nil {
+			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetProgramHashes CreateSignatureRedeemScript failed.")
+		}
+
+		astHash, err := ToCodeHash(signatureRedeemScript)
+		if err != nil {
+			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetProgramHashes ToCodeHash failed.")
+		}
+		hashs = append(hashs, astHash)
 	case TransferAsset:
 	case Record:
 	case BookKeeper:
@@ -324,7 +347,7 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 	for _, v := range hashs {
 		uniq[v] = true
 	}
-	for k, _ := range uniq {
+	for k := range uniq {
 		uniqHashes = append(uniqHashes, k)
 	}
 	sort.Sort(byProgramHashes(uniqHashes))
