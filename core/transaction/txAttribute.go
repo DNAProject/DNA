@@ -3,7 +3,7 @@ package transaction
 import (
 	"DNA/common/serialization"
 	. "DNA/errors"
-	"errors"
+	//"errors"
 	"io"
 )
 
@@ -41,14 +41,14 @@ func (tx *TxAttribute) Serialize(w io.Writer) error {
 		return NewDetailErr(err, ErrNoCode, "Transaction attribute Usage serialization error.")
 	}
 	// TODO other transaction attribute type
-	if tx.Usage == Description || tx.Usage == DescriptionUrl {
-		err := serialization.WriteVarBytes(w, tx.Data)
+	//if tx.Usage == Description || tx.Usage == DescriptionUrl {
+		err = serialization.WriteVarBytes(w, tx.Data)
 		if err != nil {
 			return NewDetailErr(err, ErrNoCode, "Transaction attribute Data serialization error.")
 		}
-	} else {
-		return NewDetailErr(errors.New("[TxAttribute] error"), ErrNoCode, "Unsupported attribute Description.")
-	}
+	//} else {
+	//	return NewDetailErr(errors.New("[TxAttribute] error"), ErrNoCode, "Unsupported attribute Description.")
+	//}
 	return nil
 }
 
@@ -58,13 +58,13 @@ func (tx *TxAttribute) Deserialize(r io.Reader) error {
 		return NewDetailErr(err, ErrNoCode, "Transaction attribute Usage deserialization error.")
 	}
 	tx.Usage = TransactionAttributeUsage(val[0])
-	if tx.Usage == Description || tx.Usage == DescriptionUrl {
+	//if tx.Usage == Description || tx.Usage == DescriptionUrl {
 		tx.Data, err = serialization.ReadVarBytes(r)
 		if err != nil {
 			return NewDetailErr(err, ErrNoCode, "Transaction attribute Data deserialization error.")
 		}
-	} else {
-		return NewDetailErr(errors.New("[TxAttribute] error"), ErrNoCode, "Unsupported attribute description.")
-	}
+	//} else {
+	//	return NewDetailErr(errors.New("[TxAttribute] error"), ErrNoCode, "Unsupported attribute description.")
+	//}
 	return nil
 }

@@ -262,14 +262,20 @@ func (bd *ChainStore) IsDoubleSpend(tx *tx.Transaction) bool {
 		}
 
 		unspents, _ := GetUint16Array(unspentValue)
+		findFlag := false
 		for k := 0; k < len(unspents); k++ {
 			if unspents[k] == tx.UTXOInputs[i].ReferTxOutputIndex {
-				return false
+				findFlag = true
+				break
 			}
+		}
+
+		if !findFlag {
+			return true
 		}
 	}
 
-	return true
+	return false
 }
 
 func (bd *ChainStore) GetBlockHash(height uint32) (Uint256, error) {
