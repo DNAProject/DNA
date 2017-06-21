@@ -821,14 +821,14 @@ func (bd *ChainStore) persist(b *Block) error {
 			}
 
 			// find Transactions[i].UTXOInputs[index].ReferTxOutputIndex and delete it
-			txunspent := make([]uint16, 0, len(unspents[txhash]) - 1)
-			for _, outputIndex := range unspents[txhash]{
+			unspentLen := len(unspents[txhash])
+			for k, outputIndex := range unspents[txhash]{
 				if outputIndex == uint16(b.Transactions[i].UTXOInputs[index].ReferTxOutputIndex){
-					continue
+					unspents[txhash][k] =  unspents[txhash][unspentLen - 1]
+					unspents[txhash] = unspents[txhash][:unspentLen-1]
+					break
 				}
-				txunspent = append(txunspent, outputIndex)
 			}
-			unspents[txhash] = txunspent
 		}
 
 		// bookkeeper
