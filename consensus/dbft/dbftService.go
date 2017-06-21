@@ -371,7 +371,10 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	if uint32(payload.BookKeeperIndex) != ds.context.PrimaryIndex {
 		return
 	}
-
+	//check of PrevHash from net and local context.PrevHash
+	if payload.PrevHash != ds.context.PrevHash {
+		return
+	}
 	header, err := ledger.DefaultLedger.Blockchain.GetHeader(ds.context.PrevHash)
 	if err != nil {
 		log.Info("PrepareRequestReceived GetHeader failed with ds.context.PrevHash", ds.context.PrevHash)
@@ -435,7 +438,10 @@ func (ds *DbftService) PrepareResponseReceived(payload *msg.ConsensusPayload, me
 	log.Debug()
 
 	log.Info(fmt.Sprintf("Prepare Response Received: height=%d View=%d index=%d", payload.Height, message.ViewNumber(), payload.BookKeeperIndex))
-
+	//check of PrevHash from net and local context.PrevHash
+	if payload.PrevHash != ds.context.PrevHash {
+		return
+	}
 	if ds.context.State.HasFlag(BlockSent) {
 		return
 	}
