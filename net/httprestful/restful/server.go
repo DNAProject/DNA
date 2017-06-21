@@ -252,8 +252,8 @@ func (rt *restServer) Restart(cmd map[string]interface{}) map[string]interface{}
 }
 func (rt *restServer) initTlsListen() (net.Listener, error) {
 
-	CertPath := Parameters.HttpsCertPath
-	KeyPath := Parameters.HttpsKeyPath
+	CertPath := Parameters.RestCertPath
+	KeyPath := Parameters.RestKeyPath
 
 	// load cert
 	cert, err := tls.LoadX509KeyPair(CertPath, KeyPath)
