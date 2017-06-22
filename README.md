@@ -53,7 +53,7 @@ Build the source code with make.
 $ make
 ```
 
-After building the source code, you should see two executable programs you may need:
+After building the source code, you should see two executable programs:
 
 * `node`: the node program
 * `nodectl`: command line tool for node control
