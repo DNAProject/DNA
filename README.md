@@ -118,7 +118,7 @@ Copy the executable file `node`, `nodectl` and configuration file `config.json` 
 * The `SeedList` section should be same in all `config.json`.
 * For the seed node, the `NodePort` is the same with the port in `SeedList` part.
 * For each non-seed node, the `NodePort` should have different ports.
-* Also make sure the `HttpJsonPort` and `HttpLocalPort` for each node do not conflict with the current host.
+* Also make sure that the `HttpJsonPort` and `HttpLocalPort` of each node do not conflict with those of the current host.
 
 After changing the configuration file, we also need to generate a wallet for each node and field the `BookKeepers` with the 4 nodes' wallet public keys. Please follow the steps in the multi-hosts deployment section above.
 
