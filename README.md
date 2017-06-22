@@ -262,7 +262,7 @@ IP               PORT
 35.189.166.234:  40336
 ```
 
-`Notice: The nodes above are intended to be used for public testing only. The data saved on the testing chain maybe be reset at any time. Keep in mind to back up the data by yourself to avoid data lose.
+`Notice: The nodes above are intended to be used for public testing only. The data saved on the testing chain maybe be reset at any time. Keep in mind to back up the data by yourself to avoid data loss.
 
 # Contributing
 
