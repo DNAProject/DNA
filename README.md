@@ -31,7 +31,7 @@ The requirements to build DNA are:
 * Properly configured Go environment
 
 
-Clone the DNA repo into appropriate $GOPATH/src directory
+Clone the DNA repository into the appropriate $GOPATH/src directory.
 
 
 ```shell
@@ -39,21 +39,21 @@ $ git clone https://github.com/DNAProject/DNA.git
 
 ```
 
-Fetch the dependent third-party packages with glide.
+Fetch the dependent third-party packages with Glide.
 
-
+`SeedList`
 ````shell
 $ cd DNA
 $ glide install
 ````
 
-Build the source with make
+Build the source code with make.
 
 ```shell
 $ make
 ```
 
-After building the source code, you could see two executable programs you may need:
+After building the source code, you should see two executable programs you may need:
 
 * `node`: the node program
 * `nodectl`: command line tool for node control
@@ -63,25 +63,28 @@ Follow the precedures in Deployment section to give them a shot!
 
 # Deployment
 
-To run DNA node regularly, at least 4 nodes are necessary. We provides two ways to deploy the 4 nodes on:
+To run DNA successfully, at least 4 nodes are required. The four nodes can be deployed in the following two way:
 
-* multi-hosts
-* single-host
+* multi-host deployment
+* single-host deployment
 
-## Configurations for multi-hosts deployment
+## Configurations for multi-host deployment
 
-We can do a quick multi-hosts deployment by changing default configuration file `config.json`. Change the IP address in `SeedList` section to the seed node's IP address, then copy the changed file to hosts that you will run on.
+We can do a quick multi-host deployment by modifying the default configuration file `config.json`. Change the IP address in `SeedList` section to the seed node's IP address, and then copy the changed file to the hosts that you will run on.
 
-On each host, put the executable program `node`, `nodectl` and the configuration file `config.json` into same directory. Like :
+
+
+
+On each host, put the executable program `node`, `nodectl` and the configuration file `config.json` into the same directory. Like :
 
 ```shell
 $ ls
 config.json node nodectl
 
 ```
-For each node, also needs a `wallet.dat` to run. The quick way to generate wallets is trying to run `./nodectl wallet -c -p YourPassword` on each host. 
+Each node also needs a `wallet.dat` to run. The quickest way to generate wallets is to run `./nodectl wallet -c -p YourPassword` on each host. 
 
-Then, change the `BookKeepers` field to 4 nodes's wallet public keys, which you can got them from the last command's echo. The public key sequence is not matter. 
+Then, change the `BookKeepers` field to the 4 nodes' wallet public keys, which you can get from the last command's echo. The public key sequence does not matter. 
 
 Now all configurations are completed.
 
@@ -110,14 +113,14 @@ $ cat config.json
 
 ## Configurations for single-host deployment
 
-Copy the executable file `node`, `nodectl` and configuration file `config.json` to 4 different directories on single host. Then change each `config.json` file as following.
+Copy the executable file `node`, `nodectl` and configuration file `config.json` to 4 different directories on the single host. Then change each `config.json` file as following.
 
 * The `SeedList` section should be same in all `config.json`.
-* For the seed node, the `NodePort` is same with the port in `SeedList` part.
-* For each non-seed node, the `NodePort` should have different port.
-* Also need to make sure the `HttpJsonPort` and `HttpLocalPort` for each node is not conflict on current host.
+* For the seed node, the `NodePort` is the same with the port in `SeedList` part.
+* For each non-seed node, the `NodePort` should have different ports.
+* Also make sure the `HttpJsonPort` and `HttpLocalPort` for each node do not conflict with the current host.
 
-After changed the configuration file, we also need to generate wallet for each node and field the `BookKeepers` with 4 nodes's wallet public keys. Please follow the steps in multi-hosts deployment section above.
+After changing the configuration file, we also need to generate a wallet for each node and field the `BookKeepers` with the 4 nodes' wallet public keys. Please follow the steps in the multi-hosts deployment section above.
 
 Here's an example:
 
@@ -214,7 +217,7 @@ $ cat node[1234]/config.json
 
 ## Getting Started
 
-Start the seed node program firstly then other nodes. Just run:
+Start the seed node program first and then other nodes. Just run:
 
 ```shell
 $ ./node
@@ -223,7 +226,7 @@ $ - input you wallet password
 
 ## Testing DNA in an open environment
 
-We also provide an open testing environment, it suppots below operation:
+We also provide an open testing environment. It supports the operation below:
 
 1. make some transactions :
 ```
@@ -235,19 +238,19 @@ We also provide an open testing environment, it suppots below operation:
 ./nodectl test -ip 35.189.182.223 -port 10336 -tx full
 ```
 
-3. look up block's information :
+3. look up the block's information :
 ```
 ./nodectl info -ip 35.189.182.223 -port 10336 -height 10
 ```
 
-4. look up transaction's information :
+4. look up the transaction's information :
 ```
 ./nodectl info -ip 35.189.182.223 -port 10336 -txhash d438896f07786b74281bc70259b0caaccb87460171104ea17473b5e802033a98
 ```
 
 ......
 
-Run `./nodectl --h` for more details.
+Run `./nodectl --h` for more detail.
 
 Some other avaliable nodes for testing:
 ```
@@ -259,7 +262,7 @@ IP               PORT
 35.189.166.234:  40336
 ```
 
-`Notice: Above nodes intended be used for public testing only, the data saved on the testing chain maybe reset at anytime. Keep in mind to backup the data by youself to avoid data losting.`
+`Notice: The nodes above are intended to be used for public testing only. The data saved on the testing chain maybe be reset at any time. Keep in mind to back up the data by yourself to avoid data lose.
 
 # Contributing
 
@@ -273,7 +276,7 @@ You can also send your patches through email to the developer
 mailing list. Please join the DNA mailing list or forum and talk to us about
 it.
 Either way, if you don't sign on your patches, we will not
-accept them. This means adding a line that says "Signature: Name" at
+accept them. This means you should add a line that says "Signature: Name" at
 the end of each commit, indicating that you wrote the code and have the right
 to pass it on as an open source patch.
 
@@ -287,9 +290,9 @@ looks like this:
 
 	Header line: explain the commit in one line (use the imperative)
 
-	Body of commit message is a few lines of text, explaining things
-	in more detail, possibly giving some background about the issue
-	being fixed, etc etc.
+	The body of the commit message is a few lines of text, explaining 
+	things in more detail, possibly giving some background about the 
+	issue being fixed, etc.
 
 	The body of the commit message can be several paragraphs, and
 	please do proper word-wrap and keep columns shorter than about
@@ -297,12 +300,12 @@ looks like this:
 	nicely even when it's indented.
 
 	Make sure you explain your solution and why you're doing what you're
-	doing, as opposed to describing what you're doing. Reviewers and your
-	future self can read the patch, but might not understand why a
+	doing, as opposed to simply describing what you're doing. You and the 
+	reviewers may read the patch in the future, but not understand why a
 	particular solution was implemented.
 
 	Reported-by: whoever-reported-it
-	Signed-off-by: Your Name <youremail@yourhost.com>
+	Signature: Your Name <youremail@yourhost.com>
 
 # Community
 
@@ -314,9 +317,9 @@ We have a mailing list for developers:
 
 We provide two ways to subscribe:
 
-* By sending any contents to email OnchainDNA+subscribe@googlegroups.com with any contents
+* Send any content to the email address OnchainDNA+subscribe@googlegroups.com
 
-* By signing in https://groups.google.com/forum/#!forum/OnchainDNA
+* Sign in https://groups.google.com/forum/#!forum/OnchainDNA
 
 
 ## Forum
@@ -329,4 +332,9 @@ We provide two ways to subscribe:
 
 # License
 
+
+
 DNA is licensed under the Apache License, Version 2.0. See LICENSE for the full license text.
+
+
+
