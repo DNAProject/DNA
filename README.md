@@ -2,31 +2,33 @@
 
 # DNA (Distributed Networks Architecture)
 
-DNA is the golang implementation of a decentralized and distributed network protocol which is based on blockchain technology. It can be used for digitalize assets or shares and accomplish some financial business through peer-to-peer network such as registration, issuing, making transactions, settlement, payment and notary, etc.
+DNA is a decentralized distributed network protocol based on block chaining technology implemented in Golang. Through peer-to-peer network, it can be used to digitize assets and financial service, including asset registration, issuance, transfer, etc.
 
-## Highlight Features
+## Key Characteristics
 
-* Extendable Generalduty Lightweight Smart Contract
+* Scalable Lightweight Universal Smart Contract
 * Crosschain Interactive Protocol
 * Quantum-Resistant Cryptography (optional module)
 * China National Crypto Standard (optional module)
-* Zero Configuration Kickoff Networks (Ongoing)
+* Zero Knowledge Proof Network (in progress)
 * High Optimization of TPS
-* IPFS Dentralizaed Storing & Sharing files solution integration (TBD)
-* P2P link layer encryption, node access privilege controlling
-* Multiple Consensus Algorithm(DBFT/RBFT/SBFT) support
-* Telescopic Block Generation Time
+* Distributed Storage and File Sharding Solutions Based on IPFS
+* P2P Link Layer Encryption
+* Node Access Control
+* Multiple Consensus Algorithm Support (DBFT/RBFT/SBFT)
+* Configurable Block Generation Time
 * Digtal Asset Management
-* Configurable Economic Incentive
-* Configable sharding Consensus
-* Configable Policy Management
+* Configurable Digital Currency Incentive
+* Configable Sharding Consensus
+* Configable Policy Management Mechanism
 
-# Building
+# Compilation
+
 The requirements to build DNA are:
 
-* Go version 1.8 or later is required
-* glide (third-party package management tool) is required
-* A properly configured go environment
+* Go version 1.8 or later
+* Glide (a third-party package management tool)
+* Properly configured Go environment
 
 
 Clone the DNA repo into appropriate $GOPATH/src directory
@@ -261,17 +263,22 @@ IP               PORT
 
 # Contributing
 
-Can I contribute patches to DNA project?
 
-Yes! Please open a pull request with signed-off commits. We appreciate your help!
 
-You can also send your patches as emails to the developer mailing list.
-Please join the DNA mailing list or forum and talk to us about it.
+May I contribute patches to DNA project?
 
-Either way, if you don't sign off your patches, we will not accept them.
-This means adding a line that says "Signed-off-by: Name <email>" at the
-end of each commit, indicating that you wrote the code and have the right
+Yes! Please open a pull request with signed commits. We
+appreciate your help!
+You can also send your patches through email to the developer
+mailing list. Please join the DNA mailing list or forum and talk to us about
+it.
+Either way, if you don't sign on your patches, we will not
+accept them. This means adding a line that says "Signature: Name" at
+the end of each commit, indicating that you wrote the code and have the right
 to pass it on as an open source patch.
+
+
+
 
 See: http://developercertificate.org/
 
