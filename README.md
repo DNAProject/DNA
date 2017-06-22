@@ -2,7 +2,7 @@
 
 # DNA (Distributed Networks Architecture)
 
-DNA is a decentralized distributed network protocol based on blockchain technology and is implemented in Golang. Through peer-to-peer network, it can be used to digitize assets and provide financial service, including asset registration, issuance, transfer, etc.
+DNA is a decentralized distributed network protocol based on blockchain technology and is implemented in Golang. Through peer-to-peer network, DNA can be used to digitize assets and provide financial service, including asset registration, issuance, transfer, etc.
 
 ## Key Characteristics
 
