@@ -2,34 +2,31 @@
 
 # DNA (Distributed Networks Architecture)
 
-DNA is the golang implementation of a decentralized and distributed network protocol which is based on blockchain technology. It can be used for digitalize assets or shares and accomplish some financial business through peer-to-peer network such as registration, issuing, making transactions, settlement, payment and notary, etc.
+ DNA is a decentralized distributed network protocol based on blockchain technology and is implemented in Golang. Through peer-to-peer network, DNA can be used to digitize assets and provide financial service, including asset registration, issuance, transfer, etc.
 
 ## Highlight Features
 
-* Extendable Generalduty Lightweight Smart Contract
-* Crosschain Interactive Protocol
-* Quantum-Resistant Cryptography (optional module)
-* China National Crypto Standard (optional module)
-* Zero Configuration Kickoff Networks (Ongoing)
-* High Optimization of TPS
-* IPFS Dentralizaed Storing & Sharing files solution integration (TBD)
-* P2P link layer encryption, node access privilege controlling
-* Multiple Consensus Algorithm(DBFT/RBFT/SBFT) support
-* Telescopic Block Generation Time
-* Digtal Asset Management
-* Configurable Economic Incentive
-* Configable sharding Consensus
-* Configable Policy Management
+ *	Scalable Lightweight Universal Smart Contract
+ *	Crosschain Interactive Protocol
+ *	Quantum-Resistant Cryptography (optional module)
+ *	China National Crypto Standard (optional module)
+ *	High Optimization of TPS
+ *	Distributed Storage and File Sharding Solutions Based on IPFS
+ *	P2P Link Layer Encryption
+ *	Node Access Control
+ *	Multiple Consensus Algorithm Support (DBFT/RBFT/SBFT)
+ *	Configurable Block Generation Time
+ *	Configurable Digital Currency Incentive
+ *	Configable Sharding Consensus (in progress)
+
 
 # Building
 The requirements to build DNA are:
-
-* Go version 1.8 or later is required
-* glide (third-party package management tool) is required
-* A properly configured go environment
-
-
-Clone the DNA repo into appropriate $GOPATH/src directory
+ *	Go version 1.8 or later
+ *	Glide (a third-party package management tool)
+ *	Properly configured Go environment
+ 
+Clone the DNA repository into the appropriate $GOPATH/src directory.
 
 
 ```shell
@@ -44,181 +41,215 @@ Fetch the dependent third-party packages with glide.
 $ cd DNA
 $ glide install
 ````
-
-Build the source with make
+Build the source code with make.
 
 ```shell
 $ make
 ```
 
-After building the source code, you could see two executable programs you may need:
+After building the source code, you should see two executable programs:
 
 * `node`: the node program
 * `nodectl`: command line tool for node control
 
-Follow the precedures in Deployment section to give them a shot!
+Follow the procedures in Deployment section to give them a shot!
 
 
 # Deployment
+ 
+To run DNA successfully, at least 4 nodes are required. The four nodes can be deployed in the following two way:
 
-To run DNA node regularly, at least 4 nodes are necessary. We provides two ways to deploy the 4 nodes on:
-
-* multi-hosts
-* single-host
+* multi-hosts deployment
+* single-host deployment
 
 ## Configurations for multi-hosts deployment
 
-We can do a quick multi-hosts deployment by changing default configuration file `config.json`. Change the IP address in `SeedList` section to the seed node's IP address, then copy the changed file to hosts that you will run on.
-
-On each host, put the executable program `node` and the configuration file `config.json` into same directory. Like :
-
+ We can do a quick multi-host deployment by modifying the default configuration file `config.json`. Change the IP address in `SeedList` section to the seed node's IP address, and then copy the changed file to the hosts that you will run on.
+ On each host, put the executable program `node`, `nodectl` and the configuration file `config.json` into the same directory. Like :
+ 
 ```shell
 $ ls
-config.json node
+config.json node nodectl
 
 ```
-
-We need to do is change the `BookKeeperName` field to "c1", "c2", "c3" and "c4" respectively on each host. The name sequence is not matter.
-
-Here's an snippet for configuration, note that 10.0.0.100 is seed node's address:
-
+ Each node also needs a `wallet.dat` to run. The quickest way to generate wallets is to run `./nodectl wallet -c -p YourPassword` on each host.
+ Then, change the `BookKeepers` field to the 4 nodes' wallet public keys, which you can get from the last command's echo. The public key sequence does not matter.
+ Now all configurations are completed.
+ 
+ Here's an snippet for configuration, note that `35.189.182.223` and `35.189.166.234` are two public seed node's addresses:
+ 
+ 
 ```shell
 $ cat config.json
 	...
-"SeedList": [
-      "10.0.1.100:20338"
+    "SeedList": [
+      "35.189.182.223:20338",
+      "35.189.166.234:30338"
     ],
 	...
-    "BookKeeperName" : "c1"
+    "BookKeepers": [
+      "03ad8f4a837f7a02adedcea920b30c5c99517aabc7d2695d93ac572b9c2106d4c2",
+      "0293bafa2df4813ae999bf42f35a38bcb9ec26a252fd28dc0ccab56c671cf784e6",
+      "02aec70e084e4e5d36ed2db54aa708a6bd095fbb663929850986a5ec22061e1be2",
+      "02758623d16774f3c5535a305e65ea949343eab06888ee2e7633b4f3f9d78d506c"
+    ],
+	"HttpRestPort": 20334,
+    "HttpJsonPort": 20336,
+    "HttpLocalPort": 20337,
     "NodePort": 20338,
-	...
+ 	...
 ```
-
-For each node, also needs a "wallet" to run. The quick way to generate wallets is trying to run the node program on a host, several wallets named with "wallet" prefix will be generated automatically. Then copy all of them to node program directory on other hosts.
-Congratulations, all configurations are completed.
 
 ## Configurations for single-host deployment
 
-Copy the executable file `node` and configuration file `config.json` to 4 different directories on single host. Then change each `config.json` file as following.
+ Copy the executable file `node`, `nodectl` and configuration file `config.json` to 4 different directories on the single host. Then change each `config.json` file as following.
+ *	The SeedList section should be same in all `config.json`.
+ *	For the seed node, the `NodePort` is the same with the port in `SeedList` part.
+ *	For each non-seed node, the `NodePort` should have different ports.
+ *	Also make sure that the `HttpJsonPort` and `HttpLocalPort` of each node do not conflict with those of the current host.
+ After changing the configuration file, we also need to generate a wallet for each node and field the `BookKeepers` with the 4 nodes' wallet public keys. Please follow the steps in the multi-hosts deployment section above.
+ Here's an example:
 
-* The `SeedList` section should be same in all `config.json`.
-* For the seed node, the `NodePort` is same with the port in `SeedList` part.
-* For each non-seed node, the `NodePort` should have different port.
-* Also need to make sure the `HttpJsonPort` and `HttpLocalPort` for each node is not conflict on current host.
-* Each node should have different "BookKeeperName" field, "c1", "c2", "c3" and "c4" respectively.
-
-After changed the configuration file, we also need to generate wallet for each node. Please follow the steps in multi-hosts deployment section above.
-
-Here's an example:
 
 ```shell
 # directory structure #
 $ tree
 ├── node1
-│   ├── config.json
-│   ├── node
-│   └── wallet*
+│   ├── config.json
+│   ├── node
+│   ├── nodectl
+│   └── wallet.dat
 ├── node2
-│   ├── config.json
-│   ├── node
-│   └── wallet*
+│   ├── config.json
+│   ├── node
+│   ├── nodectl
+│   └── wallet.dat
 ├── node3
-│   ├── config.json
-│   ├── node
-│   └── wallet*
+│   ├── config.json
+│   ├── node
+│   ├── nodectl
+│   └── wallet.dat
 └── node4
     ├── config.json
     ├── node
-    └── wallet*
+    ├── nodectl
+    └── wallet.dat
 ```
 
 ```shell
 # configuration snippets #
 $ cat node[1234]/config.json
-"SeedList": [
-      "10.0.1.1:10338"
+    "SeedList": [
+      "35.189.182.223:20338",
+      "35.189.166.234:30338"
     ],
-    "BookKeeperName" : "c1"
+    "BookKeepers": [
+      "03ad8f4a837f7a02adedcea920b30c5c99517aabc7d2695d93ac572b9c2106d4c2",
+      "0293bafa2df4813ae999bf42f35a38bcb9ec26a252fd28dc0ccab56c671cf784e6",
+      "02aec70e084e4e5d36ed2db54aa708a6bd095fbb663929850986a5ec22061e1be2",
+      "02758623d16774f3c5535a305e65ea949343eab06888ee2e7633b4f3f9d78d506c"
+    ],
+    "HttpRestPort": 10334,
     "HttpJsonPort": 10336,
     "HttpLocalPort": 10337,
     "NodePort": 10338,
     ...
 
-"SeedList": [
-      "10.0.1.1:10338"
+    "SeedList": [
+      "35.189.182.223:20338",
+      "35.189.166.234:30338"
     ],
-    "BookKeeperName" : "c2"
+    "BookKeepers": [
+      "03ad8f4a837f7a02adedcea920b30c5c99517aabc7d2695d93ac572b9c2106d4c2",
+      "0293bafa2df4813ae999bf42f35a38bcb9ec26a252fd28dc0ccab56c671cf784e6",
+      "02aec70e084e4e5d36ed2db54aa708a6bd095fbb663929850986a5ec22061e1be2",
+      "02758623d16774f3c5535a305e65ea949343eab06888ee2e7633b4f3f9d78d506c"
+    ],
+    "HttpRestPort": 20334,
     "HttpJsonPort": 20336,
     "HttpLocalPort": 20337,
     "NodePort": 20338,
     ...
 
-"SeedList": [
-      "10.0.1.1:10338"
+    "SeedList": [
+      "35.189.182.223:20338",
+      "35.189.166.234:30338"
     ],
-    "BookKeeperName" : "c3"
+    "BookKeepers": [
+      "03ad8f4a837f7a02adedcea920b30c5c99517aabc7d2695d93ac572b9c2106d4c2",
+      "0293bafa2df4813ae999bf42f35a38bcb9ec26a252fd28dc0ccab56c671cf784e6",
+      "02aec70e084e4e5d36ed2db54aa708a6bd095fbb663929850986a5ec22061e1be2",
+      "02758623d16774f3c5535a305e65ea949343eab06888ee2e7633b4f3f9d78d506c"
+    ],
+    "HttpRestPort": 30334,
     "HttpJsonPort": 30336,
     "HttpLocalPort": 30337,
     "NodePort": 30338,
     ...
 
-"SeedList": [
-      "10.0.1.1:10338"
+    "SeedList": [
+      "35.189.182.223:20338",
+      "35.189.166.234:30338"
     ],
-    "BookKeeperName" : "c4"
+    "BookKeepers": [
+      "03ad8f4a837f7a02adedcea920b30c5c99517aabc7d2695d93ac572b9c2106d4c2",
+      "0293bafa2df4813ae999bf42f35a38bcb9ec26a252fd28dc0ccab56c671cf784e6",
+      "02aec70e084e4e5d36ed2db54aa708a6bd095fbb663929850986a5ec22061e1be2",
+      "02758623d16774f3c5535a305e65ea949343eab06888ee2e7633b4f3f9d78d506c"
+    ],
+    "HttpRestPort": 40334,
     "HttpJsonPort": 40336,
     "HttpLocalPort": 40337,
     "NodePort": 40338,
-    ...
-```
 
 ## Getting Started
 
-Start the seed node program firstly then other nodes. Just run:
+Start the seed node program first and then other nodes. Just run:
 
 ```shell
 $ ./node
+$ - input you wallet password
 ```
 
 ## Testing DNA in an open environment
-
-We also provide an open testing environment, it suppots below operation:
+ 
+ We also provide an open testing environment. It supports the operation below:
 
 1. make some transactions :
 ```
-./nodectl test -ip 139.196.113.85 -port 10331 -tx perf -num 10
+./nodectl test -ip 35.189.182.223 -port 10336 -tx perf -num 10
 ```
 
 2. register, issue, transfer assert :
 ```
-./nodectl test -ip 139.196.113.85 -port 10331 -tx full
+./nodectl test -ip 35.189.182.223 -port 10336 -tx full
 ```
 
 3. look up block's information :
 ```
-./nodectl info -ip 139.196.113.85 -port 10331 -height 10
+./nodectl info -ip 35.189.182.223 -port 10336 -height 10
 ```
 
 4. look up transaction's information :
 ```
-./nodectl info -ip 139.196.113.85 -port 10331 -txhash d438896f07786b74281bc70259b0caaccb87460171104ea17473b5e802033a98
+./nodectl info -ip 35.189.182.223 -port 10336 -txhash d438896f07786b74281bc70259b0caaccb87460171104ea17473b5e802033a98
 ```
 
 ......
 
 Run `./nodectl --h` for more details.
 
-Some other avaliable nodes for testing:
+Some other available nodes for testing:
 ```
 IP               PORT
 ----------------------
-139.196.113.85:  10331
-139.196.113.101: 10331
-139.196.227.195: 10331
-139.196.227.195: 20331
+35.189.182.223:  10336
+35.189.182.223:  20336
+35.189.166.234:  30336
+35.189.166.234:  40336
 ```
-
-`Notice: Above nodes intended be used for public testing only, the data saved on the testing chain maybe reset at anytime. Keep in mind to backup the data by youself to avoid data losting.`
+ 
+ `Notice: The nodes above are intended to be used for public testing only. The data saved on the testing chain maybe be reset at any time. Keep in mind to back up the data by yourself to avoid data loss.`
 
 # Contributing
 
@@ -233,8 +264,6 @@ Either way, if you don't sign off your patches, we will not accept them.
 This means adding a line that says "Signed-off-by: Name <email>" at the
 end of each commit, indicating that you wrote the code and have the right
 to pass it on as an open source patch.
-
-See: http://developercertificate.org/
 
 Also, please write good git commit messages.  A good commit message
 looks like this:
@@ -268,9 +297,9 @@ We have a mailing list for developers:
 
 We provide two ways to subscribe:
 
-* By sending any contents to email OnchainDNA+subscribe@googlegroups.com with any contents
+* Send any contents to the email OnchainDNA+subscribe@googlegroups.com
 
-* By signing in https://groups.google.com/forum/#!forum/OnchainDNA
+* Sign in https://groups.google.com/forum/#!forum/OnchainDNA
 
 
 ## Forum
