@@ -109,7 +109,7 @@ func TransPayloadToHex(p Payload) PayloadInfo {
 		obj.Amount = object.Amount
 		obj.Issuer.X = object.Issuer.X.String()
 		obj.Issuer.Y = object.Issuer.Y.String()
-		obj.Controller = ToHexString(object.Controller.ToArray())
+		obj.Controller = ToHexString(object.Controller.ToArrayReverse())
 		return obj
 	case *payload.Record:
 		obj := new(RecordInfo)

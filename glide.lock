@@ -1,8 +1,10 @@
-hash: 2d4fd8a22fe1ce4c4564675ca87af62ad6527c19f9c29fcf29eb80c8a17bb2e3
-updated: 2017-06-15T19:55:31.387033818+08:00
+hash: b475260a415728e132a4f3f23f17e75e79d0d55321335ad1ed2579669bef009c
+updated: 2017-06-30T13:46:28.0886999+08:00
 imports:
 - name: github.com/bitly/go-simplejson
   version: da1a8928f709389522c8023062a3739f3b4af419
+- name: github.com/dnaproject/gopass
+  version: 3d5cac4c3c49028515a6f149131ef897100b71c2
 - name: github.com/golang/crypto
   version: 459e26527287adbc2adcc5d0d49abff9a5f315a7
   subpackages:
@@ -10,8 +12,10 @@ imports:
   - ssh/terminal
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
-- name: github.com/dnaproject/gopass
-  version: 3d5cac4c3c49028515a6f149131ef897100b71c2
+- name: github.com/gorilla/websocket
+  version: a91eba7f97777409bc2c443f5534d41dd20c5720
+- name: github.com/pborman/uuid
+  version: 1b00554d822231195d1babd97ff4a781231955c9
 - name: github.com/syndtr/goleveldb
   version: 3c5717caf1475fd25964109a0fc640bd150fce43
   subpackages:
@@ -33,5 +37,4 @@ imports:
   version: f6e8084112db1c3aa9c1e4144f024ab549ea08c1
 - name: github.com/whyrusleeping/tar-utils
   version: e8a5890cfc9d59a203361237581468780d945b6e
-
 testImports: []
