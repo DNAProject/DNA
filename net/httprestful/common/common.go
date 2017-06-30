@@ -3,13 +3,13 @@ package common
 import (
 	. "DNA/common"
 	. "DNA/common/config"
+	"DNA/common/log"
 	"DNA/core/ledger"
 	tx "DNA/core/transaction"
 	. "DNA/net/httpjsonrpc"
 	Err "DNA/net/httprestful/error"
 	. "DNA/net/protocol"
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"net"
@@ -51,30 +51,41 @@ func GetBlockHeight(cmd map[string]interface{}) map[string]interface{} {
 	resp["Result"] = ledger.DefaultLedger.Blockchain.BlockHeight
 	return resp
 }
-func getBlock(hash Uint256, getTxBytes bool) (interface{}, int64) {
-	block, err := ledger.DefaultLedger.Store.GetBlock(hash)
+func GetBlockHash(cmd map[string]interface{}) map[string]interface{} {
+	resp := ResponsePack(Err.SUCCESS)
+	param := cmd["Height"].(string)
+	if len(param) == 0 {
+		resp["Error"] = Err.INVALID_PARAMS
+		return resp
+	}
+	height, err := strconv.ParseInt(param, 10, 64)
 	if err != nil {
-		return "", Err.UNKNOWN_BLOCK
+		resp["Error"] = Err.INVALID_PARAMS
+		return resp
 	}
-	if getTxBytes {
-		w := bytes.NewBuffer(nil)
-		block.Serialize(w)
-		return hex.EncodeToString(w.Bytes()), Err.SUCCESS
+	hash, err := ledger.DefaultLedger.Store.GetBlockHash(uint32(height))
+	if err != nil {
+		resp["Error"] = Err.INVALID_PARAMS
+		return resp
 	}
-
+	resp["Result"] = ToHexString(hash.ToArrayReverse())
+	return resp
+}
+func GetBlockInfo(block *ledger.Block) BlockInfo {
+	hash := block.Hash()
 	blockHead := &BlockHead{
 		Version:          block.Blockdata.Version,
-		PrevBlockHash:    ToHexString(block.Blockdata.PrevBlockHash.ToArray()),
-		TransactionsRoot: ToHexString(block.Blockdata.TransactionsRoot.ToArray()),
+		PrevBlockHash:    ToHexString(block.Blockdata.PrevBlockHash.ToArrayReverse()),
+		TransactionsRoot: ToHexString(block.Blockdata.TransactionsRoot.ToArrayReverse()),
 		Timestamp:        block.Blockdata.Timestamp,
 		Height:           block.Blockdata.Height,
 		ConsensusData:    block.Blockdata.ConsensusData,
-		NextBookKeeper:   ToHexString(block.Blockdata.NextBookKeeper.ToArray()),
+		NextBookKeeper:   ToHexString(block.Blockdata.NextBookKeeper.ToArrayReverse()),
 		Program: ProgramInfo{
 			Code:      ToHexString(block.Blockdata.Program.Code),
 			Parameter: ToHexString(block.Blockdata.Program.Parameter),
 		},
-		Hash: ToHexString(hash.ToArray()),
+		Hash: ToHexString(hash.ToArrayReverse()),
 	}
 
 	trans := make([]*Transactions, len(block.Transactions))
@@ -83,11 +94,23 @@ func getBlock(hash Uint256, getTxBytes bool) (interface{}, int64) {
 	}
 
 	b := BlockInfo{
-		Hash:         ToHexString(hash.ToArray()),
+		Hash:         ToHexString(hash.ToArrayReverse()),
 		BlockData:    blockHead,
 		Transactions: trans,
 	}
-	return b, Err.SUCCESS
+	return b
+}
+func getBlock(hash Uint256, getTxBytes bool) (interface{}, int64) {
+	block, err := ledger.DefaultLedger.Store.GetBlock(hash)
+	if err != nil {
+		return "", Err.UNKNOWN_BLOCK
+	}
+	if getTxBytes {
+		w := bytes.NewBuffer(nil)
+		block.Serialize(w)
+		return ToHexString(w.Bytes()), Err.SUCCESS
+	}
+	return GetBlockInfo(block), Err.SUCCESS
 }
 func GetBlockByHash(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
@@ -101,7 +124,7 @@ func GetBlockByHash(cmd map[string]interface{}) map[string]interface{} {
 		getTxBytes = true
 	}
 	var hash Uint256
-	hex, err := hex.DecodeString(param)
+	hex, err := HexToBytesReverse(param)
 	if err != nil {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
@@ -147,7 +170,7 @@ func GetAssetByHash(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
 
 	str := cmd["Hash"].(string)
-	hex, err := hex.DecodeString(str)
+	hex, err := HexToBytesReverse(str)
 	if err != nil {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
@@ -155,12 +178,12 @@ func GetAssetByHash(cmd map[string]interface{}) map[string]interface{} {
 	var hash Uint256
 	err = hash.Deserialize(bytes.NewReader(hex))
 	if err != nil {
-		resp["Error"] = Err.INVALID_TRANSACTION
+		resp["Error"] = Err.INVALID_ASSET
 		return resp
 	}
 	asset, err := ledger.DefaultLedger.Store.GetAsset(hash)
 	if err != nil {
-		resp["Error"] = Err.UNKNOWN_TRANSACTION
+		resp["Error"] = Err.UNKNOWN_ASSET
 		return resp
 	}
 	resp["Result"] = asset
@@ -174,7 +197,7 @@ func GetUnspendOutput(cmd map[string]interface{}) map[string]interface{} {
 	var programHash Uint160
 	var assetHash Uint256
 
-	bys, err := hex.DecodeString(addr)
+	bys, err := HexToBytesReverse(addr)
 	if err != nil {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
@@ -184,7 +207,7 @@ func GetUnspendOutput(cmd map[string]interface{}) map[string]interface{} {
 		return resp
 	}
 
-	bys, err = hex.DecodeString(assetid)
+	bys, err = HexToBytesReverse(assetid)
 	if err != nil {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
@@ -215,13 +238,13 @@ func GetUnspendOutput(cmd map[string]interface{}) map[string]interface{} {
 				continue
 			}
 			txHash := t.Hash()
-			txHashHex := ToHexString(txHash.ToArray())
+			txHashHex := ToHexString(txHash.ToArrayReverse())
 			for i, output := range t.Outputs {
 				if output.AssetID.CompareTo(assetHash) == 0 &&
 					output.ProgramHash.CompareTo(programHash) == 0 {
 					key := txHashHex + ":" + strconv.Itoa(i)
-					asset := ToHexString(output.AssetID.ToArray())
-					pHash := ToHexString(output.ProgramHash.ToArray())
+					asset := ToHexString(output.AssetID.ToArrayReverse())
+					pHash := ToHexString(output.ProgramHash.ToArrayReverse())
 					value := int64(output.Value)
 					info := &TxOutputInfo{
 						asset,
@@ -247,7 +270,7 @@ func GetUnspendOutput(cmd map[string]interface{}) map[string]interface{} {
 				continue
 			}
 			for _, input := range t.UTXOInputs {
-				refer := ToHexString(input.ReferTxID.ToArray())
+				refer := ToHexString(input.ReferTxID.ToArrayReverse())
 				index := strconv.Itoa(int(input.ReferTxOutputIndex))
 				key := refer + ":" + index
 				delete(outputs, key)
@@ -263,7 +286,7 @@ func GetTransactionByHash(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
 
 	str := cmd["Hash"].(string)
-	bys, err := hex.DecodeString(str)
+	bys, err := HexToBytesReverse(str)
 	if err != nil {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
@@ -282,7 +305,7 @@ func GetTransactionByHash(cmd map[string]interface{}) map[string]interface{} {
 	if raw, ok := cmd["Raw"].(string); ok && raw == "1" {
 		w := bytes.NewBuffer(nil)
 		tx.Serialize(w)
-		resp["Result"] = hex.EncodeToString(w.Bytes())
+		resp["Result"] = ToHexString(w.Bytes())
 		return resp
 	}
 	tran := TransArryByteToHexString(tx)
@@ -297,13 +320,13 @@ func SendRawTransaction(cmd map[string]interface{}) map[string]interface{} {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
 	}
-	hex, err := hex.DecodeString(str)
+	bys, err := HexToBytes(str)
 	if err != nil {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
 	}
 	var txn tx.Transaction
-	if err := txn.Deserialize(bytes.NewReader(hex)); err != nil {
+	if err := txn.Deserialize(bytes.NewReader(bys)); err != nil {
 		resp["Error"] = Err.INVALID_TRANSACTION
 		return resp
 	}
@@ -313,112 +336,25 @@ func SendRawTransaction(cmd map[string]interface{}) map[string]interface{} {
 		resp["Error"] = Err.INTERNAL_ERROR
 		return resp
 	}
-	resp["Result"] = ToHexString(hash.ToArray())
+	resp["Result"] = ToHexString(hash.ToArrayReverse())
+	//TODO 0xd1 -> tx.InvokeCode
+	if txn.TxType == 0xd1 {
+		if userid, ok := cmd["Userid"].(string); ok && len(userid) > 0 {
+			resp["Userid"] = userid
+		}
+	}
 	return resp
 }
 
 //record
-func getRecordData(cmd map[string]interface{}) ([]byte, int64) {
-	if raw, ok := cmd["Raw"].(string); ok && raw == "1" {
-		str, ok := cmd["RecordData"].(string)
-		if !ok {
-			return nil, Err.INVALID_PARAMS
-		}
-		bys, err := hex.DecodeString(str)
-		if err != nil {
-			return nil, Err.INVALID_PARAMS
-		}
-		return bys, Err.SUCCESS
-	}
-	type Data struct {
-		Algrithem string `json:Algrithem`
-		Desc      string `json:Desc`
-		Hash      string `json:Hash`
-		Text      string `json:Text`
-		Signature string `json:Signature`
-	}
-	type RecordData struct {
-		CAkey     string  `json:CAkey`
-		Data      Data    `json:Data`
-		SeqNo     string  `json:SeqNo`
-		Timestamp float64 `json:Timestamp`
-		//TrdPartyTimestamp float64 `json:TrdPartyTimestamp`
-	}
-
-	tmp := &RecordData{}
-	reqRecordData, ok := cmd["RecordData"].(map[string]interface{})
-	if !ok {
-		return nil, Err.INVALID_PARAMS
-	}
-	reqBtys, err := json.Marshal(reqRecordData)
-	if err != nil {
-		return nil, Err.INVALID_PARAMS
-	}
-
-	if err := json.Unmarshal(reqBtys, tmp); err != nil {
-		return nil, Err.INVALID_PARAMS
-	}
-	tmp.CAkey, ok = cmd["CAkey"].(string)
-	if !ok || tmp.Timestamp == 0 || len(tmp.Data.Hash) == 0 || len(tmp.Data.Algrithem) == 0 || len(tmp.Data.Desc) == 0 {
-		return nil, Err.INVALID_PARAMS
-	}
-	repBtys, err := json.Marshal(tmp)
-	if err != nil {
-		return nil, Err.INVALID_PARAMS
-	}
-	return repBtys, Err.SUCCESS
-}
-func SendRecorByTransferTransaction(cmd map[string]interface{}) map[string]interface{} {
-	resp := ResponsePack(Err.SUCCESS)
-	var recordData []byte
-	recordData, resp["Error"] = getRecordData(cmd)
-	if recordData == nil {
-		return resp
-	}
-
-	var inputs []*tx.UTXOTxInput
-	var outputs []*tx.TxOutput
-
-	transferTx, _ := tx.NewTransferAssetTransaction(inputs, outputs)
-	record := tx.NewTxAttribute(tx.Description, recordData)
-	transferTx.Attributes = append(transferTx.Attributes, &record)
-
-	hash := transferTx.Hash()
-	resp["Result"] = ToHexString(hash.ToArray())
-
-	if err := VerifyAndSendTx(transferTx); err != nil {
-		resp["Error"] = Err.INTERNAL_ERROR
-		return resp
-	}
-	return resp
-}
-
-func SendRecodTransaction(cmd map[string]interface{}) map[string]interface{} {
-	resp := ResponsePack(Err.SUCCESS)
-	var recordData []byte
-	recordData, resp["Error"] = getRecordData(cmd)
-	if recordData == nil {
-		return resp
-	}
-	recordType := "record"
-	recordTx, _ := tx.NewRecordTransaction(recordType, recordData)
-
-	hash := recordTx.Hash()
-	resp["Result"] = ToHexString(hash.ToArray())
-	if err := VerifyAndSendTx(recordTx); err != nil {
-		resp["Error"] = Err.INTERNAL_ERROR
-		return resp
-	}
-	return resp
-}
 
 //config
-func GetOauthServerAddr(cmd map[string]interface{}) map[string]interface{} {
+func GetOauthServerUrl(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
 	resp["Result"] = Parameters.OauthServerAddr
 	return resp
 }
-func SetOauthServerAddr(cmd map[string]interface{}) map[string]interface{} {
+func SetOauthServerUrl(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
 
 	addr, ok := cmd["Addr"].(string)
@@ -439,7 +375,7 @@ func SetOauthServerAddr(cmd map[string]interface{}) map[string]interface{} {
 	resp["Result"] = Parameters.OauthServerAddr
 	return resp
 }
-func GetNoticeServerAddr(cmd map[string]interface{}) map[string]interface{} {
+func GetNoticeServerUrl(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
 	resp["Result"] = Parameters.NoticeServerAddr
 	return resp
@@ -447,20 +383,16 @@ func GetNoticeServerAddr(cmd map[string]interface{}) map[string]interface{} {
 
 func SetPushBlockFlag(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
-	start, ok := cmd["Open"].(bool)
+	open, ok := cmd["Open"].(bool)
 	if !ok {
 		resp["Error"] = Err.INVALID_PARAMS
 		return resp
 	}
-	if start {
-		pushBlockFlag = true
-	} else {
-		pushBlockFlag = false
-	}
+	pushBlockFlag = open
 	resp["Result"] = pushBlockFlag
 	return resp
 }
-func SetNoticeServerAddr(cmd map[string]interface{}) map[string]interface{} {
+func SetNoticeServerUrl(cmd map[string]interface{}) map[string]interface{} {
 	resp := ResponsePack(Err.SUCCESS)
 
 	addr, ok := cmd["Addr"].(string)
@@ -557,7 +489,6 @@ func OauthRequest(method string, cmd map[string]interface{}, url string) (map[st
 	var repMsg = make(map[string]interface{})
 	var response *http.Response
 	var err error
-
 	switch method {
 	case "GET":
 
@@ -595,4 +526,28 @@ func OauthRequest(method string, cmd map[string]interface{}, url string) (map[st
 	}
 
 	return repMsg, err
+}
+func CheckAccessToken(auth_type, access_token string) (cakey string, errCode int64, result interface{}) {
+
+	if len(Parameters.OauthServerAddr) == 0 {
+		return "", Err.SUCCESS, ""
+	}
+	req := make(map[string]interface{})
+	req["token"] = access_token
+	req["auth_type"] = auth_type
+	rep, err := OauthRequest("GET", req, Parameters.OauthServerAddr+"/"+access_token+"?auth_type="+auth_type)
+	if err != nil {
+		log.Error("Oauth timeout:", err)
+		return "", Err.OAUTH_TIMEOUT, rep
+	}
+	if errcode, ok := rep["Error"].(float64); ok && errcode == 0 {
+		result, ok := rep["Result"].(map[string]interface{})
+		if !ok {
+			return "", Err.INVALID_TOKEN, rep
+		}
+		if CAkey, ok := result["CaKey"].(string); ok {
+			return CAkey, Err.SUCCESS, rep
+		}
+	}
+	return "", Err.INVALID_TOKEN, rep
 }
