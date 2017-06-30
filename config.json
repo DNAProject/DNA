@@ -9,6 +9,7 @@
     "BookKeepers": [
     ],
     "HttpRestPort": 20334,
+    "HttpWsPort":20335,
     "HttpJsonPort": 20336,
     "HttpLocalPort": 20337,
     "NoticeServerAddr":"",
