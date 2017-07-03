@@ -2,9 +2,9 @@ package ledger
 
 import (
 	. "DNA/common"
+	"DNA/core/account"
 	. "DNA/core/asset"
 	tx "DNA/core/transaction"
-	"DNA/core/account"
 	"DNA/crypto"
 )
 
@@ -26,7 +26,7 @@ type ILedgerStore interface {
 
 	SaveAsset(assetid Uint256, asset *Asset) error
 	GetAsset(hash Uint256) (*Asset, error)
-
+	GetAssetDetail(hash Uint256) (*Asset, Fixed64, Fixed64, error)
 	GetAccount(programHash Uint160) (*account.AccountState, error)
 
 	GetCurrentBlockHash() Uint256

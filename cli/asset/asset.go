@@ -46,6 +46,20 @@ func openWallet(name string, passwd []byte) account.Client {
 	return wallet
 }
 
+func getAssetHash(assetHashStr string) (Uint256, error) {
+	assetHashHex, err := hex.DecodeString(assetHashStr)
+	if err != nil {
+		fmt.Println("Decoding asset hash string failed")
+		return Uint256{}, err
+	}
+	var assetHash Uint256
+	if err := assetHash.Deserialize(bytes.NewReader(assetHashHex)); err != nil {
+		fmt.Println("Deserialization asset hash failed")
+		return Uint256{}, err
+	}
+	return assetHash, nil
+}
+
 func getUintHash(programHashStr, assetHashStr string) (Uint160, Uint256, error) {
 	programHashHex, err := hex.DecodeString(programHashStr)
 	if err != nil {
@@ -57,14 +71,8 @@ func getUintHash(programHashStr, assetHashStr string) (Uint160, Uint256, error) 
 		fmt.Println("Deserialization program hash failed")
 		return Uint160{}, Uint256{}, err
 	}
-	assetHashHex, err := hex.DecodeString(assetHashStr)
+	assetHash, err := getAssetHash(assetHashStr)
 	if err != nil {
-		fmt.Println("Decoding asset hash string failed")
-		return Uint160{}, Uint256{}, err
-	}
-	var assetHash Uint256
-	if err := assetHash.Deserialize(bytes.NewReader(assetHashHex)); err != nil {
-		fmt.Println("Deserialization asset hash failed")
 		return Uint160{}, Uint256{}, err
 	}
 	return programHash, assetHash, nil
@@ -108,6 +116,28 @@ func makeRegTransaction(admin, issuer *account.Account, name string, value Fixed
 	var buffer bytes.Buffer
 	if err := tx.Serialize(&buffer); err != nil {
 		fmt.Println("serialize registtransaction failed")
+		return "", err
+	}
+	return hex.EncodeToString(buffer.Bytes()), nil
+}
+
+func makeIncreaseIssueAssetTransaction(issuer *account.Account, assertHashStr string, value Fixed64) (string, error) {
+	assetHash, err := getAssetHash(assertHashStr)
+	if err != nil {
+		return "", err
+	}
+
+	tx, _ := transaction.NewIncreaseIssueAssetTransaction(assetHash, value)
+	txAttr := transaction.NewTxAttribute(transaction.Nonce, []byte(strconv.FormatInt(rand.Int63(), 10)))
+	tx.Attributes = make([]*transaction.TxAttribute, 0)
+	tx.Attributes = append(tx.Attributes, &txAttr)
+	if err := signTransaction(issuer, tx); err != nil {
+		fmt.Println("sign increaseIssue transaction failed")
+		return "", err
+	}
+	var buffer bytes.Buffer
+	if err := tx.Serialize(&buffer); err != nil {
+		fmt.Println("serialize increaseIssueAsset failed")
 		return "", err
 	}
 	return hex.EncodeToString(buffer.Bytes()), nil
@@ -240,8 +270,9 @@ func assetAction(c *cli.Context) error {
 	}
 	reg := c.Bool("reg")
 	issue := c.Bool("issue")
+	incissue := c.Bool("incissue")
 	transfer := c.Bool("transfer")
-	if !reg && !issue && !transfer {
+	if !reg && !issue && !transfer && !incissue {
 		cli.ShowSubcommandHelp(c)
 		return nil
 	}
@@ -265,6 +296,17 @@ func assetAction(c *cli.Context) error {
 		}
 		issuer := admin
 		txHex, err = makeRegTransaction(admin, issuer, name, Fixed64(value))
+	} else if incissue {
+		asset := c.String("asset")
+		if asset == "" {
+			fmt.Println("missing flag [--asset] ")
+			return nil
+		}
+		txHex, err = makeIncreaseIssueAssetTransaction(admin, asset, Fixed64(value))
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
 	} else {
 		asset := c.String("asset")
 		to := c.String("to")
@@ -287,6 +329,7 @@ func assetAction(c *cli.Context) error {
 		fmt.Fprintln(os.Stderr, err)
 		return err
 	}
+
 	FormatOutput(resp)
 
 	return nil
@@ -296,7 +339,7 @@ func NewCommand() *cli.Command {
 	return &cli.Command{
 		Name:        "asset",
 		Usage:       "asset registration, issuance and transfer",
-		Description: "With nodectl asset, you could control assert through transaction.",
+		Description: "With nodectl asset, you could control asset through transaction.",
 		ArgsUsage:   "[args]",
 		Flags: []cli.Flag{
 			cli.BoolFlag{
@@ -306,6 +349,10 @@ func NewCommand() *cli.Command {
 			cli.BoolFlag{
 				Name:  "issue, i",
 				Usage: "issue asset that has been registered",
+			},
+			cli.BoolFlag{
+				Name:  "incissue",
+				Usage: "increase issue asset that has been registered",
 			},
 			cli.BoolFlag{
 				Name:  "transfer, t",

@@ -6,6 +6,7 @@ import (
 	tx "DNA/core/transaction"
 	"DNA/core/transaction/payload"
 	"errors"
+	"fmt"
 	"math"
 )
 
@@ -35,7 +36,6 @@ func VerifyTransaction(Tx *tx.Transaction) error {
 	if err := CheckTransactionPayload(Tx); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -208,6 +208,17 @@ func CheckTransactionPayload(Tx *tx.Transaction) error {
 		return nil
 	case *payload.RegisterAsset:
 	case *payload.IssueAsset:
+	case *payload.IncreaseIssueAsset:
+		if pld.Amount < 0 {
+			return errors.New(fmt.Sprint("[txValidator],invalidate IncreaseIssueAsset payload: negetive amount ", pld.Amount))
+		}
+		assetTx, err := tx.TxStore.GetTransaction(pld.AssetID)
+		if err != nil {
+			return errors.New(fmt.Sprintf("[VerifyTransaction], GetTransaction failed With AssetID:=%x", pld.AssetID))
+		}
+		if assetTx.TxType != tx.RegisterAsset {
+			return errors.New(fmt.Sprintf("[VerifyTransaction], Transaction Type illegal With AssetID:=%x", pld.AssetID))
+		}
 	case *payload.TransferAsset:
 	case *payload.BookKeeping:
 	case *payload.PrivacyPayload:

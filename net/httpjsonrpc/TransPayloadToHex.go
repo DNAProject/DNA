@@ -51,6 +51,12 @@ type RegisterAssetInfo struct {
 type TransferAssetInfo struct {
 }
 
+type IncreaseIssueAssetInfo struct {
+	AssetID string
+	Amount  Fixed64
+}
+
+
 type RecordInfo struct {
 	RecordType string
 	RecordData string
@@ -91,6 +97,11 @@ func TransPayloadToHex(p Payload) PayloadInfo {
 		}
 		return obj
 	case *payload.IssueAsset:
+	case *payload.IncreaseIssueAsset:
+		obj := new(IncreaseIssueAssetInfo)
+		obj.AssetID = ToHexString(object.AssetID.ToArray())
+		obj.Amount = object.Amount
+		return obj
 	case *payload.TransferAsset:
 	case *payload.DeployCode:
 		obj := new(DeployCodeInfo)

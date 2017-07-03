@@ -496,6 +496,30 @@ func (bd *ChainStore) GetAsset(hash Uint256) (*Asset, error) {
 	return asset, nil
 }
 
+func (bd *ChainStore) GetAssetDetail(hash Uint256) (*Asset, Fixed64, Fixed64, error) {
+	log.Debug(fmt.Sprintf("GetAssetDetail Hash: %x\n", hash))
+
+	// get asset
+	as, err := bd.GetAsset(hash)
+	if err != nil {
+		return nil, -1, -1, err
+	}
+
+	// get amount
+	aa, err := bd.GetRegisterAmount(hash)
+	if err != nil {
+		return nil, -1, -1, err
+	}
+
+	// get quantities
+	qt, err := bd.GetQuantityIssued(hash)
+	if err != nil {
+		return nil, -1, -1, err
+	}
+
+	return as, aa, qt, nil
+}
+
 func (bd *ChainStore) GetTransaction(hash Uint256) (*tx.Transaction, error) {
 	log.Debug()
 	log.Debug(fmt.Sprintf("GetTransaction Hash: %x\n", hash))
@@ -645,6 +669,7 @@ func (self *ChainStore) GetBookKeeperList() ([]*crypto.PubKey, []*crypto.PubKey,
 func (bd *ChainStore) persist(b *Block) error {
 	unspents := make(map[Uint256][]uint16)
 	quantities := make(map[Uint256]Fixed64)
+	registerAmount := make(map[Uint256]Fixed64)
 
 	///////////////////////////////////////////////////////////////
 	// Get Unspents for every tx
@@ -725,6 +750,7 @@ func (bd *ChainStore) persist(b *Block) error {
 		// now support RegisterAsset / IssueAsset / TransferAsset and Miner TX ONLY.
 		if b.Transactions[i].TxType == tx.RegisterAsset ||
 			b.Transactions[i].TxType == tx.IssueAsset ||
+			b.Transactions[i].TxType == tx.IncreaseIssueAsset ||
 			b.Transactions[i].TxType == tx.TransferAsset ||
 			b.Transactions[i].TxType == tx.Record ||
 			b.Transactions[i].TxType == tx.BookKeeper ||
@@ -742,12 +768,29 @@ func (bd *ChainStore) persist(b *Block) error {
 			if err != nil {
 				return err
 			}
+
+			// save register asset amount
+			registerAmount[b.Transactions[i].Hash()] = ar.Amount
+		}
+
+		if b.Transactions[i].TxType == tx.IncreaseIssueAsset {
+			ar := b.Transactions[i].Payload.(*payload.IncreaseIssueAsset)
+			if _, ok := registerAmount[ar.AssetID]; ok {
+				registerAmount[ar.AssetID] += ar.Amount
+			} else {
+				aa, err := bd.GetRegisterAmount(ar.AssetID)
+				if err != nil {
+					return err
+				}
+
+				registerAmount[ar.AssetID] = aa + ar.Amount
+			}
 		}
 
 		if b.Transactions[i].TxType == tx.IssueAsset {
 			results := b.Transactions[i].GetMergedAssetIDValueFromOutputs()
 			for assetId, value := range results {
-				if _, ok := quantities[assetId]; !ok {
+				if _, ok := quantities[assetId]; ok {
 					quantities[assetId] += value
 				} else {
 					quantities[assetId] = value
@@ -914,6 +957,20 @@ func (bd *ChainStore) persist(b *Block) error {
 			unspentArray := ToByteArray(value)
 			bd.st.BatchPut(unspentKey.Bytes(), unspentArray)
 		}
+	}
+
+	// batch put registerAmout
+	for assetId, value := range registerAmount {
+		amountKey := bytes.NewBuffer(nil)
+		amountKey.WriteByte(byte(ST_AmountRegistered))
+		assetId.Serialize(amountKey)
+
+		amountArray := bytes.NewBuffer(nil)
+		value.Serialize(amountArray)
+
+		bd.st.BatchPut(amountKey.Bytes(), amountArray.Bytes())
+		log.Debug(fmt.Sprintf("quantityKey: %x\n", amountKey.Bytes()))
+		log.Debug(fmt.Sprintf("quantityArray: %x\n", amountArray.Bytes()))
 	}
 
 	// batch put quantities
@@ -1113,6 +1170,24 @@ func (bd *ChainStore) BlockInCache(hash Uint256) bool {
 		return true
 	}
 	return false
+}
+
+func (bd *ChainStore) GetRegisterAmount(assetId Uint256) (Fixed64, error) {
+	log.Debug(fmt.Sprintf("GetRegisterAmount Hash: %x\n", assetId))
+
+	prefix := []byte{byte(ST_AmountRegistered)}
+	data, err_get := bd.st.Get(append(prefix, assetId.ToArray()...))
+	log.Debug(fmt.Sprintf("GetRegisterAmount Data: %x\n", data))
+
+	var amount Fixed64
+	if err_get != nil {
+		return -1, err_get
+	} else {
+		r := bytes.NewReader(data)
+		amount.Deserialize(r)
+	}
+
+	return amount, nil
 }
 
 func (bd *ChainStore) GetQuantityIssued(assetId Uint256) (Fixed64, error) {
