@@ -225,10 +225,24 @@ func magicVerify(magic uint32) bool {
 	return true
 }
 
-func PayloadLen(buf []byte) int {
+func PayloadLen(buf []byte) (int, []byte) {
 	var h msgHdr
 	h.Deserialization(buf)
-	return int(h.Length)
+	if magicVerify(h.Magic) {
+		//TODO: verify hdr checksum
+		return int(h.Length), buf
+	} else {
+		//try find the magic number
+		for i := 0; i <= len(buf)-MSGHDRLEN; i++ {
+			if magicVerify(binary.LittleEndian.Uint32(buf[i:])) {
+				buf = append(buf[:0], buf[i:]...)
+				h.Deserialization(buf)
+				//TODO: verify hdr checksum
+				return int(h.Length), buf
+			}
+		}
+		return 0, nil
+	}
 }
 
 func checkSum(p []byte) []byte {
