@@ -44,8 +44,15 @@ func unpackNodeBuf(node *node, buf []byte) {
 			errors.New("Unexpected size of received message")
 			return
 		}
-		// FIXME Check the payload < 0 error case
-		msgLen = PayloadLen(buf) + MSGHDRLEN
+
+		length := 0
+		length, buf = PayloadLen(buf)
+
+		if length == 0 && buf == nil {
+			return
+		}
+
+		msgLen = length + MSGHDRLEN
 	} else {
 		msgLen = node.rxBuf.len
 	}
@@ -203,9 +210,18 @@ func parseIPaddr(s string) (string, error) {
 
 func (node *node) Connect(nodeAddr string) error {
 	log.Debug()
+
+	if node.IsAddrInNbrList(nodeAddr) == true {
+		return nil
+	}
+	if node.IsAddrInConnectingList(nodeAddr) == true {
+		return nil
+	}
+	node.SetAddrInConnectingList(nodeAddr)
 	isTls := Parameters.IsTLS
 	var conn net.Conn
 	var err error
+
 	if isTls {
 		conn, err = TLSDial(nodeAddr)
 		if err != nil {

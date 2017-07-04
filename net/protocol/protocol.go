@@ -46,7 +46,7 @@ const (
 const (
 	HELLOTIMEOUT     = 3 // Seconds
 	MAXHELLORETYR    = 3
-	MAXBUFLEN        = 1024 * 1024 * 5 // Fixme The maximum buffer to receive message
+	MAXBUFLEN        = 1024 * 16 // Fixme The maximum buffer to receive message
 	MAXCHANBUF       = 512
 	PROTOCOLVERSION  = 0
 	PERIODUPDATETIME = 3 // Time to update and sync information with other nodes
@@ -68,6 +68,7 @@ type Noder interface {
 	Version() uint32
 	GetID() uint64
 	Services() uint64
+	GetAddr() string
 	GetPort() uint16
 	GetState() uint32
 	GetRelay() bool
@@ -123,6 +124,10 @@ type Noder interface {
 	SetHeight(height uint64)
 	WaitForFourPeersStart()
 	GetFlightHeights() []uint32
+	IsAddrInNbrList(addr string) bool
+	IsAddrInConnectingList(addr string) bool
+	SetAddrInConnectingList(addr string)
+	RemoveAddrInConnectingList(addr string)
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {
