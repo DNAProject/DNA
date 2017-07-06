@@ -8,7 +8,6 @@ import (
 	. "DNA/net/protocol"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -225,12 +224,14 @@ func (node *node) Connect(nodeAddr string) error {
 	if isTls {
 		conn, err = TLSDial(nodeAddr)
 		if err != nil {
+			node.RemoveAddrInConnectingList(nodeAddr)
 			log.Error("TLS connect failed: ", err)
 			return nil
 		}
 	} else {
 		conn, err = NonTLSDial(nodeAddr)
 		if err != nil {
+			node.RemoveAddrInConnectingList(nodeAddr)
 			log.Error("non TLS connect failed: ", err)
 			return nil
 		}
@@ -294,9 +295,7 @@ func TLSDial(nodeAddr string) (net.Conn, error) {
 }
 
 func (node *node) Tx(buf []byte) {
-	log.Debug()
-	str := hex.EncodeToString(buf)
-	log.Debug(fmt.Sprintf("TX buf length: %d\n%s", len(buf), str))
+	log.Debugf("TX buf length: %d\n%x", len(buf), buf)
 
 	_, err := node.conn.Write(buf)
 	if err != nil {
