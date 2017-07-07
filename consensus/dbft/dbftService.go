@@ -549,7 +549,7 @@ func (ds *DbftService) Timeout() {
 			}
 
 			ds.context.Nonce = GetNonce()
-			transactionsPool := ds.localNet.GetTxnPool(false)
+			transactionsPool := ds.localNet.GetTxnPool(true)
 			//TODO: add policy
 			//TODO: add max TX limitation
 
@@ -572,7 +572,6 @@ func (ds *DbftService) Timeout() {
 	} else if (ds.context.State.HasFlag(Primary) && ds.context.State.HasFlag(RequestSent)) || ds.context.State.HasFlag(Backup) {
 		ds.RequestChangeView()
 	}
-
 }
 
 func (ds *DbftService) timerRoutine() {
