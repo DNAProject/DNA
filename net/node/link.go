@@ -32,46 +32,53 @@ type link struct {
 	connCnt uint64 // The connection count
 }
 
-// Shrinking the buf to the exactly reading in byte length
-//@Return @1 the start header of next message, the left length of the next message
 func unpackNodeBuf(node *node, buf []byte) {
-	var msgLen int
-	var msgBuf []byte
-	if node.rxBuf.p == nil {
-		if len(buf) < MSGHDRLEN {
-			log.Warn("Unexpected size of received message")
-			errors.New("Unexpected size of received message")
+
+	for len(buf) > 0 {
+		plen := len(node.rxBuf.p)
+		tlen := plen + len(buf)
+
+		msgLen := node.rxBuf.len // rxBuf.len is used to cache the confirmed msgLen
+
+		if msgLen == 0 {
+
+			// not enough data to determin the msg header: just append and return to read more
+			if tlen < MSGHDRLEN {
+				node.rxBuf.p = append(node.rxBuf.p, buf...)
+				return
+			}
+
+			// here data is enough to determin the msg header
+			// guarentee msgHdr is in node.rxBuf.p
+			if plen < MSGHDRLEN {
+				node.rxBuf.p = append(node.rxBuf.p, buf[0:MSGHDRLEN-plen]...)
+				buf = buf[MSGHDRLEN-plen:]
+				plen = MSGHDRLEN
+			}
+
+			bodyLen, _ := PayloadLen(node.rxBuf.p)
+			if bodyLen == 0 {
+				log.Fatal("assert failed: wrong msg header received! usually, this means that there is a bug in some place")
+				return
+			}
+			msgLen = bodyLen + MSGHDRLEN
+			node.rxBuf.len = msgLen // save msgLen in rxBuf.len to avoid call PayloadLen multiple times
+		}
+
+		// not enough data to determin the msg body: append and return to read more
+		if tlen < msgLen {
+			node.rxBuf.p = append(node.rxBuf.p, buf...)
 			return
 		}
 
-		length := 0
-		length, buf = PayloadLen(buf)
+		msg := append(node.rxBuf.p, buf[0:msgLen-plen]...)
+		go HandleNodeMsg(node, msg, len(msg))
 
-		if length == 0 && buf == nil {
-			return
-		}
-
-		msgLen = length + MSGHDRLEN
-	} else {
-		msgLen = node.rxBuf.len
-	}
-
-	if len(buf) == msgLen {
-		msgBuf = append(node.rxBuf.p, buf[:]...)
-		go HandleNodeMsg(node, msgBuf, len(msgBuf))
 		node.rxBuf.p = nil
 		node.rxBuf.len = 0
-	} else if len(buf) < msgLen {
-		node.rxBuf.p = append(node.rxBuf.p, buf[:]...)
-		node.rxBuf.len = msgLen - len(buf)
-	} else {
-		msgBuf = append(node.rxBuf.p, buf[0:msgLen]...)
-		go HandleNodeMsg(node, msgBuf, len(msgBuf))
-		node.rxBuf.p = nil
-		node.rxBuf.len = 0
-
-		unpackNodeBuf(node, buf[msgLen:])
+		buf = buf[msgLen-plen:]
 	}
+
 }
 
 func (node *node) rx() {
