@@ -25,5 +25,7 @@ func StartProtocol(pubKey *crypto.PubKey) protocol.Noder {
 	net := node.InitNode(pubKey)
 	net.ConnectSeeds()
 
+	node.ExportNodeStatus(net)
+
 	return net
 }
