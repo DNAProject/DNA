@@ -49,7 +49,6 @@ const (
 	MAXBUFLEN        = 1024 * 16 // Fixme The maximum buffer to receive message
 	MAXCHANBUF       = 512
 	PROTOCOLVERSION  = 0
-	PERIODUPDATETIME = 3 // Time to update and sync information with other nodes
 	HEARTBEAT        = 2
 	KEEPALIVETIMEOUT = 3
 	DIALTIMEOUT      = 3
