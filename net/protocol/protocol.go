@@ -125,9 +125,10 @@ type Noder interface {
 	SetHeight(height uint64)
 	WaitForFourPeersStart()
 	GetFlightHeights() []uint32
-	IsAddrInNbrList(addr string) bool
+	IfNeedConnect(addr string) bool
 	SetAddrInConnectingList(addr string) bool
 	RemoveAddrInConnectingList(addr string)
+	ParseNodeAddr() string
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {

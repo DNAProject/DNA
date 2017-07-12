@@ -210,7 +210,7 @@ func parseIPaddr(s string) (string, error) {
 func (node *node) Connect(nodeAddr string) error {
 	log.Debug()
 
-	if node.IsAddrInNbrList(nodeAddr) == true {
+	if node.IfNeedConnect(nodeAddr) == false {
 		return nil
 	}
 	if added := node.SetAddrInConnectingList(nodeAddr); added == false {
