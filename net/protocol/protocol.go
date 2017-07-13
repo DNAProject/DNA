@@ -49,7 +49,6 @@ const (
 	MAXBUFLEN        = 1024 * 16 // Fixme The maximum buffer to receive message
 	MAXCHANBUF       = 512
 	PROTOCOLVERSION  = 0
-	PERIODUPDATETIME = 3 // Time to update and sync information with other nodes
 	HEARTBEAT        = 2
 	KEEPALIVETIMEOUT = 3
 	DIALTIMEOUT      = 3
@@ -125,9 +124,10 @@ type Noder interface {
 	SetHeight(height uint64)
 	WaitForFourPeersStart()
 	GetFlightHeights() []uint32
-	IsAddrInNbrList(addr string) bool
+	IfNeedConnect(addr string) bool
 	SetAddrInConnectingList(addr string) bool
 	RemoveAddrInConnectingList(addr string)
+	ParseNodeAddr() string
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {

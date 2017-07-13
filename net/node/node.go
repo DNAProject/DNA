@@ -76,20 +76,18 @@ func (node *node) DumpInfo() {
 	log.Info("\t conn cnt = ", node.link.connCnt)
 }
 
-func (node *node) IsAddrInNbrList(addr string) bool {
+func (node *node) IfNeedConnect(addr string) bool {
 	node.nbrNodes.RLock()
 	defer node.nbrNodes.RUnlock()
 	for _, n := range node.nbrNodes.List {
-		if n.GetState() == HAND || n.GetState() == HANDSHAKE || n.GetState() == ESTABLISH {
-			addr := n.GetAddr()
-			port := n.GetPort()
-			na := addr + ":" + strconv.Itoa(int(port))
+		if n.GetState() != INIT && n.GetState() != INACTIVITY {
+			na := n.ParseNodeAddr()
 			if strings.Compare(na, addr) == 0 {
-				return true
+				return false
 			}
 		}
 	}
-	return false
+	return true
 }
 
 func (node *node) SetAddrInConnectingList(addr string) (added bool) {
@@ -451,16 +449,16 @@ func (node *node) RemoveFlightHeightLessThan(h uint32) {
 }
 
 func (node *node) RemoveFlightHeight(height uint32) {
-	log.Debug("height is ", height)
-	for _, h := range node.flightHeights {
-		log.Debug("flight height ", h)
-	}
 	node.flightHeights = SliceRemove(node.flightHeights, height)
-	for _, h := range node.flightHeights {
-		log.Debug("after flight height ", h)
-	}
 }
 
 func (node *node) GetLastRXTime() time.Time {
 	return node.time
+}
+
+func (node *node) ParseNodeAddr() string {
+	addr := node.GetAddr()
+	port := node.GetPort()
+	na := addr + ":" + strconv.Itoa(int(port))
+	return na
 }
