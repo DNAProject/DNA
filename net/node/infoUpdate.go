@@ -71,7 +71,7 @@ func (node *node) SendPingToNbr() {
 	noders := node.local.GetNeighborNoder()
 	for _, n := range noders {
 		t := n.GetLastRXTime()
-		if time.Since(t).Seconds() > PERIODUPDATETIME {
+		if time.Since(t).Seconds() > config.PERIODUPDATETIME {
 			if n.GetState() == ESTABLISH {
 				buf, err := NewPingMsg()
 				if err != nil {
@@ -89,7 +89,7 @@ func (node *node) HeartBeatMonitor() {
 	for _, n := range noders {
 		if n.GetState() == ESTABLISH {
 			t := n.GetLastRXTime()
-			if time.Since(t).Seconds() > (PERIODUPDATETIME * KEEPALIVETIMEOUT) {
+			if time.Since(t).Seconds() > (config.PERIODUPDATETIME * KEEPALIVETIMEOUT) {
 				log.Warn("keepalive timeout!!!")
 				n.SetState(INACTIVITY)
 				n.CloseConn()
@@ -180,7 +180,7 @@ func (node *node) TryConnect() {
 // a node map method
 // Fixme the Nodes should be a parameter
 func (node *node) updateNodeInfo() {
-	ticker := time.NewTicker(time.Second * PERIODUPDATETIME)
+	ticker := time.NewTicker(time.Second * config.PERIODUPDATETIME)
 	quit := make(chan struct{})
 	for {
 		select {

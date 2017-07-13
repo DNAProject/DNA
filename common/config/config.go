@@ -10,6 +10,9 @@ import (
 
 const (
 	DefaultConfigFilename = "./config.json"
+	PERIODUPDATETIME      = 3 // Time to update and sync information with other nodes
+	TIMESOFUPDATETIME     = 2
+	MINGENBLOCKTIME       = PERIODUPDATETIME * TIMESOFUPDATETIME
 )
 
 var Version string
