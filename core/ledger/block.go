@@ -12,6 +12,7 @@ import (
 	"DNA/vm"
 	"io"
 	"time"
+	"DNA/core/transaction/payload"
 )
 
 type Block struct {
@@ -170,7 +171,7 @@ func GenesisBlockInit() (*Block, error) {
 	{
 		trans.TxType = tx.BookKeeping
 		trans.PayloadVersion = byte(0)
-		trans.Payload = nil
+		trans.Payload = new(payload.BookKeeping)
 		trans.Attributes = nil
 		trans.UTXOInputs = nil
 		trans.BalanceInputs = nil
