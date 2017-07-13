@@ -213,10 +213,10 @@ func (node *node) Connect(nodeAddr string) error {
 	if node.IsAddrInNbrList(nodeAddr) == true {
 		return nil
 	}
-	if node.IsAddrInConnectingList(nodeAddr) == true {
-		return nil
+	if added := node.SetAddrInConnectingList(nodeAddr); added == false {
+		return errors.New("node exist in connecting list, cancel")
 	}
-	node.SetAddrInConnectingList(nodeAddr)
+
 	isTls := Parameters.IsTLS
 	var conn net.Conn
 	var err error
@@ -226,14 +226,14 @@ func (node *node) Connect(nodeAddr string) error {
 		if err != nil {
 			node.RemoveAddrInConnectingList(nodeAddr)
 			log.Error("TLS connect failed: ", err)
-			return nil
+			return err
 		}
 	} else {
 		conn, err = NonTLSDial(nodeAddr)
 		if err != nil {
 			node.RemoveAddrInConnectingList(nodeAddr)
 			log.Error("non TLS connect failed: ", err)
-			return nil
+			return err
 		}
 	}
 	node.link.connCnt++
