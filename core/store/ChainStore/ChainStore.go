@@ -50,23 +50,31 @@ type ChainStore struct {
 func init() {
 }
 
-func NewStore() IStore {
-	ldbs, _ := NewLevelDBStore("Chain")
+func NewStore(file string) (IStore, error) {
+	ldbs, err := NewLevelDBStore(file)
 
-	return ldbs
+	return ldbs, err
 }
 
-func NewLedgerStore() ILedgerStore {
+func NewLedgerStore() (ILedgerStore, error) {
 	// TODO: read config file decide which db to use.
-	cs, _ := NewChainStore("Chain")
+	cs, err := NewChainStore("Chain")
+	if err != nil {
+		return nil, err
+	}
 
-	return cs
+	return cs, nil
 }
 
 func NewChainStore(file string) (*ChainStore, error) {
 
+	st, err := NewStore(file)
+	if err != nil {
+		return nil, err
+	}
+
 	return &ChainStore{
-		st:                 NewStore(),
+		st:                 st,
 		headerIndex:        map[uint32]Uint256{},
 		blockCache:         map[Uint256]*Block{},
 		headerCache:        map[Uint256]*Header{},
@@ -1279,6 +1287,40 @@ func (bd *ChainStore) GetAccount(programHash Uint160) (*account.AccountState, er
 	return accountState, nil
 }
 
+func (bd *ChainStore) IsBlockInStore(hash Uint256) bool {
+
+	var b *Block = new(Block)
+
+	b.Blockdata = new(Blockdata)
+	b.Blockdata.Program = new(program.Program)
+
+	prefix := []byte{byte(DATA_Header)}
+	blockData, err_get := bd.st.Get(append(prefix, hash.ToArray()...))
+	if err_get != nil {
+		return false
+	}
+
+	r := bytes.NewReader(blockData)
+
+	// first 8 bytes is sys_fee
+	_, err := serialization.ReadUint64(r)
+	if err != nil {
+		return false
+	}
+
+	// Deserialize block data
+	err = b.FromTrimmedData(r)
+	if err != nil {
+		return false
+	}
+
+	if b.Blockdata.Height > bd.currentBlockHeight {
+		return false
+	}
+
+	return true
+}
+
 func (bd *ChainStore) GetUnspentFromProgramHash(programHash Uint160, assetid Uint256) ([]*tx.UTXOUnspent, error) {
 
 	prefix := []byte{byte(IX_Unspent_UTXO)}
@@ -1333,4 +1375,67 @@ func (bd *ChainStore) saveUnspentWithProgramHash(programHash Uint160, assetid Ui
 	}
 
 	return nil
+}
+
+func (bd *ChainStore) GetUnspentsFromProgramHash(programHash Uint160) (map[Uint256][]*tx.UTXOUnspent, error) {
+	uxtoUnspents := make(map[Uint256][]*tx.UTXOUnspent)
+
+	prefix := []byte{byte(IX_Unspent_UTXO)}
+	key := append(prefix, programHash.ToArray()...)
+	iter := bd.st.NewIterator(key)
+	for iter.Next() {
+		rk := bytes.NewReader(iter.Key())
+
+		// read prefix
+		_, _ = serialization.ReadBytes(rk, 1)
+		var ph Uint160
+		ph.Deserialize(rk)
+		var assetid Uint256
+		assetid.Deserialize(rk)
+		log.Tracef("[GetUnspentsFromProgramHash] assetid: %x\n", assetid.ToArray())
+
+		r := bytes.NewReader(iter.Value())
+		listNum, err := serialization.ReadVarUint(r, 0)
+		if err != nil {
+			return nil, err
+		}
+
+		// read unspent list in store
+		unspents := make([]*tx.UTXOUnspent, listNum)
+		for i := 0; i < int(listNum); i++ {
+			uu := new(tx.UTXOUnspent)
+			err := uu.Deserialize(r)
+			if err != nil {
+				return nil, err
+			}
+
+			unspents[i] = uu
+		}
+		uxtoUnspents[assetid] = unspents
+	}
+
+	return uxtoUnspents, nil
+}
+
+func (bd *ChainStore) GetAssets() map[Uint256]*Asset {
+	assets := make(map[Uint256]*Asset)
+
+	iter := bd.st.NewIterator([]byte{byte(ST_Info)})
+	for iter.Next() {
+		rk := bytes.NewReader(iter.Key())
+
+		// read prefix
+		_, _ = serialization.ReadBytes(rk, 1)
+		var assetid Uint256
+		assetid.Deserialize(rk)
+		log.Tracef("[GetAssets] assetid: %x\n", assetid.ToArray())
+
+		asset := new(Asset)
+		r := bytes.NewReader(iter.Value())
+		asset.Deserialize(r)
+
+		assets[assetid] = asset
+	}
+
+	return assets
 }
