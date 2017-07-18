@@ -12,6 +12,7 @@ import (
 	"DNA/net"
 	"DNA/net/httpjsonrpc"
 	"DNA/net/httprestful"
+	"DNA/net/httpwebsocket"
 	"DNA/net/protocol"
 	"os"
 	"runtime"
@@ -43,7 +44,11 @@ func main() {
 
 	log.Info("0. Loading the Ledger")
 	ledger.DefaultLedger = new(ledger.Ledger)
-	ledger.DefaultLedger.Store = ChainStore.NewLedgerStore()
+	ledger.DefaultLedger.Store, err = ChainStore.NewLedgerStore()
+	if err != nil {
+		log.Fatal("open LedgerStore err:", err)
+		os.Exit(1)
+	}
 	ledger.DefaultLedger.Store.InitLedgerStore(ledger.DefaultLedger)
 	transaction.TxStore = ledger.DefaultLedger.Store
 	crypto.SetAlg(config.Parameters.EncryptAlg)
@@ -88,7 +93,8 @@ func main() {
 	log.Info("--Start the RPC interface")
 	go httpjsonrpc.StartRPCServer()
 	go httpjsonrpc.StartLocalServer()
-	httprestful.StartServer(noder)
+	go httprestful.StartServer(noder)
+	go httpwebsocket.StartServer(noder)
 
 	for {
 		time.Sleep(dbft.GenBlockTime)
