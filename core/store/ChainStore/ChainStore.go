@@ -1148,20 +1148,24 @@ func (bd *ChainStore) SaveBlock(b *Block, ledger *Ledger) error {
 	bd.mu.Lock()
 	defer bd.mu.Unlock()
 
+	if b.Blockdata.Height <= bd.currentBlockHeight {
+		return nil
+	}
+
 	if bd.blockCache[b.Hash()] == nil {
 		bd.blockCache[b.Hash()] = b
 	}
 
 	if b.Blockdata.Height >= (uint32(len(bd.headerIndex)) + 1) {
 		//return false,NewDetailErr(errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - headerIndex.count >= 1, block height:%d, headerIndex.count:%d",b.Blockdata.Height, uint32(len(bd.headerIndex)) )),ErrDuplicatedBlock,"")
-		return errors.New(fmt.Sprintf("WARNING: [SaveBlock] block height - headerIndex.count >= 1, block height:%d, headerIndex.count:%d", b.Blockdata.Height, uint32(len(bd.headerIndex))))
+		return errors.New(fmt.Sprintf("Info: [SaveBlock] block height:%d - headerIndex.count:%d >= 1, save it later.", b.Blockdata.Height, uint32(len(bd.headerIndex))))
 	}
 
 	if b.Blockdata.Height == uint32(len(bd.headerIndex)) {
 		//Block verify
 		err := validation.VerifyBlock(b, ledger, false)
 		if err != nil {
-			log.Debug("VerifyBlock() error!")
+			log.Error("VerifyBlock error!")
 			return err
 		}
 
