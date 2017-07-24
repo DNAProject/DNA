@@ -563,3 +563,20 @@ func GetBookKeepers() []*crypto.PubKey {
 
 	return pubKeys
 }
+
+func GetStateUpdater() []*crypto.PubKey {
+	var pubKeys = []*crypto.PubKey{}
+	for _, key := range config.Parameters.StateUpdater {
+		pubKey := []byte(key)
+		pubKey, err := hex.DecodeString(key)
+		// TODO Convert the key string to byte
+		k, err := crypto.DecodePoint(pubKey)
+		if err != nil {
+			log.Error("Incorrectly book keepers key")
+			return nil
+		}
+		pubKeys = append(pubKeys, k)
+	}
+
+	return pubKeys
+}

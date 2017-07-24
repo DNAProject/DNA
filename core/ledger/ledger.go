@@ -13,6 +13,7 @@ import (
 
 var DefaultLedger *Ledger
 var StandbyBookKeepers []*crypto.PubKey
+var StateUpdater []*crypto.PubKey
 
 // Ledger - the struct for onchainDNA ledger
 type Ledger struct {
@@ -24,6 +25,10 @@ type Ledger struct {
 //check weather the transaction contains the doubleSpend.
 func (l *Ledger) IsDoubleSpend(Tx *tx.Transaction) bool {
 	return DefaultLedger.Store.IsDoubleSpend(Tx)
+}
+
+func (l *Ledger) IsStateUpdaterVaild(Tx *tx.Transaction) bool {
+	return DefaultLedger.Store.IsStateUpdaterVaild(Tx)
 }
 
 //Get the DefaultLedger.
