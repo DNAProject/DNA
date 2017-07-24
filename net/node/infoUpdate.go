@@ -134,7 +134,7 @@ func (node *node) reconnect() {
 		node.RetryAddrs[addr] = node.RetryAddrs[addr] + 1
 		rand.Seed(time.Now().UnixNano())
 		log.Trace("Try to reconnect peer, peer addr is ", addr)
-		<-time.After(time.Duration(rand.Intn(CONNMAXBACK)) * time.Second)
+		<-time.After(time.Duration(rand.Intn(CONNMAXBACK)) * time.Millisecond)
 		log.Trace("Back off time`s up, start connect node")
 		node.Connect(addr)
 		if node.RetryAddrs[addr] < MAXRETRYCOUNT {
@@ -200,12 +200,14 @@ func (node *node) updateNodeInfo() {
 }
 
 func (node *node) updateConnection() {
-	t := time.NewTicker(time.Second * CONNMONITOR)
+	t := time.NewTimer(time.Second * CONNMONITOR)
 	for {
 		select {
 		case <-t.C:
 			node.ConnectSeeds()
 			node.TryConnect()
+			t.Stop()
+			t.Reset(time.Second * CONNMONITOR)
 		}
 	}
 
