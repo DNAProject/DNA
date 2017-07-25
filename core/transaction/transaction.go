@@ -30,6 +30,7 @@ const (
 	Record         TransactionType = 0x81
 	DeployCode     TransactionType = 0xd0
 	DataFile       TransactionType = 0x12
+	DestroyUTXO    TransactionType = 0x18
 )
 
 //Payload define the func for loading the payload data
@@ -200,6 +201,8 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 		tx.Payload = new(payload.PrivacyPayload)
 	case DataFile:
 		tx.Payload = new(payload.DataFile)
+	case DestroyUTXO:
+		tx.Payload = new(payload.DestroyUTXO)
 	default:
 		return errors.New("[Transaction],invalide transaction type.")
 	}
@@ -293,9 +296,6 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 		hashs = append(hashs, astHash)
 	case IssueAsset:
 		result := tx.GetMergedAssetIDValueFromOutputs()
-		if err != nil {
-			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetTransactionResults failed.")
-		}
 		for k := range result {
 			tx, err := TxStore.GetTransaction(k)
 			if err != nil {
@@ -339,6 +339,27 @@ func (tx *Transaction) GetProgramHashes() ([]Uint160, error) {
 			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetProgramHashes ToCodeHash failed.")
 		}
 		hashs = append(hashs, astHash)
+	case DestroyUTXO:
+		inputs, err := tx.GetMergedAssetIDValueFromReference()
+		if err != nil {
+			return nil, NewDetailErr(err, ErrNoCode, "[Transaction], GetTransactionInputs failed.")
+		}
+		for k := range inputs {
+			tx, err := TxStore.GetTransaction(k)
+			if err != nil {
+				return nil, NewDetailErr(err, ErrNoCode, fmt.Sprintf("[Transaction], GetTransaction failed With AssetID:=%x", k))
+			}
+			if tx.TxType != RegisterAsset {
+				return nil, NewDetailErr(errors.New("[Transaction] error"), ErrNoCode, fmt.Sprintf("[Transaction], Transaction Type ileage With AssetID:=%x", k))
+			}
+
+			switch v1 := tx.Payload.(type) {
+			case *payload.RegisterAsset:
+				hashs = append(hashs, v1.Controller)
+			default:
+				return nil, NewDetailErr(errors.New("[Transaction] error"), ErrNoCode, fmt.Sprintf("[Transaction], payload is illegal", k))
+			}
+		}
 	default:
 	}
 	//remove dupilicated hashes
