@@ -82,6 +82,7 @@ func main() {
 	time.Sleep(20 * time.Second)
 	noder.SyncNodeHeight()
 	noder.WaitForFourPeersStart()
+	noder.WaitForSyncBlkFinish()
 	if protocol.SERVICENODENAME != config.Parameters.NodeType {
 		log.Info("5. Start DBFT Services")
 		dbftServices := dbft.NewDbftService(client, "logdbft", noder)
