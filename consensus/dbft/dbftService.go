@@ -170,13 +170,14 @@ func (ds *DbftService) CheckSignatures() error {
 
 func (ds *DbftService) CreateBookkeepingTransaction(nonce uint64) *tx.Transaction {
 	log.Debug()
-
 	//TODO: sysfee
-
+	bookKeepingPayload := &payload.BookKeeping{
+		Nonce: uint64(time.Now().UnixNano()),
+	}
 	return &tx.Transaction{
 		TxType:         tx.BookKeeping,
-		PayloadVersion: 0x2,
-		Payload:        &payload.BookKeeping{},
+		PayloadVersion: payload.BookKeepingPayloadVersion,
+		Payload:        bookKeepingPayload,
 		Attributes:     []*tx.TxAttribute{},
 		UTXOInputs:     []*tx.UTXOTxInput{},
 		BalanceInputs:  []*tx.BalanceTxInput{},
@@ -540,7 +541,7 @@ func (ds *DbftService) Timeout() {
 			}
 
 			ds.context.Nonce = GetNonce()
-			transactionsPool := ds.localNet.GetTxnPool(false)
+			transactionsPool := ds.localNet.GetTxnPool(true)
 			//TODO: add policy
 			//TODO: add max TX limitation
 
@@ -563,7 +564,6 @@ func (ds *DbftService) Timeout() {
 	} else if (ds.context.State.HasFlag(Primary) && ds.context.State.HasFlag(RequestSent)) || ds.context.State.HasFlag(Backup) {
 		ds.RequestChangeView()
 	}
-
 }
 
 func (ds *DbftService) timerRoutine() {
