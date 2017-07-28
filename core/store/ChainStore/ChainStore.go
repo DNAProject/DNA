@@ -73,7 +73,7 @@ func NewChainStore(file string) (*ChainStore, error) {
 		return nil, err
 	}
 
-	return &ChainStore{
+	chain := &ChainStore{
 		st:                 st,
 		headerIndex:        map[uint32]Uint256{},
 		blockCache:         map[Uint256]*Block{},
@@ -81,7 +81,11 @@ func NewChainStore(file string) (*ChainStore, error) {
 		currentBlockHeight: 0,
 		storedHeaderCount:  0,
 		disposed:           false,
-	}, nil
+	}
+
+	ExportStoreStatus(chain)
+
+	return chain, nil
 }
 
 func (bd *ChainStore) InitLedgerStoreWithGenesisBlock(genesisBlock *Block, defaultBookKeeper []*crypto.PubKey) (uint32, error) {

@@ -29,6 +29,12 @@ func (this *TXNPool) init() {
 	this.txnList = make(map[common.Uint256]*transaction.Transaction)
 }
 
+func (this *TXNPool) Len() int {
+	this.RLock()
+	defer this.RUnlock()
+	return len(this.txnList)
+}
+
 //append transaction to txnpool when check ok.
 //1.check transaction. 2.check with ledger(db) 3.check with pool
 func (this *TXNPool) AppendTxnPool(txn *transaction.Transaction) bool {
