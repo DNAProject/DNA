@@ -36,7 +36,7 @@ type ILedgerStore interface {
 	GetHeaderHashByHeight(height uint32) Uint256
 
 	GetBookKeeperList() ([]*crypto.PubKey, []*crypto.PubKey, error)
-	InitLedgerStoreWithGenesisBlock(genesisblock *Block, defaultBookKeeper []*crypto.PubKey) (uint32, error)
+	InitLedgerStoreWithGenesisBlock(genesisblock *Block, defaultBookKeeper []*crypto.PubKey, defaultStateUpdater []*crypto.PubKey) (uint32, error)
 
 	GetQuantityIssued(assetid Uint256) (Fixed64, error)
 
@@ -48,4 +48,8 @@ type ILedgerStore interface {
 
 	IsTxHashDuplicate(txhash Uint256) bool
 	IsBlockInStore(hash Uint256) bool
+
+	GetStateUpdater() ([]*crypto.PubKey, error)
+	GetState(namespace []byte, key []byte) ([]byte, error)
+	IsStateUpdaterVaild(Tx *tx.Transaction) bool
 }
