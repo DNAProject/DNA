@@ -405,8 +405,6 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 		return
 	}
 
-	log.Info("send prepare response")
-	ds.context.State |= SignatureSent
 	bookKeeper, err := ds.Client.GetAccount(ds.context.BookKeepers[ds.context.BookKeeperIndex])
 	if err != nil {
 		log.Error("[DbftService] GetAccount failed")
@@ -419,6 +417,13 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	}
 	payload = ds.context.MakePrepareResponse(ds.context.Signatures[ds.context.BookKeeperIndex])
 	ds.SignAndRelay(payload)
+	log.Info("send prepare response")
+	ds.context.State |= SignatureSent
+
+	err = ds.CheckSignatures()
+	if err != nil {
+		log.Error("[DbftService] CheckSignatures failed.")
+	}
 
 	log.Info("Prepare Request finished")
 }
