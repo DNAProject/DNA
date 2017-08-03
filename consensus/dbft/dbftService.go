@@ -28,6 +28,7 @@ const (
 )
 
 var GenBlockTime = (MINGENBLOCKTIME * time.Second)
+var GenBlockCheckTime = GenBlockTime
 
 type DbftService struct {
 	context           ConsensusContext
@@ -260,7 +261,7 @@ func (ds *DbftService) InitializeConsensus(viewNum byte) error {
 		ds.timeView = viewNum
 
 		ds.timer.Stop()
-		ds.timer.Reset(GenBlockTime << (viewNum + 1))
+		ds.timer.Reset((GenBlockTime + GenBlockCheckTime) << viewNum)
 	}
 	return nil
 }
@@ -467,7 +468,7 @@ func (ds *DbftService) RequestChangeView() {
 		ds.context.ViewNumber, ds.context.ExpectedView[ds.context.BookKeeperIndex], ds.context.GetStateDetail()))
 
 	ds.timer.Stop()
-	ds.timer.Reset(GenBlockTime << (ds.context.ExpectedView[ds.context.BookKeeperIndex] + 1))
+	ds.timer.Reset((GenBlockTime + GenBlockCheckTime) << (ds.context.ExpectedView[ds.context.BookKeeperIndex]))
 
 	ds.SignAndRelay(ds.context.MakeChangeView())
 	ds.CheckExpectedView(ds.context.ExpectedView[ds.context.BookKeeperIndex])
@@ -505,6 +506,13 @@ func (ds *DbftService) Start() error {
 		GenBlockTime = time.Duration(config.Parameters.GenBlockTime) * time.Second
 	} else {
 		log.Warn("The Generate block time should be longer than 6 seconds, so set it to be 6.")
+	}
+
+	genBlockCheckTime := config.Parameters.GenBlockCheckTime
+	if genBlockCheckTime <= 0 || genBlockCheckTime > config.Parameters.GenBlockTime {
+		GenBlockCheckTime = GenBlockTime
+	} else {
+		GenBlockCheckTime = time.Duration(config.Parameters.GenBlockCheckTime) * time.Second
 	}
 
 	ds.blockPersistCompletedSubscriber = ledger.DefaultLedger.Blockchain.BCEvents.Subscribe(events.EventBlockPersistCompleted, ds.BlockPersistCompleted)
@@ -560,7 +568,7 @@ func (ds *DbftService) Timeout() {
 		payload := ds.context.MakePrepareRequest()
 		ds.SignAndRelay(payload)
 		ds.timer.Stop()
-		ds.timer.Reset(GenBlockTime << (ds.timeView + 1))
+		ds.timer.Reset((GenBlockTime + GenBlockCheckTime) << ds.timeView)
 	} else if (ds.context.State.HasFlag(Primary) && ds.context.State.HasFlag(RequestSent)) || ds.context.State.HasFlag(Backup) {
 		ds.RequestChangeView()
 	}
