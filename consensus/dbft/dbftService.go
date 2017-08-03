@@ -118,6 +118,7 @@ func (ds *DbftService) CheckSignatures() error {
 	//check if get enough signatures
 	if ds.context.GetSignaturesCount() >= ds.context.M() {
 
+		log.Infof("%d signatures received", ds.context.GetSignaturesCount())
 		//get current index's hash
 		ep, err := ds.context.BookKeepers[ds.context.BookKeeperIndex].EncodePoint(true)
 		if err != nil {
@@ -161,7 +162,8 @@ func (ds *DbftService) CheckSignatures() error {
 				log.Error(fmt.Sprintf("[CheckSignatures] Xmit block Error: %s, blockHash: %d", err.Error(), block.Hash()))
 				return NewDetailErr(err, ErrNoCode, "[DbftService], CheckSignatures AddContract failed.")
 			}
-
+			log.Info("Block generated")
+			ds.context.Signatures = make([][]byte, len(ds.context.BookKeepers))
 			ds.context.State |= BlockGenerated
 		}
 	}
@@ -394,9 +396,6 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 		return
 	}
 
-	ds.context.Signatures = make([][]byte, len(ds.context.BookKeepers))
-	ds.context.Signatures[payload.BookKeeperIndex] = message.Signature
-
 	//check if the transactions received are verified. If it already exists in transaction pool
 	//then no need to verify it again. Otherwise, verify it.
 	unverifyed := ds.GetUnverifiedTxs(ds.context.Transactions)
@@ -405,8 +404,9 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 		return
 	}
 
-	log.Info("send prepare response")
-	ds.context.State |= SignatureSent
+	//ds.context.Signatures = make([][]byte, len(ds.context.BookKeepers))
+	ds.context.Signatures[payload.BookKeeperIndex] = message.Signature
+
 	bookKeeper, err := ds.Client.GetAccount(ds.context.BookKeepers[ds.context.BookKeeperIndex])
 	if err != nil {
 		log.Error("[DbftService] GetAccount failed")
@@ -419,7 +419,13 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	}
 	payload = ds.context.MakePrepareResponse(ds.context.Signatures[ds.context.BookKeeperIndex])
 	ds.SignAndRelay(payload)
-
+	log.Info("send prepare response")
+	ds.context.State |= SignatureSent
+	err = ds.CheckSignatures()
+	if err != nil {
+		log.Error("PrepareRequestReceived:CheckSignatures failed")
+		return
+	}
 	log.Info("Prepare Request finished")
 }
 
@@ -429,23 +435,33 @@ func (ds *DbftService) PrepareResponseReceived(payload *msg.ConsensusPayload, me
 	log.Info(fmt.Sprintf("Prepare Response Received: height=%d View=%d index=%d", payload.Height, message.ViewNumber(), payload.BookKeeperIndex))
 
 	if ds.context.State.HasFlag(BlockGenerated) {
+		log.Info("Block been generated, skip CheckSignatures")
 		return
 	}
 
 	//if the signature already exist, needn't handle again
 	if ds.context.Signatures[payload.BookKeeperIndex] != nil {
+		log.Info("signature already exist")
 		return
 	}
 
 	header := ds.context.MakeHeader()
 	if header == nil {
+		log.Info("make header return nil")
 		return
 	}
 	if _, err := va.VerifySignature(header, ds.context.BookKeepers[payload.BookKeeperIndex], message.Signature); err != nil {
+		log.Info("VerifySignature error ", err.Error())
 		return
 	}
 
 	ds.context.Signatures[payload.BookKeeperIndex] = message.Signature
+
+	if ds.context.State.HasFlag(Backup) && !ds.context.State.HasFlag(RequestReceived) {
+		log.Info("Prepare Response Received, wait for Prepare request")
+		return
+	}
+
 	err := ds.CheckSignatures()
 	if err != nil {
 		log.Error("CheckSignatures failed")
