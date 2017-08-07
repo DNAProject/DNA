@@ -6,6 +6,8 @@ import (
 	"DNA/core/contract/program"
 	"DNA/core/transaction/payload"
 	"DNA/crypto"
+	"math/rand"
+	"time"
 )
 
 //initial a new transaction with asset registration payload
@@ -57,7 +59,10 @@ func NewBookKeeperTransaction(pubKey *crypto.PubKey, isAdd bool, cert []byte) (*
 
 func NewIssueAssetTransaction(outputs []*TxOutput) (*Transaction, error) {
 
-	assetRegPayload := &payload.IssueAsset{}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	assetRegPayload := &payload.IssueAsset{
+		Nonce: r.Uint64(),
+	}
 
 	return &Transaction{
 		TxType:        IssueAsset,

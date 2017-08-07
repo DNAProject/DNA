@@ -34,6 +34,7 @@ type DeployCodeInfo struct {
 
 //implement PayloadInfo define IssueAssetInfo
 type IssueAssetInfo struct {
+	Nonce uint64
 }
 
 type IssuerInfo struct {
@@ -95,6 +96,9 @@ func TransPayloadToHex(p Payload) PayloadInfo {
 		}
 		return obj
 	case *payload.IssueAsset:
+		obj := new(IssueAssetInfo)
+		obj.Nonce = object.Nonce
+		return obj
 	case *payload.TransferAsset:
 	case *payload.DeployCode:
 		obj := new(DeployCodeInfo)

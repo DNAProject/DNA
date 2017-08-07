@@ -1,10 +1,14 @@
 package payload
 
-import "io"
+import (
+	"DNA/common/serialization"
+	"io"
+)
 
 const IssueAssetPayloadVersion byte = 0x00
 
 type IssueAsset struct {
+	Nonce uint64
 }
 
 func (a *IssueAsset) Data(version byte) []byte {
@@ -14,9 +18,11 @@ func (a *IssueAsset) Data(version byte) []byte {
 }
 
 func (a *IssueAsset) Serialize(w io.Writer, version byte) error {
-	return nil
+	return serialization.WriteUint64(w, a.Nonce)
 }
 
 func (a *IssueAsset) Deserialize(r io.Reader, version byte) error {
-	return nil
+	var err error
+	a.Nonce, err = serialization.ReadUint64(r)
+	return err
 }
