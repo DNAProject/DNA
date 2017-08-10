@@ -388,8 +388,9 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	ds.context.Transactions = message.Transactions
 
 	//block header verification
-	_, err = va.VerifySignature(ds.context.MakeHeader(), ds.context.BookKeepers[payload.BookKeeperIndex], message.Signature)
-	if err != nil {
+	ok, err := va.VerifySignature(ds.context.MakeHeader(), ds.context.BookKeepers[payload.BookKeeperIndex], message.Signature)
+	if !ok {
+		//err may be nil,depend on the crypto implement
 		log.Warn("PrepareRequestReceived VerifySignature failed.", err)
 		return
 	}
@@ -441,12 +442,15 @@ func (ds *DbftService) PrepareResponseReceived(payload *msg.ConsensusPayload, me
 	if header == nil {
 		return
 	}
-	if _, err := va.VerifySignature(header, ds.context.BookKeepers[payload.BookKeeperIndex], message.Signature); err != nil {
+	ok, err := va.VerifySignature(header, ds.context.BookKeepers[payload.BookKeeperIndex], message.Signature)
+	if !ok {
+		//err may be nil,depend on the crypto implement
+		log.Warn("PrepareResponseReceived VerifySignature failed.", err)
 		return
 	}
 
 	ds.context.Signatures[payload.BookKeeperIndex] = message.Signature
-	err := ds.CheckSignatures()
+	err = ds.CheckSignatures()
 	if err != nil {
 		log.Error("CheckSignatures failed")
 		return
