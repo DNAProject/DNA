@@ -7,39 +7,40 @@ import (
 	"DNA/core/ledger"
 	tx "DNA/core/transaction"
 	"DNA/core/transaction/payload"
+	. "DNA/errors"
 	"errors"
 	"fmt"
 	"math"
 )
 
 // VerifyTransaction verifys received single transaction
-func VerifyTransaction(Tx *tx.Transaction) error {
+func VerifyTransaction(Tx *tx.Transaction) (error, ErrCode) {
 
 	if err := CheckDuplicateInput(Tx); err != nil {
-		return err
+		return err, ErrDuplicateInput
 	}
 
 	if err := CheckAssetPrecision(Tx); err != nil {
-		return err
+		return err, ErrAssetPrecision
 	}
 
 	if err := CheckTransactionBalance(Tx); err != nil {
-		return err
+		return err, ErrTransactionBalance
 	}
 
 	if err := CheckAttributeProgram(Tx); err != nil {
-		return err
+		return err, ErrAttributeProgram
 	}
 
 	if err := CheckTransactionContracts(Tx); err != nil {
-		return err
+		return err, ErrTransactionContracts
 	}
 
 	if err := CheckTransactionPayload(Tx); err != nil {
-		return err
+		return err, ErrTransactionPayload
 	}
 
-	return nil
+	return nil, ErrNoError
 }
 
 // VerifyTransactionWithBlock verifys a transaction with current transaction pool in memory
@@ -118,14 +119,16 @@ func VerifyTransactionWithBlock(TxPool []*tx.Transaction) error {
 }
 
 // VerifyTransactionWithLedger verifys a transaction with history transaction in ledger
-func VerifyTransactionWithLedger(Tx *tx.Transaction, ledger *ledger.Ledger) error {
+func VerifyTransactionWithLedger(Tx *tx.Transaction, ledger *ledger.Ledger) ErrCode {
 	if IsDoubleSpend(Tx, ledger) {
-		return errors.New("[VerifyTransactionWithLedger] IsDoubleSpend check faild.")
+		log.Info("[VerifyTransactionWithLedger] IsDoubleSpend check faild.")
+		return ErrDoubleSpend
 	}
 	if exist := ledger.Store.IsTxHashDuplicate(Tx.Hash()); exist {
-		return errors.New("[VerifyTransactionWithLedger] duplicate transaction check faild.")
+		log.Info("[VerifyTransactionWithLedger] duplicate transaction check faild.")
+		return ErrTxHashDuplicate
 	}
-	return nil
+	return ErrNoError
 }
 
 //validate the transaction of duplicate UTXO input
