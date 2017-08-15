@@ -114,10 +114,6 @@ type Noder interface {
 	SyncNodeHeight()
 	CleanSubmittedTransactions(block *ledger.Block) error
 
-	IsSyncHeaders() bool
-	SetSyncHeaders(b bool)
-	IsSyncFailed() bool
-	SetSyncFailed()
 	StartRetryTimer()
 	StopRetryTimer()
 	GetNeighborNoder() []Noder

@@ -20,17 +20,14 @@ func (node *node) GetBlkHdrs() {
 	if node.local.GetNbrNodeCnt() < MINCONNCNT {
 		return
 	}
-
+	rand.Seed(time.Now().UnixNano())
 	noders := node.local.GetNeighborNoder()
-	for _, n := range noders {
-		if uint64(ledger.DefaultLedger.Store.GetHeaderHeight()) < n.GetHeight() {
-			if n.LocalNode().IsSyncFailed() == false {
-				SendMsgSyncHeaders(n)
-				n.StartRetryTimer()
-				break
-			}
-		}
-	}
+
+	index := rand.Intn(len(noders))
+	n := noders[index]
+	SendMsgSyncHeaders(n)
+	n.StartRetryTimer()
+
 }
 
 func (node *node) SyncBlk() {
@@ -45,6 +42,9 @@ func (node *node) SyncBlk() {
 	noders := node.local.GetNeighborNoder()
 
 	for _, n := range noders {
+		if uint32(n.GetHeight()) <= currentBlkHeight {
+			continue
+		}
 		n.RemoveFlightHeightLessThan(currentBlkHeight)
 		count := MAXREQBLKONCE - uint32(n.GetFlightHeightCnt())
 		dValue = int32(headerHeight - currentBlkHeight - reqCnt)
@@ -74,15 +74,12 @@ func (node *node) SyncBlk() {
 func (node *node) SendPingToNbr() {
 	noders := node.local.GetNeighborNoder()
 	for _, n := range noders {
-		t := n.GetLastRXTime()
-		if time.Since(t).Seconds() > PERIODUPDATETIME {
-			if n.GetState() == ESTABLISH {
-				buf, err := NewPingMsg()
-				if err != nil {
-					log.Error("failed build a new ping message")
-				} else {
-					go n.Tx(buf)
-				}
+		if n.GetState() == ESTABLISH {
+			buf, err := NewPingMsg()
+			if err != nil {
+				log.Error("failed build a new ping message")
+			} else {
+				go n.Tx(buf)
 			}
 		}
 	}
@@ -108,10 +105,31 @@ func (node *node) ReqNeighborList() {
 }
 
 func (node *node) ConnectSeeds() {
-	if node.nbrNodes.GetConnectionCnt() == 0 {
+	if node.nbrNodes.GetConnectionCnt() < MINCONNCNT {
 		seedNodes := config.Parameters.SeedList
 		for _, nodeAddr := range seedNodes {
-			go node.Connect(nodeAddr)
+			found := false
+			var n Noder
+			var ip net.IP
+			node.nbrNodes.Lock()
+			for _, tn := range node.nbrNodes.List {
+				addr := getNodeAddr(tn)
+				ip = addr.IpAddr[:]
+				addrstring := ip.To16().String() + ":" + strconv.Itoa(int(addr.Port))
+				if nodeAddr == addrstring {
+					n = tn
+					found = true
+					break
+				}
+			}
+			node.nbrNodes.Unlock()
+			if found {
+				if n.GetState() == ESTABLISH {
+					n.ReqNeighborList()
+				}
+			} else { //not found
+				go node.Connect(nodeAddr)
+			}
 		}
 	}
 }
