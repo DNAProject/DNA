@@ -386,6 +386,7 @@ func (ds *DbftService) PrepareRequestReceived(payload *msg.ConsensusPayload, mes
 	ds.context.Timestamp = payload.Timestamp
 	ds.context.Nonce = message.Nonce
 	ds.context.Transactions = message.Transactions
+	ds.context.header = nil
 
 	//block header verification
 	_, err = va.VerifySignature(ds.context.MakeHeader(), ds.context.BookKeepers[payload.BookKeeperIndex], message.Signature)
@@ -462,7 +463,11 @@ func (ds *DbftService) RefreshPolicy() {
 func (ds *DbftService) RequestChangeView() {
 	log.Debug()
 	// FIXME if there is no save block notifcation, when the timeout call this function it will crash
-	ds.context.ExpectedView[ds.context.BookKeeperIndex] = ds.context.ExpectedView[ds.context.BookKeeperIndex] + 1
+	if ds.context.ViewNumber > ds.context.ExpectedView[ds.context.BookKeeperIndex] {
+		ds.context.ExpectedView[ds.context.BookKeeperIndex] = ds.context.ViewNumber + 1
+	} else {
+		ds.context.ExpectedView[ds.context.BookKeeperIndex] += 1
+	}
 	log.Info(fmt.Sprintf("Request change view: height=%d View=%d nv=%d state=%s", ds.context.Height,
 		ds.context.ViewNumber, ds.context.ExpectedView[ds.context.BookKeeperIndex], ds.context.GetStateDetail()))
 
@@ -552,6 +557,7 @@ func (ds *DbftService) Timeout() {
 			for _, tx := range transactionsPool {
 				ds.context.Transactions = append(ds.context.Transactions, tx)
 			}
+			ds.context.header = nil
 			//build block and sign
 			block := ds.context.MakeHeader()
 			account, _ := ds.Client.GetAccount(ds.context.BookKeepers[ds.context.BookKeeperIndex]) //TODO: handle error
