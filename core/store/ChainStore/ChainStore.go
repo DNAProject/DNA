@@ -778,7 +778,8 @@ func (bd *ChainStore) persist(b *Block) error {
 			b.Transactions[i].TxType == tx.BookKeeper ||
 			b.Transactions[i].TxType == tx.PrivacyPayload ||
 			b.Transactions[i].TxType == tx.BookKeeping ||
-			b.Transactions[i].TxType == tx.DataFile {
+			b.Transactions[i].TxType == tx.DataFile ||
+			b.Transactions[i].TxType == tx.DestroyUTXO {
 			err = bd.SaveTransaction(b.Transactions[i], b.Blockdata.Height)
 			if err != nil {
 				return err
@@ -800,6 +801,16 @@ func (bd *ChainStore) persist(b *Block) error {
 				} else {
 					quantities[assetId] = value
 				}
+			}
+		}
+
+		if b.Transactions[i].TxType == tx.DestroyUTXO {
+			results, err := b.Transactions[i].GetMergedAssetIDValueFromReference()
+			if err != nil {
+				log.Error("[GetMergedAssetIDValueFromReference] failed.")
+			}
+			for assetId, value := range results {
+				quantities[assetId] -= value
 			}
 		}
 

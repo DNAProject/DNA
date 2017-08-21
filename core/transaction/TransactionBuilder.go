@@ -142,3 +142,19 @@ func NewDataFileTransaction(path string, fileName string, note string, issuer *c
 		Programs:      []*program.Program{},
 	}, nil
 }
+
+func NewDestroyUTXOTransaction(inputs []*UTXOTxInput) (*Transaction, error) {
+
+	//TODO: check arguments
+
+	destroyUTXO := &payload.DestroyUTXO{}
+
+	return &Transaction{
+		TxType:        DestroyUTXO,
+		Payload:       destroyUTXO,
+		Attributes:    []*TxAttribute{},
+		UTXOInputs:    inputs,
+		BalanceInputs: []*BalanceTxInput{},
+		Programs:      []*program.Program{},
+	}, nil
+}

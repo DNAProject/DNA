@@ -137,6 +137,7 @@ func TransPayloadToHex(p Payload) PayloadInfo {
 		obj.Issuer.X = object.Issuer.X.String()
 		obj.Issuer.Y = object.Issuer.Y.String()
 		return obj
+	case *payload.DestroyUTXO:
 	}
 	return nil
 }
