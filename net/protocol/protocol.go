@@ -5,6 +5,7 @@ import (
 	"DNA/core/ledger"
 	"DNA/core/transaction"
 	"DNA/crypto"
+	. "DNA/errors"
 	"DNA/events"
 	"bytes"
 	"encoding/binary"
@@ -88,7 +89,7 @@ type Noder interface {
 	GetHeight() uint64
 	GetConnectionCnt() uint
 	GetTxnPool(bool) map[common.Uint256]*transaction.Transaction
-	AppendTxnPool(*transaction.Transaction) bool
+	AppendTxnPool(*transaction.Transaction) ErrCode
 	ExistedID(id common.Uint256) bool
 	ReqNeighborList()
 	DumpInfo()
@@ -114,8 +115,6 @@ type Noder interface {
 	SyncNodeHeight()
 	CleanSubmittedTransactions(block *ledger.Block) error
 
-	StartRetryTimer()
-	StopRetryTimer()
 	GetNeighborNoder() []Noder
 	GetNbrNodeCnt() uint32
 	StoreFlightHeight(height uint32)

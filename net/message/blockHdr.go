@@ -10,8 +10,6 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
-	"math/rand"
-	"time"
 )
 
 type headersReq struct {
@@ -178,33 +176,15 @@ func SendMsgSyncHeaders(node Noder) {
 	}
 }
 
-func ReqBlkHdrFromOthers(node Noder) {
-	noders := node.LocalNode().GetNeighborNoder()
-	if len(noders) == 0 {
-		return
-	}
-	rand.Seed(time.Now().UnixNano())
-	index := rand.Intn(len(noders))
-	if noders[index].GetID() == node.GetID() {
-		index = (index + 1) % len(noders)
-	}
-	n := noders[index]
-	SendMsgSyncHeaders(n)
-
-}
-
 func (msg blkHeader) Handle(node Noder) error {
 	log.Debug()
-	node.StopRetryTimer()
 	err := ledger.DefaultLedger.Store.AddHeaders(msg.blkHdr, ledger.DefaultLedger)
 	if err != nil {
 		log.Warn("Add block Header error")
-		ReqBlkHdrFromOthers(node)
 		return errors.New("Add block Header error, send new header request to another node\n")
 	}
 	if msg.cnt == MAXBLKHDRCNT {
 		SendMsgSyncHeaders(node)
-		node.StartRetryTimer()
 	}
 	return nil
 }
@@ -215,7 +195,7 @@ func GetHeadersFromHash(startHash common.Uint256, stopHash common.Uint256) ([]le
 	headers := []ledger.Header{}
 	var startHeight uint32
 	var stopHeight uint32
-	curHeight := ledger.DefaultLedger.GetLocalBlockChainHeight()
+	curHeight := ledger.DefaultLedger.Store.GetHeaderHeight()
 	if startHash == empty {
 		if stopHash == empty {
 			if curHeight > MAXBLKHDRCNT {
@@ -246,7 +226,13 @@ func GetHeadersFromHash(startHash common.Uint256, stopHash common.Uint256) ([]le
 				return nil, 0, err
 			}
 			stopHeight = bkstop.Blockdata.Height
+
+			// avoid unsigned integer underflow
+			if startHeight < stopHeight {
+				return nil, 0, errors.New("do not have header to send")
+			}
 			count = startHeight - stopHeight
+
 			if count >= MAXBLKHDRCNT {
 				count = MAXBLKHDRCNT
 				stopHeight = startHeight - MAXBLKHDRCNT
