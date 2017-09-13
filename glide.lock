@@ -1,5 +1,5 @@
 hash: 2f1075f47c8df863bcabfbec42ce9f000dca85561e74147bb4144790d3728e43
-updated: 2017-07-04T18:08:50.5023931+08:00
+updated: 2017-09-13T17:44:02.2041524+08:00
 imports:
 - name: github.com/bitly/go-simplejson
   version: da1a8928f709389522c8023062a3739f3b4af419
@@ -13,11 +13,13 @@ imports:
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/gorilla/websocket
-  version: a91eba7f97777409bc2c443f5534d41dd20c5720
+  version: a69d9f6de432e2c6b296a947d8a5ee88f68522cf
 - name: github.com/itchyny/base58-go
   version: 4b24a7dfa1bfba3724ffb3598b1c6ded1cff087f
 - name: github.com/pborman/uuid
-  version: 1b00554d822231195d1babd97ff4a781231955c9
+  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
+- name: github.com/phayes/cryptoid
+  version: 981f0b34ea99d930005432caccc63d7878e06ff4
 - name: github.com/syndtr/goleveldb
   version: 3c5717caf1475fd25964109a0fc640bd150fce43
   subpackages:
