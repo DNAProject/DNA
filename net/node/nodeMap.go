@@ -154,3 +154,12 @@ func (node *node) GetNbrNodeCnt() uint32 {
 	}
 	return count
 }
+
+func (node *node) RandGetANbr() Noder {
+	for _, n := range node.nbrNodes.List {
+		if n.GetState() == ESTABLISH {
+			return n
+		}
+	}
+	return nil
+}

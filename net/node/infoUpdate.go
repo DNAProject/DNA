@@ -4,6 +4,7 @@ import (
 	"DNA/common/config"
 	"DNA/common/log"
 	"DNA/core/ledger"
+	"DNA/events"
 	. "DNA/net/message"
 	. "DNA/net/protocol"
 	"math/rand"
@@ -243,6 +244,14 @@ func (node *node) updateNodeInfo() {
 	//close(quit)
 }
 
+func (node *node) CheckConnCnt() {
+	//compare if connect count is larger than DefaultMaxPeers, disconnect one of the connection
+	if node.nbrNodes.GetConnectionCnt() > node.GetDefaultMaxPeers() {
+		disconnNode := node.RandGetANbr()
+		node.eventQueue.GetEvent("disconnect").Notify(events.EventNodeDisconnect, disconnNode)
+	}
+}
+
 func (node *node) updateConnection() {
 	t := time.NewTimer(time.Second * CONNMONITOR)
 	for {
@@ -251,6 +260,7 @@ func (node *node) updateConnection() {
 			node.ConnectSeeds()
 			//node.TryConnect()
 			node.ConnectNode()
+			node.CheckConnCnt()
 			t.Stop()
 			t.Reset(time.Second * CONNMONITOR)
 		}
