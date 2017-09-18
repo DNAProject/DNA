@@ -249,11 +249,10 @@ func (node *node) updateConnection() {
 		select {
 		case <-t.C:
 			node.ConnectSeeds()
-			node.TryConnect()
+			//node.TryConnect()
 			node.ConnectNode()
 			t.Stop()
 			t.Reset(time.Second * CONNMONITOR)
 		}
 	}
-
 }
