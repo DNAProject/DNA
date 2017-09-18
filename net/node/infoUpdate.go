@@ -144,6 +144,22 @@ func (node *node) ConnectSeeds() {
 	}
 }
 
+func (node *node) ConnectNode() {
+	cntcount := node.nbrNodes.GetConnectionCnt()
+	if cntcount < node.GetMaxOutboundCnt() {
+		nbrAddr, _ := node.GetNeighborAddrs()
+		addrs := node.RandGetAddresses(nbrAddr)
+		for _, nodeAddr := range addrs {
+			addr := nodeAddr.IpAddr
+			port := nodeAddr.Port
+			var ip net.IP
+			ip = addr[:]
+			na := ip.To16().String() + ":" + strconv.Itoa(int(port))
+			go node.Connect(na)
+		}
+	}
+}
+
 func getNodeAddr(n *node) NodeAddr {
 	var addr NodeAddr
 	addr.IpAddr, _ = n.GetAddr16()
@@ -234,6 +250,7 @@ func (node *node) updateConnection() {
 		case <-t.C:
 			node.ConnectSeeds()
 			node.TryConnect()
+			node.ConnectNode()
 			t.Stop()
 			t.Reset(time.Second * CONNMONITOR)
 		}

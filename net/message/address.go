@@ -92,7 +92,11 @@ func (msg addrReq) Handle(node Noder) error {
 	// lock
 	var addrstr []NodeAddr
 	var count uint64
-	addrstr, count = node.LocalNode().GetNeighborAddrs()
+
+	//select atmost 8 addr from know address list to send
+	addrtmp := []NodeAddr{}
+	addrstr = node.LocalNode().RandGetAddresses(addrtmp)
+	count = uint64(len(addrstr))
 	buf, err := NewAddrs(addrstr, count)
 	if err != nil {
 		return err
@@ -180,7 +184,8 @@ func (msg addr) Handle(node Noder) error {
 			continue
 		}
 
-		go node.LocalNode().Connect(address)
+		//save the node address in address list
+		node.LocalNode().AddAddressToKnownAddress(v)
 	}
 	return nil
 }

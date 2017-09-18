@@ -197,6 +197,16 @@ func (msg version) Handle(node Noder) error {
 		msg.P.Port, msg.P.Nonce, msg.P.Relay, msg.P.StartHeight)
 	localNode.AddNbrNode(node)
 
+	ip, _ := node.GetAddr16()
+	addr := NodeAddr{
+		Time:     node.GetTime(),
+		Services: msg.P.Services,
+		IpAddr:   ip,
+		Port:     msg.P.Port,
+		ID:       msg.P.Nonce,
+	}
+	localNode.AddAddressToKnownAddress(addr)
+
 	var buf []byte
 	if s == INIT {
 		node.SetState(HANDSHAKE)
