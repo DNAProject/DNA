@@ -26,6 +26,8 @@ const (
 	ErrStateUpdaterVaild    ErrCode = 45011
 	ErrSummaryAsset         ErrCode = 45012
 	ErrXmitFail             ErrCode = 45013
+	ErrTooEarly             ErrCode = 45014
+	ErrExpired              ErrCode = 45015
 )
 
 func (err ErrCode) Error() string {
@@ -38,7 +40,10 @@ func (err ErrCode) Error() string {
 		return "Unknown error"
 	case ErrDuplicatedTx:
 		return "There are duplicated Transactions"
-
+	case ErrTooEarly:
+		return "Too early to be packed in the block"
+	case ErrExpired:
+		return "Expired"
 	}
 
 	return fmt.Sprintf("Unknown error? Error code = %d", err)

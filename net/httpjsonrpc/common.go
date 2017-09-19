@@ -71,14 +71,16 @@ type ProgramInfo struct {
 }
 
 type Transactions struct {
-	TxType         TransactionType
-	PayloadVersion byte
-	Payload        PayloadInfo
-	Attributes     []TxAttributeInfo
-	UTXOInputs     []UTXOTxInputInfo
-	BalanceInputs  []BalanceTxInputInfo
-	Outputs        []TxoutputInfo
-	Programs       []ProgramInfo
+	TxType             TransactionType
+	TransactionVersion byte
+	PayloadVersion     byte
+	Payload            PayloadInfo
+	Attributes         []TxAttributeInfo
+	UTXOInputs         []UTXOTxInputInfo
+	BalanceInputs      []BalanceTxInputInfo
+	Outputs            []TxoutputInfo
+	CurrBlockHeight    uint32
+	Programs           []ProgramInfo
 
 	AssetOutputs      []TxoutputMap
 	AssetInputAmount  []AmountMap

@@ -26,7 +26,9 @@ func TransArryByteToHexString(ptx *tx.Transaction) *Transactions {
 
 	trans := new(Transactions)
 	trans.TxType = ptx.TxType
-	trans.PayloadVersion = ptx.PayloadVersion
+	trans.PayloadVersion = ptx.GetPayloadVersion()
+	trans.TransactionVersion = ptx.GetTransactionVersion()
+	trans.CurrBlockHeight = ptx.CurrBlockHeight
 	trans.Payload = TransPayloadToHex(ptx.Payload)
 
 	n := 0

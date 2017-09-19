@@ -50,6 +50,22 @@ func VerifyTransaction(Tx *tx.Transaction) ErrCode {
 	return ErrNoError
 }
 
+func VerifyTransactionExpiration(Tx *tx.Transaction, validInterval, blockHeight uint32) ErrCode {
+	if Tx.GetTransactionVersion() == 0 {
+		return ErrNoError
+	}
+
+	if Tx.CurrBlockHeight >= blockHeight {
+		return ErrTooEarly
+	}
+
+	if Tx.CurrBlockHeight+validInterval < blockHeight {
+		return ErrExpired
+	}
+
+	return ErrNoError
+}
+
 // VerifyTransactionWithBlock verifys a transaction with current transaction pool in memory
 func VerifyTransactionWithBlock(TxPool []*tx.Transaction) error {
 	//initial

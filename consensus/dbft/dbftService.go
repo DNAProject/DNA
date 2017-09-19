@@ -174,16 +174,19 @@ func (ds *DbftService) CreateBookkeepingTransaction(nonce uint64) *tx.Transactio
 	bookKeepingPayload := &payload.BookKeeping{
 		Nonce: uint64(time.Now().UnixNano()),
 	}
-	return &tx.Transaction{
-		TxType:         tx.BookKeeping,
-		PayloadVersion: payload.BookKeepingPayloadVersion,
-		Payload:        bookKeepingPayload,
-		Attributes:     []*tx.TxAttribute{},
-		UTXOInputs:     []*tx.UTXOTxInput{},
-		BalanceInputs:  []*tx.BalanceTxInput{},
-		Outputs:        []*tx.TxOutput{},
-		Programs:       []*program.Program{},
+
+	trans := &tx.Transaction{
+		TxType:        tx.BookKeeping,
+		Payload:       bookKeepingPayload,
+		Attributes:    []*tx.TxAttribute{},
+		UTXOInputs:    []*tx.UTXOTxInput{},
+		BalanceInputs: []*tx.BalanceTxInput{},
+		Outputs:       []*tx.TxOutput{},
+		Programs:      []*program.Program{},
 	}
+	trans.SetPayloadVersion(payload.BookKeepingPayloadVersion)
+
+	return trans
 }
 
 func (ds *DbftService) ChangeViewReceived(payload *msg.ConsensusPayload, message *ChangeView) {

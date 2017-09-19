@@ -2,6 +2,7 @@ package transaction
 
 import (
 	. "DNA/common"
+	"DNA/common/log"
 	"DNA/common/serialization"
 	"DNA/core/contract"
 	"DNA/core/contract/program"
@@ -49,14 +50,15 @@ type Payload interface {
 var TxStore ILedgerStore
 
 type Transaction struct {
-	TxType         TransactionType
-	PayloadVersion byte
-	Payload        Payload
-	Attributes     []*TxAttribute
-	UTXOInputs     []*UTXOTxInput
-	BalanceInputs  []*BalanceTxInput
-	Outputs        []*TxOutput
-	Programs       []*program.Program
+	TxType          TransactionType
+	version         byte // first 4 bits as transaction version, left bits as payloadversion
+	Payload         Payload
+	Attributes      []*TxAttribute
+	UTXOInputs      []*UTXOTxInput
+	BalanceInputs   []*BalanceTxInput
+	Outputs         []*TxOutput
+	CurrBlockHeight uint32 // added at transaction version 1
+	Programs        []*program.Program
 
 	//Inputs/Outputs map base on Asset (needn't serialize)
 	AssetOutputs      map[Uint256][]*TxOutput
@@ -64,6 +66,29 @@ type Transaction struct {
 	AssetOutputAmount map[Uint256]Fixed64
 
 	hash *Uint256
+}
+
+func (tx *Transaction) GetPayloadVersion() byte {
+	return tx.version & 0x0f
+}
+
+func (tx *Transaction) GetTransactionVersion() byte {
+	return tx.version >> 4
+}
+
+func (tx *Transaction) SetPayloadVersion(version byte) {
+	if version > 0x0f {
+		log.Error("Transation: wrong version number", version)
+		return
+	}
+	tx.version |= version
+}
+func (tx *Transaction) SetTransactionVersion(version byte) {
+	if version > 0x0f {
+		log.Error("Transation: wrong version number", version)
+		return
+	}
+	tx.version |= (version << 4)
 }
 
 //Serialize the Transaction
@@ -95,12 +120,12 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 	//txType
 	w.Write([]byte{byte(tx.TxType)})
 	//PayloadVersion
-	w.Write([]byte{tx.PayloadVersion})
+	w.Write([]byte{tx.version})
 	//Payload
 	if tx.Payload == nil {
 		return errors.New("Transaction Payload is nil.")
 	}
-	tx.Payload.Serialize(w, tx.PayloadVersion)
+	tx.Payload.Serialize(w, tx.GetPayloadVersion())
 	//[]*txAttribute
 	err := serialization.WriteVarUint(w, uint64(len(tx.Attributes)))
 	if err != nil {
@@ -130,6 +155,13 @@ func (tx *Transaction) SerializeUnsigned(w io.Writer) error {
 	if len(tx.Outputs) > 0 {
 		for _, output := range tx.Outputs {
 			output.Serialize(w)
+		}
+	}
+
+	if tx.GetTransactionVersion() >= 1 {
+		err = serialization.WriteUint32(w, tx.CurrBlockHeight)
+		if err != nil {
+			return NewDetailErr(err, ErrNoCode, "Transaction CurrBlockHeight serialization failed.")
 		}
 	}
 
@@ -173,9 +205,9 @@ func (tx *Transaction) DeserializeUnsigned(r io.Reader) error {
 }
 
 func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
-	var payloadVersion [1]byte
-	_, err := io.ReadFull(r, payloadVersion[:])
-	tx.PayloadVersion = payloadVersion[0]
+	var version [1]byte
+	_, err := io.ReadFull(r, version[:])
+	tx.version = version[0]
 	if err != nil {
 		return err
 	}
@@ -202,7 +234,7 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 	default:
 		return errors.New("[Transaction],invalide transaction type.")
 	}
-	err = tx.Payload.Deserialize(r, tx.PayloadVersion)
+	err = tx.Payload.Deserialize(r, tx.GetPayloadVersion())
 	if err != nil {
 		return NewDetailErr(err, ErrNoCode, "Payload Parse error")
 	}
@@ -250,6 +282,14 @@ func (tx *Transaction) DeserializeUnsignedWithoutType(r io.Reader) error {
 			tx.Outputs = append(tx.Outputs, output)
 		}
 	}
+
+	if tx.GetTransactionVersion() >= 1 {
+		tx.CurrBlockHeight, err = serialization.ReadUint32(r)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
