@@ -148,6 +148,7 @@ type Noder interface {
 	GetDefaultMaxPeers() uint
 	GetMaxOutboundCnt() uint
 	GetGetAddrMax() uint
+	NeedMoreAddresses() bool
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {

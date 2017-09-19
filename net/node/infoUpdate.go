@@ -136,7 +136,9 @@ func (node *node) ConnectSeeds() {
 			node.nbrNodes.Unlock()
 			if found {
 				if n.GetState() == ESTABLISH {
-					n.ReqNeighborList()
+					if node.LocalNode().NeedMoreAddresses() {
+						n.ReqNeighborList()
+					}
 				}
 			} else { //not found
 				go node.Connect(nodeAddr)

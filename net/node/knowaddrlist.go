@@ -7,6 +7,12 @@ import (
 	"sync"
 )
 
+const (
+	// needAddressThreshold is the number of addresses under which the
+	// address manager will claim to need more addresses.
+	needAddressThreshold = 1000
+)
+
 type KnownAddress struct {
 	srcAddr NodeAddr
 }
@@ -31,6 +37,13 @@ func (ka *KnownAddress) NetAddress() NodeAddr {
 
 func (ka *KnownAddress) GetID() uint64 {
 	return ka.srcAddr.ID
+}
+
+func (al *KnownAddressList) NeedMoreAddresses() bool {
+	al.Lock()
+	defer al.Unlock()
+
+	return al.addrCount < needAddressThreshold
 }
 
 func (al *KnownAddressList) AddressExisted(uid uint64) bool {
