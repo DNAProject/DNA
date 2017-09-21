@@ -40,7 +40,10 @@ type consensus struct {
 }
 
 func (cp *ConsensusPayload) Hash() common.Uint256 {
-	return common.Uint256{}
+	d := sig.GetHashData(cp)
+	temp := sha256.Sum256([]byte(d))
+	cp.hash = common.Uint256(sha256.Sum256(temp[:]))
+	return cp.hash
 }
 
 func (cp *ConsensusPayload) Verify() error {
@@ -106,7 +109,12 @@ func (cp *ConsensusPayload) GetMessage() []byte {
 
 func (msg consensus) Handle(node Noder) error {
 	log.Debug()
-	node.LocalNode().GetEvent("consensus").Notify(events.EventNewInventory, &msg.cons)
+	cp := &msg.cons
+	if !node.LocalNode().ExistedID(cp.Hash()) {
+		node.LocalNode().GetEvent("consensus").Notify(events.EventNewInventory, cp)
+		node.LocalNode().Relay(node, cp)
+		log.Info("Relay consensus message")
+	}
 	return nil
 }
 

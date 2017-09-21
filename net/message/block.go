@@ -27,6 +27,7 @@ type block struct {
 func (msg block) Handle(node Noder) error {
 	log.Debug("RX block message")
 	hash := msg.blk.Hash()
+	isSync := false
 	if ledger.DefaultLedger.BlockInLedger(hash) {
 		ReceiveDuplicateBlockCnt++
 		log.Debug("Receive ", ReceiveDuplicateBlockCnt, " duplicated block.")
@@ -36,7 +37,17 @@ func (msg block) Handle(node Noder) error {
 		log.Warn("Block add failed: ", err, " ,block hash is ", hash)
 		return err
 	}
-	node.RemoveFlightHeight(msg.blk.Blockdata.Height)
+	for _, n := range node.LocalNode().GetNeighborNoder() {
+		if n.ExistFlightHeight(msg.blk.Blockdata.Height) {
+			//sync block
+			n.RemoveFlightHeight(msg.blk.Blockdata.Height)
+			isSync = true
+		}
+	}
+	if !isSync {
+		//haven`t require this block ,relay hash
+		node.LocalNode().Relay(node, hash)
+	}
 	node.LocalNode().GetEvent("block").Notify(events.EventNewInventory, &msg.blk)
 	return nil
 }

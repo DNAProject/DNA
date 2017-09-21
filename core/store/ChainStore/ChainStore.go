@@ -1099,8 +1099,9 @@ func (self *ChainStore) SaveBlock(b *Block, ledger *Ledger) error {
 	}
 
 	if b.Blockdata.Height > headerHeight {
-		return errors.New(fmt.Sprintf("Info: [SaveBlock] block height - headerIndex.count >= 1, block height:%d, headerIndex.count:%d",
-			b.Blockdata.Height, headerHeight))
+		log.Infof("Info: [SaveBlock] block height - headerIndex.count >= 1, block height:%d, headerIndex.count:%d",
+			b.Blockdata.Height, headerHeight)
+		return nil
 	}
 
 	if b.Blockdata.Height == headerHeight {
