@@ -23,7 +23,7 @@ func NewBlockchain(height uint32) *Blockchain {
 	}
 }
 
-func NewBlockchainWithGenesisBlock(defaultBookKeeper []*crypto.PubKey) (*Blockchain, error) {
+func NewBlockchainWithGenesisBlock(defaultBookKeeper []*crypto.PubKey, txValidinterval uint32) (*Blockchain, error) {
 	genesisBlock, err := GenesisBlockInit(defaultBookKeeper)
 	if err != nil {
 		return nil, NewDetailErr(err, ErrNoCode, "[Blockchain], NewBlockchainWithGenesisBlock failed.")
@@ -32,7 +32,7 @@ func NewBlockchainWithGenesisBlock(defaultBookKeeper []*crypto.PubKey) (*Blockch
 	hashx := genesisBlock.Hash()
 	genesisBlock.hash = &hashx
 
-	height, err := DefaultLedger.Store.InitLedgerStoreWithGenesisBlock(genesisBlock, defaultBookKeeper)
+	height, err := DefaultLedger.Store.InitLedgerStoreWithGenesisBlock(genesisBlock, defaultBookKeeper, txValidinterval)
 	if err != nil {
 		return nil, NewDetailErr(err, ErrNoCode, "[Blockchain], InitLevelDBStoreWithGenesisBlock failed.")
 	}

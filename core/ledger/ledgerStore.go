@@ -36,7 +36,9 @@ type ILedgerStore interface {
 	GetHeaderHashByHeight(height uint32) Uint256
 
 	GetBookKeeperList() ([]*crypto.PubKey, []*crypto.PubKey, error)
-	InitLedgerStoreWithGenesisBlock(genesisblock *Block, defaultBookKeeper []*crypto.PubKey) (uint32, error)
+	GetTxValidInterval() (uint32, error)
+
+	InitLedgerStoreWithGenesisBlock(genesisBlock *Block, defaultBookKeeper []*crypto.PubKey, txValidInterval uint32) (uint32, error)
 
 	GetQuantityIssued(assetid Uint256) (Fixed64, error)
 

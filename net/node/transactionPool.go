@@ -33,6 +33,18 @@ func (this *TXNPool) init() {
 //append transaction to txnpool when check ok.
 //1.check transaction. 2.check with ledger(db) 3.check with pool
 func (this *TXNPool) AppendTxnPool(txn *transaction.Transaction) ErrCode {
+	if txn.GetTransactionVersion() >= 1 {
+		blockHeight := ledger.DefaultLedger.Blockchain.BlockHeight
+		validInterval, err := ledger.DefaultLedger.Store.GetTxValidInterval()
+		if err != nil {
+			log.Error("Can not get TxValidInterval from DB, ", err)
+			return ErrInternal
+		}
+		if errCode := va.VerifyTransactionExpiration(txn, validInterval, blockHeight+1); errCode != ErrNoError {
+			log.Info("Transaction verification failed", txn.Hash())
+			return errCode
+		}
+	}
 	//verify transaction with Concurrency
 	if errCode := va.VerifyTransaction(txn); errCode != ErrNoError {
 		log.Info("Transaction verification failed", txn.Hash())
