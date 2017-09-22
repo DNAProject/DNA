@@ -67,7 +67,7 @@ func (ds *DbftService) BlockPersistCompleted(v interface{}) {
 	log.Debug()
 	if block, ok := v.(*ledger.Block); ok {
 		log.Infof("persist block: %x", block.Hash())
-		err := ds.localNet.CleanSubmittedTransactions(block)
+		err := ds.localNet.CleanSubmittedTransactions(block.Transactions)
 		if err != nil {
 			log.Warn(err)
 		}
@@ -557,9 +557,11 @@ func (ds *DbftService) Timeout() {
 			//add book keeping transaction first
 			ds.context.Transactions = append(ds.context.Transactions, txBookkeeping)
 			//add transactions from transaction pool
+
 			for _, tx := range transactionsPool {
 				ds.context.Transactions = append(ds.context.Transactions, tx)
 			}
+
 			ds.context.header = nil
 			//build block and sign
 			block := ds.context.MakeHeader()

@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"DNA/common"
-	"DNA/core/ledger"
 	"DNA/core/transaction"
 	"DNA/crypto"
 	. "DNA/errors"
@@ -119,7 +118,7 @@ type Noder interface {
 	SetBookKeeperAddr(pk *crypto.PubKey)
 	GetNeighborHeights() ([]uint64, uint64)
 	SyncNodeHeight()
-	CleanSubmittedTransactions(block *ledger.Block) error
+	CleanSubmittedTransactions(txs []*transaction.Transaction) error
 
 	GetNeighborNoder() []Noder
 	GetNbrNodeCnt() uint32

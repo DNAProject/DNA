@@ -41,7 +41,7 @@ func (this *TXNPool) AppendTxnPool(txn *transaction.Transaction) ErrCode {
 			return ErrInternal
 		}
 		if errCode := va.VerifyTransactionExpiration(txn, validInterval, blockHeight+1); errCode != ErrNoError {
-			log.Info("Transaction verification failed", txn.Hash())
+			log.Warn("Transaction verification failed", txn.Hash())
 			return errCode
 		}
 	}
@@ -75,22 +75,38 @@ func (this *TXNPool) GetTxnPool(byCount bool) map[common.Uint256]*transaction.Tr
 	}
 	var num int
 	txnMap := make(map[common.Uint256]*transaction.Transaction, count)
+	interval, _ := ledger.DefaultLedger.Store.GetTxValidInterval()
+	expired := make([]*transaction.Transaction, 0)
+	height := ledger.DefaultLedger.Blockchain.BlockHeight + 1
 	for txnId, tx := range this.txnList {
+		if tx.GetTransactionVersion() >= 1 {
+			if errCode := va.VerifyTransactionExpiration(tx, interval, height); errCode != ErrNoError {
+				if errCode == ErrExpired {
+					expired = append(expired, tx)
+				}
+				continue
+			}
+		}
 		txnMap[txnId] = tx
 		num++
 		if num >= count {
 			break
 		}
 	}
+
 	this.RUnlock()
+	if len(expired) > 0 {
+		log.Info("Got expired transactions:", len(expired))
+		this.CleanSubmittedTransactions(expired)
+	}
 	return txnMap
 }
 
 //clean the trasaction Pool with committed block.
-func (this *TXNPool) CleanSubmittedTransactions(block *ledger.Block) error {
-	this.cleanTransactionList(block.Transactions)
-	this.cleanUTXOList(block.Transactions)
-	this.cleanIssueSummary(block.Transactions)
+func (this *TXNPool) CleanSubmittedTransactions(txs []*transaction.Transaction) error {
+	this.cleanTransactionList(txs)
+	this.cleanUTXOList(txs)
+	this.cleanIssueSummary(txs)
 	return nil
 }
 
