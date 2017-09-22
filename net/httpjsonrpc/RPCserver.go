@@ -12,6 +12,7 @@ func StartRPCServer() {
 	http.HandleFunc("/", Handle)
 
 	HandleFunc("getbestblockhash", getBestBlockHash)
+	HandleFunc("getbestblockheight", getBestBlockHeight)
 	HandleFunc("getblock", getBlock)
 	HandleFunc("getblockcount", getBlockCount)
 	HandleFunc("getblockhash", getBlockHash)

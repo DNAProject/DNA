@@ -149,7 +149,12 @@ func dataAction(c *cli.Context) error {
 		wallet := openWallet(c.String("wallet"), WalletPassword(c.String("password")))
 		admin, _ := wallet.GetDefaultAccount()
 
-		tx, _ = transaction.NewDataFileTransaction(address, name, "", admin.PubKey())
+		height, err := GetCurrBlockHeight()
+		if err != nil {
+			fmt.Println("Can not get currBlockHeight", err)
+			return err
+		}
+		tx, _ = transaction.NewDataFileTransaction(address, name, "", admin.PubKey(), height)
 		txAttr := transaction.NewTxAttribute(transaction.Nonce, []byte(strconv.FormatInt(rand.Int63(), 10)))
 		tx.Attributes = make([]*transaction.TxAttribute, 0)
 		tx.Attributes = append(tx.Attributes, &txAttr)

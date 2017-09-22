@@ -97,7 +97,12 @@ func makeRegTransaction(admin, issuer *account.Account, name string, description
 		fmt.Println("CreateSignatureContract failed")
 		return "", err
 	}
-	tx, _ := transaction.NewRegisterAssetTransaction(asset, value, issuer.PubKey(), transactionContract.ProgramHash)
+	height, err := GetCurrBlockHeight()
+	if err != nil {
+		fmt.Println("Can not get currBlockHeight", err)
+		return "", err
+	}
+	tx, _ := transaction.NewRegisterAssetTransaction(asset, value, issuer.PubKey(), transactionContract.ProgramHash, height)
 	txAttr := transaction.NewTxAttribute(transaction.Nonce, []byte(strconv.FormatInt(rand.Int63(), 10)))
 	tx.Attributes = make([]*transaction.TxAttribute, 0)
 	tx.Attributes = append(tx.Attributes, &txAttr)
@@ -124,7 +129,12 @@ func makeIssueTransaction(issuer *account.Account, programHashStr, assetHashStr 
 		ProgramHash: programHash,
 	}
 	outputs := []*transaction.TxOutput{issueTxOutput}
-	tx, _ := transaction.NewIssueAssetTransaction(outputs)
+	height, err := GetCurrBlockHeight()
+	if err != nil {
+		fmt.Println("Can not get currBlockHeight", err)
+		return "", err
+	}
+	tx, _ := transaction.NewIssueAssetTransaction(outputs, height)
 	txAttr := transaction.NewTxAttribute(transaction.Nonce, []byte(strconv.FormatInt(rand.Int63(), 10)))
 	tx.Attributes = make([]*transaction.TxAttribute, 0)
 	tx.Attributes = append(tx.Attributes, &txAttr)
@@ -217,7 +227,12 @@ func makeTransferTransaction(signer *account.Account, programHashStr, assetHashS
 	if expected != 0 {
 		return "", errors.New("transfer failed, ammount is not enough")
 	}
-	tx, _ := transaction.NewTransferAssetTransaction(inputs, outputs)
+	height, err := GetCurrBlockHeight()
+	if err != nil {
+		fmt.Println("Can not get currBlockHeight", err)
+		return "", err
+	}
+	tx, _ := transaction.NewTransferAssetTransaction(inputs, outputs, height)
 	txAttr := transaction.NewTxAttribute(transaction.Nonce, []byte(strconv.FormatInt(rand.Int63(), 10)))
 	tx.Attributes = make([]*transaction.TxAttribute, 0)
 	tx.Attributes = append(tx.Attributes, &txAttr)
@@ -248,6 +263,7 @@ func assetAction(c *cli.Context) error {
 
 	wallet := openWallet(c.String("wallet"), WalletPassword(c.String("password")))
 	admin, _ := wallet.GetDefaultAccount()
+
 	value := c.Int64("value")
 	if value == 0 {
 		fmt.Println("invalid value [--value]")
@@ -294,6 +310,7 @@ func assetAction(c *cli.Context) error {
 }
 
 func NewCommand() *cli.Command {
+
 	return &cli.Command{
 		Name:        "asset",
 		Usage:       "asset registration, issuance and transfer",

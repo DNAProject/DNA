@@ -2,6 +2,7 @@ package common
 
 import (
 	. "DNA/common"
+	"DNA/core/ledger"
 	tx "DNA/core/transaction"
 	. "DNA/errors"
 	. "DNA/net/httpjsonrpc"
@@ -89,7 +90,8 @@ func SendRecord(cmd map[string]interface{}) map[string]interface{} {
 	var inputs []*tx.UTXOTxInput
 	var outputs []*tx.TxOutput
 
-	transferTx, _ := tx.NewTransferAssetTransaction(inputs, outputs)
+	height := ledger.DefaultLedger.Blockchain.BlockHeight
+	transferTx, _ := tx.NewTransferAssetTransaction(inputs, outputs, height)
 
 	rcdInner := tx.NewTxAttribute(tx.Description, innerTime)
 	transferTx.Attributes = append(transferTx.Attributes, &rcdInner)
@@ -124,7 +126,8 @@ func SendRecordTransaction(cmd map[string]interface{}) map[string]interface{} {
 		return resp
 	}
 	recordType := "record"
-	recordTx, _ := tx.NewRecordTransaction(recordType, recordData)
+	height := ledger.DefaultLedger.Blockchain.BlockHeight
+	recordTx, _ := tx.NewRecordTransaction(recordType, recordData, height)
 
 	hash := recordTx.Hash()
 	resp["Result"] = ToHexString(hash.ToArrayReverse())

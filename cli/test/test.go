@@ -1,13 +1,11 @@
 package test
 
 import (
-	"fmt"
-	"os"
-
 	. "DNA/cli/common"
 	"DNA/net/httpjsonrpc"
-
+	"fmt"
 	"github.com/urfave/cli"
+	"os"
 )
 
 func testAction(c *cli.Context) (err error) {

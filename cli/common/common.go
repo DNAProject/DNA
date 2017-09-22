@@ -9,6 +9,7 @@ import (
 
 	"DNA/common/config"
 	"DNA/common/password"
+	"DNA/net/httpjsonrpc"
 
 	"github.com/urfave/cli"
 )
@@ -68,4 +69,23 @@ func WalletPassword(passwd string) []byte {
 	} else {
 		return []byte(passwd)
 	}
+}
+
+func GetCurrBlockHeight() (uint32, error) {
+	resp, err := httpjsonrpc.Call(Address(), "getbestblockheight", 0, []interface{}{})
+
+	if err != nil {
+		fmt.Println("HTTP JSON call failed", err)
+		return 0, err
+	}
+	r := make(map[string]interface{})
+	err = json.Unmarshal(resp, &r)
+	if err != nil {
+		fmt.Println("Unmarshal JSON failed")
+		return 0, err
+	}
+
+	height := r["result"].(float64)
+
+	return uint32(height), nil
 }

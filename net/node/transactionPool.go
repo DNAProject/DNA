@@ -40,8 +40,8 @@ func (this *TXNPool) AppendTxnPool(txn *transaction.Transaction) ErrCode {
 			log.Error("Can not get TxValidInterval from DB, ", err)
 			return ErrInternal
 		}
-		if errCode := va.VerifyTransactionExpiration(txn, validInterval, blockHeight+1); errCode != ErrNoError {
-			log.Warn("Transaction verification failed", txn.Hash())
+		if errCode := va.VerifyTransactionExpiration(txn, validInterval, blockHeight+1); errCode == ErrTooEarly {
+			log.Warnf("Transaction expired %x", txn.Hash())
 			return errCode
 		}
 	}
