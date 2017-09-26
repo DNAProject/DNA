@@ -56,6 +56,7 @@ const (
 	Api_WebsocketState      = "/api/v1/config/websocket/state"
 	Api_Restart             = "/api/v1/restart"
 	Api_GetContract         = "/api/v1/contract/:hash"
+	Api_GetTimestamp        = "/api/v1/timestamp"
 )
 
 func InitRestServer(checkAccessToken func(string, string) (string, int64, interface{})) ApiServer {
@@ -174,6 +175,7 @@ func (rt *restServer) registryMethod() {
 		Api_NoticeServerUrl:   {name: "setnoticeserverurl", handler: SetNoticeServerUrl},
 		Api_NoticeServerState: {name: "setpostblock", handler: SetPushBlockFlag},
 		Api_WebsocketState:    {name: "setwebsocketstate", handler: rt.setWebsocketState},
+		Api_GetTimestamp:      {name: "gettimestamp", handler: GetTimestamp},
 	}
 	rt.postMap = postMethodMap
 	rt.getMap = getMethodMap
@@ -363,7 +365,9 @@ func (rt *restServer) write(w http.ResponseWriter, data []byte) {
 	w.Write(data)
 }
 func (rt *restServer) response(w http.ResponseWriter, resp map[string]interface{}) {
-	resp["Desc"] = Err.ErrMap[resp["Error"].(int64)]
+	if resp["Desc"] == "" {
+		resp["Desc"] = Err.ErrMap[resp["Error"].(int64)]
+	}
 	data, err := json.Marshal(resp)
 	if err != nil {
 		log.Fatal("HTTP Handle - json.Marshal: %v", err)

@@ -24,6 +24,7 @@
     "HttpLocalPort": 20337,
     "NoticeServerUrl":"",
     "OauthServerUrl":"",
+    "TimestampSources":["http://timestamp.sheca.com/Timestamp/pdftime.do"],
     "NodePort": 20338,
     "PrintLevel": 1,
     "IsTLS": false,
