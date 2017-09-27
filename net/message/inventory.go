@@ -14,8 +14,6 @@ import (
 	"io"
 )
 
-var LastInvHash Uint256
-
 type blocksReq struct {
 	msgHdr
 	p struct {
@@ -136,12 +134,14 @@ func (msg Inv) Handle(node Noder) error {
 			id.Deserialize(bytes.NewReader(msg.P.Blk[HASHLEN*i:]))
 			// TODO check the ID queue
 			if !ledger.DefaultLedger.Store.BlockInCache(id) &&
-				!ledger.DefaultLedger.BlockInLedger(id) &&
-				LastInvHash != id {
-				LastInvHash = id
-				// send the block request
-				log.Infof("inv request block hash: %x", id)
-				ReqBlkData(node, id)
+				!ledger.DefaultLedger.BlockInLedger(id) {
+				node.CacheHash(id) //cached hash would not relayed
+				if !node.LocalNode().ExistedID(id) {
+					// send the block request
+					log.Infof("inv request block hash: %x", id)
+					ReqBlkData(node, id)
+				}
+
 			}
 
 		}

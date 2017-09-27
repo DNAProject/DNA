@@ -26,15 +26,15 @@ import (
 
 type node struct {
 	//sync.RWMutex	//The Lock not be used as expected to use function channel instead of lock
-	state     uint32 // node state
-	id        uint64 // The nodes's id
+	state     uint32   // node state
+	id        uint64   // The nodes's id
 	cap       [32]byte // The node capability set
-	version   uint32 // The network protocol the node used
-	services  uint64 // The services the node supplied
-	relay     bool   // The relay capability of the node (merge into capbility flag)
-	height    uint64 // The node latest block height
-	txnCnt    uint64 // The transactions be transmit by this node
-	rxTxnCnt  uint64 // The transaction received by this node
+	version   uint32   // The network protocol the node used
+	services  uint64   // The services the node supplied
+	relay     bool     // The relay capability of the node (merge into capbility flag)
+	height    uint64   // The node latest block height
+	txnCnt    uint64   // The transactions be transmit by this node
+	rxTxnCnt  uint64   // The transaction received by this node
 	publicKey *crypto.PubKey
 	// TODO does this channel should be a buffer channel
 	chF        chan func() error // Channel used to operate the node without lock
@@ -48,9 +48,12 @@ type node struct {
 	 * |--|--|--|--|--|--|isSyncFailed|isSyncHeaders|
 	 */
 	flightHeights            []uint32
+	cachelock                sync.RWMutex
+	flightlock               sync.RWMutex
 	lastContact              time.Time
 	nodeDisconnectSubscriber events.Subscriber
 	tryTimes                 uint32
+	cachedHashes             []Uint256
 	ConnectingNodes
 	RetryConnAddrs
 }
@@ -173,6 +176,8 @@ func InitNode(pubKey *crypto.PubKey) Noder {
 	n.publicKey = pubKey
 	n.TXNPool.init()
 	n.eventQueue.init()
+	n.idCache.init()
+	n.cachedHashes = make([]Uint256, 0)
 	n.nodeDisconnectSubscriber = n.eventQueue.GetEvent("disconnect").Subscribe(events.EventNodeDisconnect, n.NodeDisconnect)
 	go n.initConnection()
 	go n.updateConnection()
@@ -216,7 +221,7 @@ func (node *node) GetPort() uint16 {
 	return node.port
 }
 
-func (node *node) GetHttpInfoPort() (int) {
+func (node *node) GetHttpInfoPort() int {
 	return int(node.httpInfoPort)
 }
 
@@ -224,7 +229,7 @@ func (node *node) SetHttpInfoPort(nodeInfoPort uint16) {
 	node.httpInfoPort = nodeInfoPort
 }
 
-func (node *node) GetHttpInfoState() bool{
+func (node *node) GetHttpInfoState() bool {
 	if node.cap[HTTPINFOFLAG] == 0x01 {
 		return true
 	} else {
@@ -232,8 +237,8 @@ func (node *node) GetHttpInfoState() bool{
 	}
 }
 
-func (node *node) SetHttpInfoState(nodeInfo bool){
-	if nodeInfo{
+func (node *node) SetHttpInfoState(nodeInfo bool) {
+	if nodeInfo {
 		node.cap[HTTPINFOFLAG] = 0x01
 	} else {
 		node.cap[HTTPINFOFLAG] = 0x00
@@ -268,7 +273,7 @@ func (node *node) SetState(state uint32) {
 	atomic.StoreUint32(&(node.state), state)
 }
 
-func (node *node) GetPubKey() *crypto.PubKey{
+func (node *node) GetPubKey() *crypto.PubKey {
 	return node.publicKey
 }
 
@@ -423,6 +428,8 @@ func (node *node) WaitForFourPeersStart() {
 }
 
 func (node *node) StoreFlightHeight(height uint32) {
+	node.flightlock.Lock()
+	defer node.flightlock.Unlock()
 	node.flightHeights = append(node.flightHeights, height)
 }
 
@@ -434,6 +441,8 @@ func (node *node) GetFlightHeights() []uint32 {
 }
 
 func (node *node) RemoveFlightHeightLessThan(h uint32) {
+	node.flightlock.Lock()
+	defer node.flightlock.Unlock()
 	heights := node.flightHeights
 	p := len(heights)
 	i := 0
@@ -450,6 +459,8 @@ func (node *node) RemoveFlightHeightLessThan(h uint32) {
 }
 
 func (node *node) RemoveFlightHeight(height uint32) {
+	node.flightlock.Lock()
+	defer node.flightlock.Unlock()
 	log.Debug("height is ", height)
 	for _, h := range node.flightHeights {
 		log.Debug("flight height ", h)
@@ -489,4 +500,90 @@ func (node *node) RemoveFromRetryList(addr string) {
 		}
 	}
 
+}
+
+func (node *node) Relay(frmnode Noder, message interface{}) error {
+	log.Debug()
+	var buffer []byte
+	var err error
+	isHash := false
+	switch message.(type) {
+	case *transaction.Transaction:
+		log.Debug("TX transaction message")
+		txn := message.(*transaction.Transaction)
+		buffer, err = NewTxn(txn)
+		if err != nil {
+			log.Error("Error New Tx message: ", err)
+			return err
+		}
+		node.txnCnt++
+	case *ConsensusPayload:
+		log.Debug("TX consensus message")
+		consensusPayload := message.(*ConsensusPayload)
+		buffer, err = NewConsensus(consensusPayload)
+		if err != nil {
+			log.Error("Error New consensus message: ", err)
+			return err
+		}
+	case Uint256:
+		log.Debug("TX block hash message")
+		hash := message.(Uint256)
+		isHash = true
+		buf := bytes.NewBuffer([]byte{})
+		hash.Serialize(buf)
+		// construct inv message
+		invPayload := NewInvPayload(BLOCK, 1, buf.Bytes())
+		buffer, err = NewInv(invPayload)
+		if err != nil {
+			log.Error("Error New inv message")
+			return err
+		}
+	default:
+		log.Warn("Unknown Relay message type")
+		return errors.New("Unknown Relay message type")
+	}
+
+	node.nbrNodes.RLock()
+	for _, n := range node.nbrNodes.List {
+		if n.state == ESTABLISH && n.relay == true &&
+			n.id != frmnode.GetID() {
+			if isHash && n.ExistHash(message.(Uint256)) {
+				continue
+			}
+			n.Tx(buffer)
+		}
+	}
+	node.nbrNodes.RUnlock()
+	return nil
+}
+
+func (node *node) CacheHash(hash Uint256) {
+	node.cachelock.Lock()
+	defer node.cachelock.Unlock()
+	node.cachedHashes = append(node.cachedHashes, hash)
+	if len(node.cachedHashes) > MAXCACHEHASH {
+		node.cachedHashes = append(node.cachedHashes[:0], node.cachedHashes[1:]...)
+	}
+}
+
+func (node *node) ExistHash(hash Uint256) bool {
+	node.cachelock.Lock()
+	defer node.cachelock.Unlock()
+	for _, v := range node.cachedHashes {
+		if v == hash {
+			return true
+		}
+	}
+	return false
+}
+
+func (node *node) ExistFlightHeight(height uint32) bool {
+	node.flightlock.Lock()
+	defer node.flightlock.Unlock()
+	for _, v := range node.flightHeights {
+		if v == height {
+			return true
+		}
+	}
+	return false
 }

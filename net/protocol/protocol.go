@@ -43,6 +43,7 @@ const (
 	DIVHASHLEN    = 5
 	MINCONNCNT    = 3
 	MAXREQBLKONCE = 16
+	MAXCACHEHASH  = 16
 )
 
 const (
@@ -58,6 +59,7 @@ const (
 	CONNMONITOR      = 6
 	CONNMAXBACK      = 4000
 	MAXRETRYCOUNT    = 3
+	MAXIDCACHED      = 5000
 )
 
 // The node state
@@ -137,6 +139,10 @@ type Noder interface {
 	RemoveAddrInConnectingList(addr string)
 	AddInRetryList(addr string)
 	RemoveFromRetryList(addr string)
+	Relay(Noder, interface{}) error
+	ExistHash(hash common.Uint256) bool
+	CacheHash(hash common.Uint256)
+	ExistFlightHeight(height uint32) bool
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {
