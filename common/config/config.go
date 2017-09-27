@@ -10,6 +10,8 @@ import (
 
 const (
 	DefaultConfigFilename = "./config.json"
+	MINGENBLOCKTIME       = 2
+	DEFAULTGENBLOCKTIME   = 6
 )
 
 var Version string
@@ -42,6 +44,7 @@ type Configuration struct {
 	EncryptAlg      string   `json:"EncryptAlg"`
 	MaxLogSize      int64    `json:"MaxLogSize"`
 	MaxTxInBlock    int      `json:"MaxTransactionInBlock"`
+	MaxHdrSyncReqs  int      `json:"MaxConcurrentSyncHeaderReqs"`
 }
 
 type ConfigFile struct {

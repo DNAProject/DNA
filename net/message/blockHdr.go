@@ -150,6 +150,8 @@ blkHdrErr:
 func (msg headersReq) Handle(node Noder) error {
 	log.Debug()
 	// lock
+	node.LocalNode().AcqSyncReqSem()
+	defer node.LocalNode().RelSyncReqSem()
 	var startHash [HASHLEN]byte
 	var stopHash [HASHLEN]byte
 	startHash = msg.p.hashStart

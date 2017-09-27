@@ -32,17 +32,18 @@ const (
 )
 
 const (
-	MSGCMDLEN     = 12
-	CMDOFFSET     = 4
-	CHECKSUMLEN   = 4
-	HASHLEN       = 32 // hash length in byte
-	MSGHDRLEN     = 24
-	NETMAGIC      = 0x74746e41
-	MAXBLKHDRCNT  = 500
-	MAXINVHDRCNT  = 500
-	DIVHASHLEN    = 5
-	MINCONNCNT    = 3
-	MAXREQBLKONCE = 16
+	MSGCMDLEN         = 12
+	CMDOFFSET         = 4
+	CHECKSUMLEN       = 4
+	HASHLEN           = 32 // hash length in byte
+	MSGHDRLEN         = 24
+	NETMAGIC          = 0x74746e41
+	MAXBLKHDRCNT      = 500
+	MAXINVHDRCNT      = 500
+	DIVHASHLEN        = 5
+	MINCONNCNT        = 3
+	MAXREQBLKONCE     = 16
+	TIMESOFUPDATETIME = 2
 )
 
 const (
@@ -58,6 +59,7 @@ const (
 	CONNMONITOR      = 6
 	CONNMAXBACK      = 4000
 	MAXRETRYCOUNT    = 3
+	MAXSYNCHDRREQ    = 2 //Max Concurrent Sync Header Request
 )
 
 // The node state
@@ -137,6 +139,8 @@ type Noder interface {
 	RemoveAddrInConnectingList(addr string)
 	AddInRetryList(addr string)
 	RemoveFromRetryList(addr string)
+	AcqSyncReqSem()
+	RelSyncReqSem()
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {
