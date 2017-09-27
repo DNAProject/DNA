@@ -4,6 +4,7 @@ import (
 	"DNA/common/config"
 	"DNA/common/log"
 	"DNA/core/ledger"
+	"DNA/events"
 	. "DNA/net/message"
 	. "DNA/net/protocol"
 	"math/rand"
@@ -135,11 +136,29 @@ func (node *node) ConnectSeeds() {
 			node.nbrNodes.Unlock()
 			if found {
 				if n.GetState() == ESTABLISH {
-					n.ReqNeighborList()
+					if node.LocalNode().NeedMoreAddresses() {
+						n.ReqNeighborList()
+					}
 				}
 			} else { //not found
 				go node.Connect(nodeAddr)
 			}
+		}
+	}
+}
+
+func (node *node) ConnectNode() {
+	cntcount := node.nbrNodes.GetConnectionCnt()
+	if cntcount < node.GetMaxOutboundCnt() {
+		nbrAddr, _ := node.GetNeighborAddrs()
+		addrs := node.RandGetAddresses(nbrAddr)
+		for _, nodeAddr := range addrs {
+			addr := nodeAddr.IpAddr
+			port := nodeAddr.Port
+			var ip net.IP
+			ip = addr[:]
+			na := ip.To16().String() + ":" + strconv.Itoa(int(port))
+			go node.Connect(na)
 		}
 	}
 }
@@ -233,16 +252,25 @@ func (node *node) updateNodeInfo() {
 	//close(quit)
 }
 
+func (node *node) CheckConnCnt() {
+	//compare if connect count is larger than DefaultMaxPeers, disconnect one of the connection
+	if node.nbrNodes.GetConnectionCnt() > node.GetDefaultMaxPeers() {
+		disconnNode := node.RandGetANbr()
+		node.eventQueue.GetEvent("disconnect").Notify(events.EventNodeDisconnect, disconnNode)
+	}
+}
+
 func (node *node) updateConnection() {
 	t := time.NewTimer(time.Second * CONNMONITOR)
 	for {
 		select {
 		case <-t.C:
 			node.ConnectSeeds()
-			node.TryConnect()
+			//node.TryConnect()
+			node.ConnectNode()
+			node.CheckConnCnt()
 			t.Stop()
 			t.Reset(time.Second * CONNMONITOR)
 		}
 	}
-
 }

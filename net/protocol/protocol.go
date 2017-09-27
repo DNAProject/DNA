@@ -47,18 +47,22 @@ const (
 )
 
 const (
-	HELLOTIMEOUT     = 3 // Seconds
-	MAXHELLORETYR    = 3
-	MAXBUFLEN        = 1024 * 16 // Fixme The maximum buffer to receive message
-	MAXCHANBUF       = 512
-	PROTOCOLVERSION  = 0
-	PERIODUPDATETIME = 3 // Time to update and sync information with other nodes
-	HEARTBEAT        = 2
-	KEEPALIVETIMEOUT = 3
-	DIALTIMEOUT      = 6
-	CONNMONITOR      = 6
-	CONNMAXBACK      = 4000
-	MAXRETRYCOUNT    = 3
+	HELLOTIMEOUT         = 3 // Seconds
+	MAXHELLORETYR        = 3
+	MAXBUFLEN            = 1024 * 16 // Fixme The maximum buffer to receive message
+	MAXCHANBUF           = 512
+	PROTOCOLVERSION      = 0
+	PERIODUPDATETIME     = 3 // Time to update and sync information with other nodes
+	HEARTBEAT            = 2
+	KEEPALIVETIMEOUT     = 3
+	DIALTIMEOUT          = 6
+	CONNMONITOR          = 6
+	CONNMAXBACK          = 4000
+	MAXRETRYCOUNT        = 3
+	NEEDADDRESSTHRESHOLD = 1000
+	MAXOUTBOUNDCNT       = 8
+	DEFAULTMAXPEERS      = 125
+	GETADDRMAX           = 2500
 )
 
 // The node state
@@ -78,6 +82,7 @@ type Noder interface {
 	GetID() uint64
 	Services() uint64
 	GetAddr() string
+	GetAddr16() ([16]byte, error)
 	GetPort() uint16
 	GetHttpInfoPort() int
 	SetHttpInfoPort(uint16)
@@ -138,6 +143,13 @@ type Noder interface {
 	RemoveAddrInConnectingList(addr string)
 	AddInRetryList(addr string)
 	RemoveFromRetryList(addr string)
+	GetAddressCnt() uint64
+	AddAddressToKnownAddress(na NodeAddr)
+	RandGetAddresses(nbrAddrs []NodeAddr) []NodeAddr
+	GetDefaultMaxPeers() uint
+	GetMaxOutboundCnt() uint
+	GetGetAddrMax() uint
+	NeedMoreAddresses() bool
 }
 
 func (msg *NodeAddr) Deserialization(p []byte) error {

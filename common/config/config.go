@@ -44,6 +44,9 @@ type Configuration struct {
 	EncryptAlg      string   `json:"EncryptAlg"`
 	MaxLogSize      int64    `json:"MaxLogSize"`
 	MaxTxInBlock    int      `json:"MaxTransactionInBlock"`
+	DefaultMaxPeers uint     `json:"DefaultMaxPeers"`
+	GetAddrMax      uint     `json:"GetAddrMax"`
+	MaxOutboundCnt  uint     `json:"MaxOutboundCnt"`
 }
 
 type ConfigFile struct {
