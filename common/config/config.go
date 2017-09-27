@@ -10,6 +10,8 @@ import (
 
 const (
 	DefaultConfigFilename = "./config.json"
+	MINGENBLOCKTIME       = 2
+	DEFAULTGENBLOCKTIME   = 6
 )
 
 var Version string
@@ -22,6 +24,8 @@ type Configuration struct {
 	HttpRestPort    int      `json:"HttpRestPort"`
 	RestCertPath    string   `json:"RestCertPath"`
 	RestKeyPath     string   `json:"RestKeyPath"`
+	HttpInfoPort    uint16   `json:"HttpInfoPort"`
+	HttpInfoStart   bool     `json:"HttpInfoStart"`
 	HttpWsPort      int      `json:"HttpWsPort"`
 	HttpJsonPort    int      `json:"HttpJsonPort"`
 	HttpLocalPort   int      `json:"HttpLocalPort"`
@@ -40,6 +44,7 @@ type Configuration struct {
 	EncryptAlg      string   `json:"EncryptAlg"`
 	MaxLogSize      int64    `json:"MaxLogSize"`
 	MaxTxInBlock    int      `json:"MaxTransactionInBlock"`
+	MaxHdrSyncReqs  int      `json:"MaxConcurrentSyncHeaderReqs"`
 }
 
 type ConfigFile struct {
