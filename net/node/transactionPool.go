@@ -44,8 +44,9 @@ func (this *TXNPool) AppendTxnPool(txn *transaction.Transaction) ErrCode {
 		return errCode
 	}
 	//verify transaction by pool with lock
-	if ok := this.verifyTransactionWithTxnPool(txn); !ok {
-		return ErrSummaryAsset
+	if errCode := this.verifyTransactionWithTxnPool(txn); errCode != ErrNoError {
+		log.Info("Transaction verification with transaction pool failed", txn.Hash())
+		return errCode
 	}
 	//add the transaction to process scope
 	this.addtxnList(txn)
@@ -91,19 +92,20 @@ func (this *TXNPool) GetTransaction(hash common.Uint256) *transaction.Transactio
 }
 
 //verify transaction with txnpool
-func (this *TXNPool) verifyTransactionWithTxnPool(txn *transaction.Transaction) bool {
+func (this *TXNPool) verifyTransactionWithTxnPool(txn *transaction.Transaction) ErrCode {
 	// check if the transaction includes double spent UTXO inputs
 	if err := this.verifyDoubleSpend(txn); err != nil {
 		log.Info(err)
-		return false
+		return ErrDoubleSpend
 	}
 	//check issue transaction weather occur exceed issue range.
 	if ok := this.summaryAssetIssueAmount(txn); !ok {
 		log.Info(fmt.Sprintf("Check summary Asset Issue Amount failed with txn=%x", txn.Hash()))
 		this.removeTransaction(txn)
-		return false
+		return ErrSummaryAsset
 	}
-	return true
+
+	return ErrNoError
 }
 
 //remove from associated map
