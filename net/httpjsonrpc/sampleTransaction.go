@@ -15,13 +15,13 @@ const (
 	ASSETPREFIX = "DNA"
 )
 
-func NewRegTx(rand string, index int, admin, issuer *Account) *transaction.Transaction {
+func NewRegTx(rand string, index int, admin, issuer *Account, height uint32) *transaction.Transaction {
 	name := ASSETPREFIX + "-" + strconv.Itoa(index) + "-" + rand
 	description := "description"
 	asset := &Asset{name, description, byte(MaxPrecision), AssetType(Share), UTXO}
 	amount := Fixed64(1000)
 	controller, _ := contract.CreateSignatureContract(admin.PubKey())
-	tx, _ := transaction.NewRegisterAssetTransaction(asset, amount, issuer.PubKey(), controller.ProgramHash)
+	tx, _ := transaction.NewRegisterAssetTransaction(asset, amount, issuer.PubKey(), controller.ProgramHash, height)
 	return tx
 }
 

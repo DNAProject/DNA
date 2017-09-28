@@ -25,9 +25,10 @@ import (
 )
 
 const (
-	HeaderHashListCount = 2000
-	CleanCacheThreshold = 2
-	TaskChanCap         = 4
+	HeaderHashListCount    = 2000
+	CleanCacheThreshold    = 2
+	TaskChanCap            = 4
+	DefaultTxValidInterval = 50
 )
 
 var (
@@ -149,7 +150,10 @@ func (self *ChainStore) clearCache() {
 
 }
 
-func (bd *ChainStore) InitLedgerStoreWithGenesisBlock(genesisBlock *Block, defaultBookKeeper []*crypto.PubKey) (uint32, error) {
+func (bd *ChainStore) InitLedgerStoreWithGenesisBlock(genesisBlock *Block, defaultBookKeeper []*crypto.PubKey, txValidInterval uint32) (uint32, error) {
+	if txValidInterval == 0 {
+		txValidInterval = DefaultTxValidInterval
+	}
 
 	hash := genesisBlock.Hash()
 	bd.headerIndex[0] = hash
@@ -288,6 +292,10 @@ func (bd *ChainStore) InitLedgerStoreWithGenesisBlock(genesisBlock *Block, defau
 		// defaultBookKeeper put value
 		bd.st.Put(bkListKey.Bytes(), bkListValue.Bytes())
 		///////////////////////////////////////////////////
+
+		tvi := bytes.NewBuffer(nil)
+		serialization.WriteUint32(tvi, txValidInterval)
+		bd.st.Put([]byte{byte(SYS_TxValidInterval)}, tvi.Bytes())
 
 		// persist genesis block
 		bd.persist(genesisBlock)
@@ -627,6 +635,21 @@ func (bd *ChainStore) GetBlock(hash Uint256) (*Block, error) {
 	}
 
 	return b, nil
+}
+
+func (self *ChainStore) GetTxValidInterval() (uint32, error) {
+	prefix := []byte{byte(SYS_TxValidInterval)}
+	tvi, err := self.st.Get(prefix)
+	if err != nil {
+		return 0, err
+	}
+
+	txValidInterval, err := serialization.ReadUint32(bytes.NewReader(tvi))
+	if err != nil {
+		return 0, err
+	}
+
+	return txValidInterval, nil
 }
 
 func (self *ChainStore) GetBookKeeperList() ([]*crypto.PubKey, []*crypto.PubKey, error) {

@@ -71,14 +71,16 @@ type ProgramInfo struct {
 }
 
 type Transactions struct {
-	TxType         TransactionType
-	PayloadVersion byte
-	Payload        PayloadInfo
-	Attributes     []TxAttributeInfo
-	UTXOInputs     []UTXOTxInputInfo
-	BalanceInputs  []BalanceTxInputInfo
-	Outputs        []TxoutputInfo
-	Programs       []ProgramInfo
+	TxType             TransactionType
+	TransactionVersion byte
+	PayloadVersion     byte
+	Payload            PayloadInfo
+	Attributes         []TxAttributeInfo
+	UTXOInputs         []UTXOTxInputInfo
+	BalanceInputs      []BalanceTxInputInfo
+	Outputs            []TxoutputInfo
+	CurrBlockHeight    uint32
+	Programs           []ProgramInfo
 
 	AssetOutputs      []TxoutputMap
 	AssetInputAmount  []AmountMap
@@ -273,7 +275,7 @@ func VerifyAndSendTx(txn *tx.Transaction) ErrCode {
 	// if transaction is verified unsucessfully then will not put it into transaction pool
 	if errCode := node.AppendTxnPool(txn); errCode != ErrNoError {
 		log.Warn("Can NOT add the transaction to TxnPool")
-		log.Info("[httpjsonrpc] VerifyTransaction failed when AppendTxnPool.")
+		log.Info("[httpjsonrpc] VerifyTransaction failed when AppendTxnPool.", errCode.Error())
 		return errCode
 	}
 	if err := node.Xmit(txn); err != nil {

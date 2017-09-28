@@ -63,7 +63,7 @@ func (ds *DbftService) BlockPersistCompleted(v interface{}) {
 	log.Debug()
 	if block, ok := v.(*ledger.Block); ok {
 		log.Infof("persist block: %x", block.Hash())
-		err := ds.localNet.CleanSubmittedTransactions(block)
+		err := ds.localNet.CleanSubmittedTransactions(block.Transactions)
 		if err != nil {
 			log.Warn(err)
 		}
@@ -170,16 +170,19 @@ func (ds *DbftService) CreateBookkeepingTransaction(nonce uint64) *tx.Transactio
 	bookKeepingPayload := &payload.BookKeeping{
 		Nonce: uint64(time.Now().UnixNano()),
 	}
-	return &tx.Transaction{
-		TxType:         tx.BookKeeping,
-		PayloadVersion: payload.BookKeepingPayloadVersion,
-		Payload:        bookKeepingPayload,
-		Attributes:     []*tx.TxAttribute{},
-		UTXOInputs:     []*tx.UTXOTxInput{},
-		BalanceInputs:  []*tx.BalanceTxInput{},
-		Outputs:        []*tx.TxOutput{},
-		Programs:       []*program.Program{},
+
+	trans := &tx.Transaction{
+		TxType:        tx.BookKeeping,
+		Payload:       bookKeepingPayload,
+		Attributes:    []*tx.TxAttribute{},
+		UTXOInputs:    []*tx.UTXOTxInput{},
+		BalanceInputs: []*tx.BalanceTxInput{},
+		Outputs:       []*tx.TxOutput{},
+		Programs:      []*program.Program{},
 	}
+	trans.SetPayloadVersion(payload.BookKeepingPayloadVersion)
+
+	return trans
 }
 
 func (ds *DbftService) ChangeViewReceived(payload *msg.ConsensusPayload, message *ChangeView) {
@@ -550,9 +553,11 @@ func (ds *DbftService) Timeout() {
 			//add book keeping transaction first
 			ds.context.Transactions = append(ds.context.Transactions, txBookkeeping)
 			//add transactions from transaction pool
+
 			for _, tx := range transactionsPool {
 				ds.context.Transactions = append(ds.context.Transactions, tx)
 			}
+
 			ds.context.header = nil
 			//build block and sign
 			block := ds.context.MakeHeader()

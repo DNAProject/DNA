@@ -2,7 +2,6 @@ package net
 
 import (
 	. "DNA/common"
-	"DNA/core/ledger"
 	"DNA/core/transaction"
 	"DNA/crypto"
 	. "DNA/errors"
@@ -16,7 +15,7 @@ type Neter interface {
 	Xmit(interface{}) error
 	GetEvent(eventName string) *events.Event
 	GetBookKeepersAddrs() ([]*crypto.PubKey, uint64)
-	CleanSubmittedTransactions(block *ledger.Block) error
+	CleanSubmittedTransactions(txs []*transaction.Transaction) error
 	GetNeighborNoder() []protocol.Noder
 	Tx(buf []byte)
 	AppendTxnPool(*transaction.Transaction) ErrCode

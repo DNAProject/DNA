@@ -11,9 +11,9 @@ import (
 	"DNA/crypto"
 	"DNA/net"
 	"DNA/net/httpjsonrpc"
+	"DNA/net/httpnodeinfo"
 	"DNA/net/httprestful"
 	"DNA/net/httpwebsocket"
-	"DNA/net/httpnodeinfo"
 	"DNA/net/protocol"
 	"os"
 	"runtime"
@@ -75,7 +75,7 @@ func main() {
 	ledger.StandbyBookKeepers = account.GetBookKeepers()
 
 	log.Info("3. BlockChain init")
-	blockChain, err = ledger.NewBlockchainWithGenesisBlock(ledger.StandbyBookKeepers)
+	blockChain, err = ledger.NewBlockchainWithGenesisBlock(ledger.StandbyBookKeepers, config.Parameters.TxValidInterval)
 	if err != nil {
 		log.Fatal(err, "  BlockChain generate failed")
 		goto ERROR
@@ -106,7 +106,6 @@ func main() {
 	if config.Parameters.HttpInfoStart {
 		go httpnodeinfo.StartServer(noder)
 	}
-
 
 	for {
 		time.Sleep(dbft.GenBlockTime)

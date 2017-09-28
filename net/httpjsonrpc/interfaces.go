@@ -26,7 +26,9 @@ func TransArryByteToHexString(ptx *tx.Transaction) *Transactions {
 
 	trans := new(Transactions)
 	trans.TxType = ptx.TxType
-	trans.PayloadVersion = ptx.PayloadVersion
+	trans.PayloadVersion = ptx.GetPayloadVersion()
+	trans.TransactionVersion = ptx.GetTransactionVersion()
+	trans.CurrBlockHeight = ptx.CurrBlockHeight
 	trans.Payload = TransPayloadToHex(ptx.Payload)
 
 	n := 0
@@ -112,9 +114,15 @@ func getCurrentDirectory() string {
 	}
 	return dir
 }
+
 func getBestBlockHash(params []interface{}) map[string]interface{} {
 	hash := ledger.DefaultLedger.Blockchain.CurrentBlockHash()
 	return DnaRpc(ToHexString(hash.ToArray()))
+}
+
+func getBestBlockHeight(params []interface{}) map[string]interface{} {
+	height := ledger.DefaultLedger.Blockchain.BlockHeight
+	return DnaRpc(height)
 }
 
 // Input JSON string examples for getblock method as following:
@@ -469,7 +477,8 @@ func sendSampleTransaction(params []interface{}) map[string]interface{} {
 			}
 		}
 		for i := 0; i < num; i++ {
-			regTx := NewRegTx(ToHexString(rbuf), i, admin, issuer)
+			height := ledger.DefaultLedger.Blockchain.BlockHeight
+			regTx := NewRegTx(ToHexString(rbuf), i, admin, issuer, height)
 			SignTx(admin, regTx)
 			VerifyAndSendTx(regTx)
 		}

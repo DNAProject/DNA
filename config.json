@@ -13,6 +13,7 @@
       "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
       "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
     ],
+    "TxValidInterval": 50,
     "HttpInfoPort": 20333,
     "HttpInfoStart": true,
     "HttpRestPort": 20334,
