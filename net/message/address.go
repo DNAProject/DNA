@@ -93,9 +93,7 @@ func (msg addrReq) Handle(node Noder) error {
 	var addrstr []NodeAddr
 	var count uint64
 
-	//select atmost 8 addr from know address list to send
-	addrtmp := []NodeAddr{}
-	addrstr = node.LocalNode().RandGetAddresses(addrtmp)
+	addrstr = node.LocalNode().RandSelectAddresses()
 	count = uint64(len(addrstr))
 	buf, err := NewAddrs(addrstr, count)
 	if err != nil {
