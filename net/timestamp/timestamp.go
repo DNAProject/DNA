@@ -778,42 +778,44 @@ type TimeStampClient struct {
 }
 
 //digest: sha256(message)
-func (self *TimeStampClient) FetchTimeStampToken(digest []byte) ([]byte, error) {
+func (self *TimeStampClient) FetchTimeStampToken(digest []byte) ([]byte, int64, error) {
 	req, err := NewTimeStampReq(crypto.SHA256, digest)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	req.CertReq = true
 
 	err = req.GenerateNonce()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	err = req.Verify()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	resp, err := self.Do(req)
 	if err != nil {
 		log.Error("timestampclient: cannot get response:", err)
-		return nil, err
+		return nil, 0, err
 	}
 
 	err = resp.Verify(req, nil)
 	if err != nil {
 		log.Error("timestampclient: verify error:", err)
-		return nil, err
+		return nil, 0, err
 	}
 
 	data, err := asn1.Marshal(resp.TimeStampToken)
 	if err != nil {
 		log.Error("timestampclient: failed to marshal timestamptoken:", err)
-		return nil, err
+		return nil, 0, err
 	}
 
-	return data, nil
+	info, _ := resp.GetTSTInfo()
+
+	return data, info.GenTime.Unix(), nil
 }
 
 // NewClient creates a new rfc3161.Client given a URL.

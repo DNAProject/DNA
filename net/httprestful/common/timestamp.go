@@ -44,13 +44,17 @@ func GetTimestamp(cmd map[string]interface{}) map[string]interface{} {
 
 	success := false
 	for _, client := range timestampClients {
-		token, err := client.FetchTimeStampToken(hash)
+		token, time, err := client.FetchTimeStampToken(hash)
 		if err != nil {
 			resp["Error"] = Err.TIMESTAMP_ERROR
 			resp["Desc"] = err.Error()
 			continue
 		}
-		resp["Result"] = fmt.Sprintf("%x", token)
+
+		resp["Result"] = map[string]interface{}{
+			"token":     fmt.Sprintf("%x", token),
+			"timestamp": time,
+		}
 		success = true
 		break
 	}
