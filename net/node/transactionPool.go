@@ -9,6 +9,7 @@ import (
 	"DNA/core/transaction/payload"
 	va "DNA/core/validation"
 	. "DNA/errors"
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -43,8 +44,9 @@ func (this *TXNPool) AppendTxnPool(txn *transaction.Transaction) ErrCode {
 		return errCode
 	}
 	//verify transaction by pool with lock
-	if ok := this.verifyTransactionWithTxnPool(txn); !ok {
-		return ErrSummaryAsset
+	if errCode := this.verifyTransactionWithTxnPool(txn); errCode != ErrNoError {
+		log.Info("Transaction verification with transaction pool failed", txn.Hash())
+		return errCode
 	}
 	//add the transaction to process scope
 	this.addtxnList(txn)
@@ -90,20 +92,20 @@ func (this *TXNPool) GetTransaction(hash common.Uint256) *transaction.Transactio
 }
 
 //verify transaction with txnpool
-func (this *TXNPool) verifyTransactionWithTxnPool(txn *transaction.Transaction) bool {
-	//check weather have duplicate UTXO input,if occurs duplicate, just keep the latest txn.
-	ok, duplicateTxn := this.apendToUTXOPool(txn)
-	if !ok && duplicateTxn != nil {
-		log.Info(fmt.Sprintf("txn=%x duplicateTxn UTXO occurs with txn in pool=%x,keep the latest one.", txn.Hash(), duplicateTxn.Hash()))
-		this.removeTransaction(duplicateTxn)
+func (this *TXNPool) verifyTransactionWithTxnPool(txn *transaction.Transaction) ErrCode {
+	// check if the transaction includes double spent UTXO inputs
+	if err := this.verifyDoubleSpend(txn); err != nil {
+		log.Info(err)
+		return ErrDoubleSpend
 	}
 	//check issue transaction weather occur exceed issue range.
 	if ok := this.summaryAssetIssueAmount(txn); !ok {
 		log.Info(fmt.Sprintf("Check summary Asset Issue Amount failed with txn=%x", txn.Hash()))
 		this.removeTransaction(txn)
-		return false
+		return ErrSummaryAsset
 	}
-	return true
+
+	return ErrNoError
 }
 
 //remove from associated map
@@ -130,19 +132,25 @@ func (this *TXNPool) removeTransaction(txn *transaction.Transaction) {
 }
 
 //check and add to utxo list pool
-func (this *TXNPool) apendToUTXOPool(txn *transaction.Transaction) (bool, *transaction.Transaction) {
+func (this *TXNPool) verifyDoubleSpend(txn *transaction.Transaction) error {
 	reference, err := txn.GetReference()
 	if err != nil {
-		return false, nil
+		return err
 	}
-	for k, _ := range reference {
-		t := this.getInputUTXOList(k)
-		if t != nil {
-			return false, t
+	inputs := []*transaction.UTXOTxInput{}
+	for k := range reference {
+		if txn := this.getInputUTXOList(k); txn != nil {
+			return errors.New(fmt.Sprintf("double spent UTXO inputs detected, "+
+				"transaction hash: %x, input: %s, index: %s",
+				txn.Hash(), k.ToString()[:64], k.ToString()[64:]))
 		}
-		this.addInputUTXOList(txn, k)
+		inputs = append(inputs, k)
 	}
-	return true, nil
+	for _, v := range inputs {
+		this.addInputUTXOList(txn, v)
+	}
+
+	return nil
 }
 
 //clean txnpool utxo map
