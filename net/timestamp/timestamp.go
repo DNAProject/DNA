@@ -839,6 +839,10 @@ func (client *TimeStampClient) Do(tsq *TimeStampReq) (*TimeStampResp, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//disable reuse transport to avoid EOF Error
+	// see: https://stackoverflow.com/questions/17714494/golang-http-request-results-in-eof-errors-when-making-multiple-requests-successi/23963271#23963271
+	req.Close = true
 	req.Header.Set("Content-Type", "application/timestamp-query")
 
 	resp, err := client.HTTPClient.Do(req)
