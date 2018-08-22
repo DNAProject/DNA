@@ -43,7 +43,7 @@ func opPickItem(e *ExecutionEngine) (VMState, error) {
 		PushData(e, items[index])
 	}else {
 		items := itemArr.GetByteArray()
-		PushData(e, items[index])
+		PushData(e, items)
 	}
 	return NONE, nil
 }
