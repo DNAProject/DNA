@@ -320,32 +320,6 @@ looks like this:
 	Reported-by: whoever-reported-it
 	Signed-off-by: Your Name <youremail@yourhost.com>
 
-# Community
-
-## Mailing list
-
-We have a mailing list for developers:
-
-* OnchainDNA@googlegroups.com
-
-We provide two ways to subscribe:
-
-* Send any contents to the email OnchainDNA+subscribe@googlegroups.com
-
-* Sign in https://groups.google.com/forum/#!forum/OnchainDNA
-
-
-## Site
-
-* https://www.DNAproject.org
-
-## Forum
-
-* https://forum.DNAproject.org
-
-## Wiki
-
-* https://wiki.DNAproject.org
 
 # License
 
