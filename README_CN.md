@@ -1,297 +1,377 @@
+[![Build Status](https://travis-ci.org/DNAProject/DNA.svg?branch=master)](https://travis-ci.org/DNAProject/DNA)
 
-<h1 align="center">Ontology </h1>
-<h4 align="center">Version 1.8.0 </h4>
+# DNA (Distributed Networks Architecture)
 
-[![GoDoc](https://godoc.org/github.com/ontio/ontology?status.svg)](https://godoc.org/github.com/ontio/ontology)
-[![Go Report Card](https://goreportcard.com/badge/github.com/ontio/ontology)](https://goreportcard.com/report/github.com/ontio/ontology)
-[![Travis](https://travis-ci.com/ontio/ontology.svg?branch=master)](https://travis-ci.com/ontio/ontology)
-[![Discord](https://img.shields.io/discord/102860784329052160.svg)](https://discord.gg/gDkuCAq)
-
-[English](README.md) | 中文
-
-欢迎来到Ontology的源码库！
-
-Ontology致力于创建一个组件化、可自由配置、跨链支持、高性能、横向可扩展的区块链底层基础设施。 让部署及调用去中心化应用变得更加非常简单。
-
-Ontology MainNet 已经在2018年6月30日成功上线。<br>
-但很多新的功能还处于快速的开发过程中，master分支的代码可能是不稳定的，稳定的版本可以在[releases](https://github.com/ontio/ontology/releases)中下载。
-
-公开的主网和测试网都可以在下面找到，也非常欢迎及希望能有更多的开发者加入到Ontology中来。
-
-* [特性](#特性)
-* [构建开发环境](#构建开发环境)
-* [获取ontology](#获取ontology)
-    * [从release获取](#从release获取)
-    * [从源码获取](#从源码获取)
-* [运行ontology](#运行ontology)
-    * [主网同步节点](#主网同步节点)
-    * [公开测试网Polaris同步节点](#公开测试网polaris同步节点)
-    * [测试模式](#测试模式)
-    * [使用docker运行](#使用docker运行)
-* [使用示例](#使用示例)
-    * [ONT转账调用示例](#ont转账调用示例)
-	* [查询转账结果示例](#查询转账结果示例)
-	* [查询账户余额示例](#查询账户余额示例)
-* [贡献代码](#贡献代码)
-* [开源社区](#开源社区)
-    * [网站](#网站)
-    * [Discord开发者社区](#discord开发者社区)
-* [许可证](#许可证)
+DNA是go语言实现的基于区块链技术的去中心化的分布式网络协议。可以用来数字化资产和金融相关业务包括资产注册，发行，转账等。
 
 ## 特性
 
 * 可扩展的轻量级通用智能合约
-* 可扩展的WASM合约的支持
 * 跨链交互协议（进行中）
-* 多种加密算法支持
+* 抗量子密码算法 (可选择模块)
+* 中国商用密码算法 (可选择模块)
 * 高度优化的交易处理速度
-* P2P连接链路加密(可选择模块)
-* 多种共识算法支持 (VBFT/DBFT/SBFT/PoW/SOLO...)
-* 快速的区块生成时间
+* 基于IPFS的分布式存储和文件共享解决方案
+* 节点访问权限控制
+* P2P连接链路加密
+* 多种共识算法支持 (DBFT/RBFT/SBFT)
+* 可配置区块生成时间
+* 可配置电子货币模型
+* 可配置的分区共识(进行中)
 
-## 构建开发环境
-成功编译ontology需要以下准备：
+# 编译
+成功编译DNA需要以下准备：
 
-* Golang版本在1.11及以上
+* Go版本在1.8及以上
 * 安装第三方包管理工具glide
 * 正确的Go语言开发环境
-* Golang所支持的操作系统
 
-## 获取ontology
+克隆DNA仓库到$GOPATH/src目录
 
-### 从release获取
-- 你可以通过命令 ` curl https://dev.ont.io/ontology_install | sh ` 获取最新的ontology版本
-- 你也可以从[下载页面](https://github.com/ontio/ontology/releases)获取.
-
-### 从源码获取
-克隆ontology仓库到 **$GOPATH/src/github.com/ontio** 目录
 
 ```shell
-$ git clone https://github.com/ontio/ontology.git
-```
-或者
-```shell
-$ go get github.com/ontio/ontology
+$ git clone https://github.com/DNAProject/DNA.git
 ```
 
 用第三方包管理工具glide拉取依赖库
 
+
 ````shell
-$ cd $GOPATH/src/github.com/ontio/ontology
+$ cd DNA
 $ glide install
-````
-
-如果项目有新的第三方依赖包，使用glide更新依赖库
-
-````shell
-$ cd $GOPATH/src/github.com/ontio/ontology
-$ glide update
 ````
 
 用make编译源码
 
 ```shell
-$ make all
+$ make
 ```
 
 成功编译后会生成两个可以执行程序
 
-* `ontology`: 节点程序/以命令行方式提供的节点控制程序
-* `tools/sigsvr`: (可选)签名服务 - sigsvr是一个签名服务的server以满足一些特殊的需求。详细的文档可以在[这里](./docs/specifications/sigsvr_CN.md)参考
+* `node`: 节点程序
+* `nodectl`: 以命令行方式提供的节点控制程序
 
-## 运行ontology
+# 部署
 
-### 主网同步节点
+成功运行DNA需要至少4个节点，可以通过两种方式进行部署
 
-直接启动Ontology
+* 多机部署
+* 单机部署
 
-   ```
-	./ontology
-   ```
-然后你可以连接上主网了。
+## 多机部署配置
 
-### 公开测试网Polaris同步节点
+我们可以通过修改默认的配置文件`config.json`进行快速部署。
 
-直接启动Ontology
+1. 将相关文件复制到目标主机，包括：
+    - 默认配置文件`config.json`
+    - 节点程序`node`
+    - 节点控制程序`nodectl`
 
-   ```
-	./ontology --networkid 2
-   ```
-然后你可以连接上公共测试网了。
+2. 设置每个节点网络连接的端口号（推荐不做修改，使用默认端口配置）
+    - `NodePort`为的P2P连接端口号（默认20338）
+    - `HttpJsonPort`和`HttpLocalPort`为RPC端口号（默认为20336，20337）
 
-### 测试模式
+3. 种子节点配置
+    - 在4个主机中选出至少一个做种子节点，并将种子节点地址分别填写到每个配置文件的`SeelList`中，格式为`种子节点IP地址 + 种子节点NodePort`
 
-在单机上创建一个目录，在目录下存放以下文件：
-- 节点程序`ontology`
-- 钱包文件`wallet.dat` （注：`wallet.dat`可通过`./ontology account add -d`生成）
+4. 创建钱包文件
+    - 通过命令行程序，在每个主机上分别创建节点运行所需的钱包文件wallet.dat 
+      
+        `$ ./nodectl wallet -c -p password` 
 
-使用命令 `$ ./ontology --testmode` 即可启动单机版的测试网络。
+        注：通过-p参数设置钱包密码
+
+5. 记账人配置
+    - 为每个节点创建钱包时会显示钱包的公钥信息，将所有节点的公钥信息分别填写到每个节点的配置文件的`BookKeepers`项中
+    
+        注：每个节点的钱包公钥信息也可以通过命令行程序查看：
+    
+        `$ ./nodectl wallet -l -p password` 
+
+
+多机部署配置完成，每个节点目录结构如下
+
+```shell
+$ ls
+config.json node nodectl wallet.dat
+```
+
+一个配置文件片段如下, 其中10.0.1.100、10.0.1.101等都是种子节点地址:
+```shell
+$ cat config.json
+    ...
+    "SeedList": [
+      "10.0.1.100:10338",
+      "10.0.1.101:10338",
+      "10.0.1.102:10338"
+    ],
+    "BookKeepers": [
+      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
+      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
+      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
+      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
+    ],
+    "HttpInfoPort": 10333,
+    "HttpInfoStart": true,    
+    "HttpRestPort": 10334,
+    "HttpWsPort": 10335,
+    "HttpJsonPort": 10336,
+    "HttpLocalPort": 10337,
+    "NoticeServerUrl":"",
+    "OauthServerUrl":"",
+    "NodePort": 10338,
+    ...
+```
+## 单机部署配置
+
+在单机上创建4个不同的目录，类似多机部署的方法分别在每个目录下存放以下文件：
+- 默认配置文件`config.json`
+- 节点程序`node`
+- 节点控制程序`nodectl`
+- 钱包文件`wallet.dat`
+与多机配置不同的是，需要保证本机上端口不冲突, 请使用者自行修改个端口值。
 
 单机配置的例子如下：
 - 目录结构
-
-    ```shell
-    $ tree
-    └── node
-        ├── ontology
-        └── wallet.dat
-    ```
-
-### 使用docker运行
-
-请确保机器上已安装有docker环境。
-
-1. 编译docker镜像
-
-    - 在下载好的源码根目录下，运行`make docker`命令，这将编译好ontology的docker镜像
-
-2. 运行ontology镜像
-
-    - 使用命令`docker run ontio/ontology`运行ontology；
-
-    - 如果需要使镜像运行时接受交互式键盘输入，则使用`docker run -ti ontio/ontology`命令启动镜像即可；
-
-    - 如果需要保留镜像每次运行时的数据，可以参考docker的数据持久化功能（例如 valume）；
-
-    - 如果需要使用ontology参数，则在`docker run ontio/ontology`后面直接加参数即可，例如`docker run ontio/ontology --networkid 2`，具体的ontology命令
-    行参数可以参考[这里](./docs/specifications/cli_user_guide_CN.md)。
-
-## 使用示例
-
-### ONT转账调用示例
-   - from: 转出地址； - to: 转入地址； - amount: 资产转移数量；
-      from参数可以不指定，如果不指定则使用默认账户。
-
 ```shell
-  ./ontology asset transfer  --from=ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48 --to=AaCe8nVkMRABnp5YgEjYZ9E5KYCxks2uce --amount=10
+$ tree
+├── node1
+│   ├── config.json
+│   ├── node
+│   ├── nodectl
+│   └── wallet.dat
+├── node2
+│   ├── config.json
+│   ├── node
+│   ├── nodectl
+│   └── wallet.dat
+├── node3
+│   ├── config.json
+│   ├── node
+│   ├── nodectl
+│   └── wallet.dat
+└── node4
+    ├── config.json
+    ├── node
+    ├── nodectl
+    └── wallet.dat
+```
+- 配置文件参考
+```shell
+$ cat node[1234]/config.json
+    ...
+    "SeedList": [
+      "10.0.1.100:10338",
+      "10.0.1.100:20338",
+      "10.0.1.100:30338",
+      "10.0.1.100:40338"
+    ],
+    "BookKeepers": [
+      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
+      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
+      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
+      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
+    ],
+    "HttpInfoPort": 10333,
+    "HttpInfoStart": true,    
+    "HttpRestPort": 10334,
+    "HttpWsPort": 10335,
+    "HttpJsonPort": 10336,
+    "HttpLocalPort": 10337,
+    "NoticeServerUrl":"",
+    "OauthServerUrl":"",
+    "NodePort": 10338,
+    ...
+
+    "SeedList": [
+      "10.0.1.100:10338",
+      "10.0.1.100:20338",
+      "10.0.1.100:30338",
+      "10.0.1.100:40338"
+    ],
+    "BookKeepers": [
+      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
+      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
+      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
+      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
+    ],
+    "HttpInfoPort": 20333,
+    "HttpInfoStart": true,    
+    "HttpRestPort": 20334,
+    "HttpWsPort": 20335,
+    "HttpJsonPort": 20336,
+    "HttpLocalPort": 20337,
+    "NoticeServerUrl":"",
+    "OauthServerUrl":"",
+    "NodePort": 20338,
+    ...
+
+    "SeedList": [
+      "10.0.1.100:10338",
+      "10.0.1.100:20338",
+      "10.0.1.100:30338",
+      "10.0.1.100:40338"
+    ],
+    "BookKeepers": [
+      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
+      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
+      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
+      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
+    ],
+    "HttpInfoPort": 30333,
+    "HttpInfoStart": true,    
+    "HttpRestPort": 30334,
+    "HttpWsPort": 30335,
+    "HttpJsonPort": 30336,
+    "HttpLocalPort": 30337,
+    "NoticeServerUrl":"",
+    "OauthServerUrl":"",
+    "NodePort": 30338,
+    ...
+
+    "SeedList": [
+      "10.0.1.100:10338",
+      "10.0.1.100:20338",
+      "10.0.1.100:30338",
+      "10.0.1.100:40338"
+    ],
+    "BookKeepers": [
+      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
+      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
+      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
+      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
+    ],
+    "HttpInfoPort": 40333,
+    "HttpInfoStart": true,    
+    "HttpRestPort": 40334,
+    "HttpWsPort": 40335,
+    "HttpJsonPort": 40336,
+    "HttpLocalPort": 40337,
+    "NoticeServerUrl":"",
+    "OauthServerUrl":"",
+    "NodePort": 40338,
+    ...
+    
 ```
 
-执行完后会输出：
+## 运行
+以任意顺序运行每个节点node程序，并在出现`Password:`提示后输入节点的钱包密码
 
 ```shell
-Transfer ONT
-  From:ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48
-  To:AaCe8nVkMRABnp5YgEjYZ9E5KYCxks2uce
-  Amount:10
-  TxHash:437bff5dee9a1894ad421d55b8c70a2b7f34c574de0225046531e32faa1f94ce
-```
-其中TxHash是转账交易的交易HASH，可以通过这个HASH查询转账交易的直接结果。
-出于区块链出块时间的限制，提交的转账请求不会马上执行，需要等待至少一个区块时间，等待记账节点打包交易。
-
-如果需要转ONG，可以使用参数 -- asset = ong。注意，ONT最少单位是1，而ONG则有9位小数点。
-
-```shell
-./ontology asset transfer --from=ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48 --to=ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48 --amount=95.479777254 --asset=ong
-```
-执行完后会输出：
-
-```shell
-Transfer ONG
-  From:ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48
-  To:AaCe8nVkMRABnp5YgEjYZ9E5KYCxks2uce
-  Amount:95.479777254
-  TxHash:e4245d83607e6644c360b6007045017b5c5d89d9f0f5a9c3b37801018f789cc3
+$ ./node
+$ - 输入你的钱包口令
 ```
 
-注意，Ontology cli中，所有用到账户的地址的地方，都支持账户索引和账户标签。账户索引是账户在钱包中的序号，从1开始。标签是可以在创建账户的时候指定一个唯一的别名。如：
-
-```shell
-./ontology asset transfer --from=1 --to=2 --amount=10
+## 在开放公共环境中测试DNA
+ 
+1. 交易 :
+```
+./nodectl --ip 139.219.65.178 --port 10336 test -tx perf -num 10
 ```
 
-### 查询转账结果示例
-
-```shell
-./ontology info status <TxHash>
+2. 注册,分发,交易资产 :
+```
+./nodectl --ip 139.219.65.178 --port 10336 test -tx full
 ```
 
-如：
-
-```shell
-./ontology info status e4245d83607e6644c360b6007045017b5c5d89d9f0f5a9c3b37801018f789cc3
+3. 查询区块信息 :
+```
+./nodectl --ip 139.219.65.178 --port 10336 info -height 10
 ```
 
-查询结果：
-```shell
-Transaction states:
-{
-   "TxHash": "e4245d83607e6644c360b6007045017b5c5d89d9f0f5a9c3b37801018f789cc3",
-   "State": 1,
-   "GasConsumed": 0,
-   "Notify": [
-      {
-         "ContractAddress": "0200000000000000000000000000000000000000",
-         "States": [
-            "transfer",
-            "ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48",
-            "AaCe8nVkMRABnp5YgEjYZ9E5KYCxks2uce",
-            95479777254
-         ]
-      }
-   ]
-}
+4. 查询交易信息 :
+```
+./nodectl --ip 139.219.65.178 --port 10336 info -txhash d438896f07786b74281bc70259b0caaccb87460171104ea17473b5e802033a98
 ```
 
-### 查询账户余额示例
+......
 
-```shell
-./ontology asset balance <address|index|label>
+了解更多请运行 `./nodectl --h`.
+
+## 测试环境
+
+我们在云上部署了DNA供大家使用
+
+主要功能包括：
+1. 区块链相关信息查询
+    - 区块信息
+    - 交易信息
+    - 节点信息
+2. 资产操作
+    - 注册资产
+    - 发型资产
+    - 转账
+3. 测试交易发送
+
+使用方式参见：
+
+[forum.DNAProject.com/DNA节点控制工具](https://forum.dnaproject.org/t/dna-nodectl/57)
+
+可用节点如下：
 ```
-如：
-
-```shell
-./ontology asset balance ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48
-```
-或者
-
-```shell
-./ontology asset balance 1
-```
-查询结果：
-```shell
-BalanceOf:ARVVxBPGySL56CvSSWfjRVVyZYpNZ7zp48
-  ONT:989979697
-  ONG:28165900
+IP               PORT
+----------------------
+139.219.65.178:  10336
+139.219.99.201:  10336
+139.219.96.154:  10336
 ```
 
-进一步的示例可以参考[文档中心](https://ontio.github.io/documentation/)
+注：以上环境仅供测试使用，数据可能丢失或重置，我们不保证测试数据安全，请用户注意备份数据。
 
-## 贡献代码
+# 贡献代码
 
 请您以签过名的commit发送pull request请求，我们期待您的加入！
-您也可以通过邮件的方式发送你的代码到开发者邮件列表，欢迎加入Ontology邮件列表和开发者论坛。
+您也可以通过邮件的方式发送你的代码到开发者邮件列表，欢迎加入DNA邮件列表和开发者论坛。
 
 另外，在您想为本项目贡献代码时请提供详细的提交信息，格式参考如下：
 
-  Header line: explain the commit in one line (use the imperative)
+	Header line: explain the commit in one line (use the imperative)
 
-  Body of commit message is a few lines of text, explaining things
-  in more detail, possibly giving some background about the issue
-  being fixed, etc etc.
+	Body of commit message is a few lines of text, explaining things
+	in more detail, possibly giving some background about the issue
+	being fixed, etc etc.
 
-  The body of the commit message can be several paragraphs, and
-  please do proper word-wrap and keep columns shorter than about
-  74 characters or so. That way "git log" will show things
-  nicely even when it's indented.
+	The body of the commit message can be several paragraphs, and
+	please do proper word-wrap and keep columns shorter than about
+	74 characters or so. That way "git log" will show things
+	nicely even when it's indented.
 
-  Make sure you explain your solution and why you're doing what you're
-  doing, as opposed to describing what you're doing. Reviewers and your
-  future self can read the patch, but might not understand why a
-  particular solution was implemented.
+	Make sure you explain your solution and why you're doing what you're
+	doing, as opposed to describing what you're doing. Reviewers and your
+	future self can read the patch, but might not understand why a
+	particular solution was implemented.
 
-  Reported-by: whoever-reported-it
-  Signed-off-by: Your Name <youremail@yourhost.com>
+	Reported-by: whoever-reported-it
+	Signed-off-by: Your Name <youremail@yourhost.com>
 
-## 开源社区
+# 开源社区
 
-### 网站
+## 邮件列表
 
-- https://ont.io/
+我们为开发者提供了一下邮件列表
 
-### Discord开发者社区
+- OnchainDNA@googlegroups.com
 
-- https://discord.gg/4TQujHj/
+可以通过两种方式订阅并参与讨论
 
-## 许可证
+- 发送任何内容到邮箱地址 OnchainDNA+subscribe@googlegroups.com
 
-Ontology遵守GNU Lesser General Public License, 版本3.0。 详细信息请查看项目根目录下的LICENSE文件。
+- 登录 https://groups.google.com/forum/#!forum/OnchainDNA 
+
+
+## 网站
+
+- https://www.DNAproject.org
+
+## 论坛
+
+- https://forum.DNAproject.org
+
+## Wiki
+
+- https://wiki.DNAproject.org
+
+# 许可证
+
+DNA遵守Apache License, 版本2.0。 详细信息请查看项目根目录下的LICENSE文件。
