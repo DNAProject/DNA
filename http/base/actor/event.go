@@ -22,9 +22,9 @@
 package actor
 
 import (
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/events"
 	"github.com/DNAProject/DNA/events/message"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 type EventActor struct {

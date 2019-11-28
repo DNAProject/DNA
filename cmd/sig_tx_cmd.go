@@ -23,12 +23,12 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
 	cmdcom "github.com/DNAProject/DNA/cmd/common"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/constants"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/urfave/cli"
 	"strings"
 )

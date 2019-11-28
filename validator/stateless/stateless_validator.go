@@ -24,10 +24,10 @@ package stateless
 import (
 	"reflect"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/validation"
 	vatypes "github.com/DNAProject/DNA/validator/types"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 // Validator wraps validator actor's pid

@@ -21,10 +21,10 @@
 package common
 
 import (
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 type PayloadInfo interface{}

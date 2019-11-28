@@ -29,9 +29,9 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/DNAProject/DNA/core/types"
 	base58 "github.com/itchyny/base58-go"
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/DNAProject/DNA/core/types"
 	"golang.org/x/crypto/ripemd160"
 )
 

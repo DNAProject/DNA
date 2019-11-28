@@ -28,10 +28,10 @@ import (
 	"math"
 	"sync"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 type BlockList []*Block

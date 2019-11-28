@@ -34,9 +34,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/go-interpreter/wagon/exec"
-	"github.com/go-interpreter/wagon/wasm"
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common"
@@ -55,6 +52,9 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/states"
 	vmtypes "github.com/DNAProject/DNA/vm/neovm/types"
 	common3 "github.com/DNAProject/DNA/wasmtest/common"
+	"github.com/go-interpreter/wagon/exec"
+	"github.com/go-interpreter/wagon/wasm"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 const contractDir = "testwasmdata"

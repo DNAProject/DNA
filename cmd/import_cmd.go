@@ -27,7 +27,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/gosuri/uiprogress"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -35,6 +34,7 @@ import (
 	"github.com/DNAProject/DNA/core/genesis"
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/gosuri/uiprogress"
 	"github.com/urfave/cli"
 )
 

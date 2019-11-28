@@ -27,11 +27,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-crypto/signature"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/serialization"
 	vconfig "github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-crypto/signature"
 )
 
 type MsgType uint8

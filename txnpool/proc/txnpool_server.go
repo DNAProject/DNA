@@ -26,7 +26,6 @@ package proc
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -38,6 +37,7 @@ import (
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	tc "github.com/DNAProject/DNA/txnpool/common"
 	"github.com/DNAProject/DNA/validator/types"
+	"github.com/ontio/ontology-eventbus/actor"
 	"sort"
 	"strconv"
 	"sync"

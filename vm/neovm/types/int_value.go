@@ -24,10 +24,10 @@ package types
 import (
 	"math/big"
 
-	"github.com/JohnCGriffin/overflow"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/vm/neovm/constants"
 	"github.com/DNAProject/DNA/vm/neovm/errors"
+	"github.com/JohnCGriffin/overflow"
 	"math"
 )
 

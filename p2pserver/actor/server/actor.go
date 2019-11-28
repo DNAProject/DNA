@@ -24,10 +24,10 @@ package server
 import (
 	"reflect"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/p2pserver"
 	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 type P2PActor struct {

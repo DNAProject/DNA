@@ -22,7 +22,6 @@
 package store
 
 import (
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/states"
@@ -30,6 +29,7 @@ import (
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/smartcontract/event"
 	cstates "github.com/DNAProject/DNA/smartcontract/states"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 type ExecuteResult struct {

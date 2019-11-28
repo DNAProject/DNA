@@ -26,8 +26,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	cfg "github.com/DNAProject/DNA/common/config"
+	"github.com/gorilla/websocket"
 	"github.com/pborman/uuid"
 )
 

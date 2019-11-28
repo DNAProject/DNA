@@ -29,9 +29,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-crypto/vrf"
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
@@ -48,6 +45,9 @@ import (
 	ninit "github.com/DNAProject/DNA/smartcontract/service/native/init"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/validator/increment"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-crypto/vrf"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 type BftActionType uint8

@@ -24,8 +24,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/payload"
@@ -34,6 +32,8 @@ import (
 	"github.com/DNAProject/DNA/core/utils"
 	"github.com/DNAProject/DNA/errors"
 	types2 "github.com/DNAProject/DNA/validator/types"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/stretchr/testify/assert"
 )
 

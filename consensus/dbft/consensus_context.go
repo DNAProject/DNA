@@ -24,7 +24,6 @@ package dbft
 import (
 	"fmt"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
@@ -32,6 +31,7 @@ import (
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/core/vote"
 	msg "github.com/DNAProject/DNA/p2pserver/message/types"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 const ContextVersion uint32 = 0

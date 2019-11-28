@@ -23,12 +23,12 @@ package handlers
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-crypto/signature"
 	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-crypto/signature"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

@@ -23,7 +23,6 @@ package ledger
 
 import (
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/payload"
@@ -33,6 +32,7 @@ import (
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/smartcontract/event"
 	cstate "github.com/DNAProject/DNA/smartcontract/states"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 var DefLedger *Ledger

@@ -34,7 +34,6 @@ import (
 	"sync"
 	"time"
 
-	evtActor "github.com/ontio/ontology-eventbus/actor"
 	comm "github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -47,6 +46,7 @@ import (
 	"github.com/DNAProject/DNA/p2pserver/net/netserver"
 	p2pnet "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/p2pserver/peer"
+	evtActor "github.com/ontio/ontology-eventbus/actor"
 )
 
 //P2PServer control all network activities

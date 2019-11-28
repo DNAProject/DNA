@@ -25,11 +25,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 func TestAttribute(t *testing.T) {

@@ -26,8 +26,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
@@ -39,6 +37,8 @@ import (
 	"github.com/DNAProject/DNA/events"
 	"github.com/DNAProject/DNA/events/message"
 	"github.com/DNAProject/DNA/validator/increment"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 /*

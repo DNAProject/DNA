@@ -22,8 +22,8 @@
 package leveldbstore
 
 import (
-	"github.com/ethereum/go-ethereum/common/fdlimit"
 	"github.com/DNAProject/DNA/core/store/common"
+	"github.com/ethereum/go-ethereum/common/fdlimit"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/filter"

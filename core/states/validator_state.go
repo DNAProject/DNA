@@ -22,9 +22,9 @@
 package states
 
 import (
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/errors"
+	"github.com/ontio/ontology-crypto/keypair"
 	"io"
 )
 

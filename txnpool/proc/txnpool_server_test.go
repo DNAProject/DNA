@@ -25,13 +25,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/errors"
 	tc "github.com/DNAProject/DNA/txnpool/common"
 	"github.com/DNAProject/DNA/validator/stateless"
 	vt "github.com/DNAProject/DNA/validator/types"
+	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/stretchr/testify/assert"
 )
 

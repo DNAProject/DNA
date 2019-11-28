@@ -24,11 +24,11 @@ package test
 import (
 	"bytes"
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/merkle"
 	"github.com/DNAProject/DNA/vm/neovm"
+	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"

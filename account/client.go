@@ -29,10 +29,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology-crypto/keypair"
-	s "github.com/ontio/ontology-crypto/signature"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/ontio/ontology-crypto/keypair"
+	s "github.com/ontio/ontology-crypto/signature"
 )
 
 //Client of wallet

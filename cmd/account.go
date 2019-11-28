@@ -24,11 +24,11 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
-	s "github.com/ontio/ontology-crypto/signature"
 	"github.com/DNAProject/DNA/cmd/common"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common/config"
+	"github.com/ontio/ontology-crypto/keypair"
+	s "github.com/ontio/ontology-crypto/signature"
 	"github.com/urfave/cli"
 	"strings"
 )

@@ -27,7 +27,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/genesis"
@@ -38,6 +37,7 @@ import (
 	tp "github.com/DNAProject/DNA/txnpool/proc"
 	"github.com/DNAProject/DNA/validator/stateful"
 	"github.com/DNAProject/DNA/validator/stateless"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 func TestMain(m *testing.M) {

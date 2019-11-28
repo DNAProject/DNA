@@ -24,8 +24,8 @@ import (
 	"errors"
 	"math"
 
-	"github.com/go-interpreter/wagon/exec"
 	"github.com/DNAProject/DNA/core/states"
+	"github.com/go-interpreter/wagon/exec"
 )
 
 func StorageRead(proc *exec.Process, keyPtr uint32, klen uint32, val uint32, vlen uint32, offset uint32) uint32 {

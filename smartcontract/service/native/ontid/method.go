@@ -26,13 +26,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 func regIdWithPublicKey(srvc *native.NativeService) ([]byte, error) {

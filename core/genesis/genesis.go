@@ -27,7 +27,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/constants"
@@ -40,6 +39,7 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/neovm"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 const (

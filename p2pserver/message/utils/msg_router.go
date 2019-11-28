@@ -22,11 +22,11 @@
 package utils
 
 import (
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common/log"
 	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/p2pserver/net/protocol"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 // MessageHandler defines the unified api for each net message

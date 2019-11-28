@@ -28,8 +28,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 /** AccountData - for wallet read and save, no crypto object included **/

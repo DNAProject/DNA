@@ -23,11 +23,11 @@ package ledgerstore
 
 import (
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/genesis"
+	"github.com/ontio/ontology-crypto/keypair"
 	"os"
 	"testing"
 )

@@ -26,12 +26,12 @@ import (
 	"crypto/sha256"
 	"fmt"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/signature"
 	"github.com/DNAProject/DNA/vm/neovm/constants"
 	"github.com/DNAProject/DNA/vm/neovm/errors"
 	"github.com/DNAProject/DNA/vm/neovm/types"
+	"github.com/ontio/ontology-crypto/keypair"
 	"golang.org/x/crypto/ripemd160"
 )
 

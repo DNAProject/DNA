@@ -25,8 +25,8 @@ import (
 	"crypto/sha256"
 	"io"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 type RawHeader struct {

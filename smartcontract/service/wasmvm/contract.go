@@ -22,10 +22,10 @@
 package wasmvm
 
 import (
-	"github.com/go-interpreter/wagon/exec"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/errors"
+	"github.com/go-interpreter/wagon/exec"
 )
 
 func ContractCreate(proc *exec.Process,

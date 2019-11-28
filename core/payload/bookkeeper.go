@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 const BookkeeperPayloadVersion byte = 0x00

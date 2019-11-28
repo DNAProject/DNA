@@ -24,7 +24,6 @@ package ledgerstore
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/payload"
@@ -32,6 +31,7 @@ import (
 	"github.com/DNAProject/DNA/core/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

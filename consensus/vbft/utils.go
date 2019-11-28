@@ -28,8 +28,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-crypto/vrf"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
@@ -41,6 +39,8 @@ import (
 	"github.com/DNAProject/DNA/core/store/overlaydb"
 	gov "github.com/DNAProject/DNA/smartcontract/service/native/governance"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-crypto/vrf"
 )
 
 func SignMsg(account *account.Account, msg ConsensusMsg) ([]byte, error) {

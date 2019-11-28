@@ -24,10 +24,10 @@ package program
 import (
 	"errors"
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/constants"
 	"github.com/DNAProject/DNA/vm/neovm"
+	"github.com/ontio/ontology-crypto/keypair"
 	"io"
 	"math"
 	"math/big"

@@ -21,8 +21,6 @@
 package wasmvm
 
 import (
-	"github.com/go-interpreter/wagon/exec"
-	"github.com/hashicorp/golang-lru"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/store"
 	"github.com/DNAProject/DNA/core/types"
@@ -31,6 +29,8 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/event"
 	"github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/DNAProject/DNA/smartcontract/storage"
+	"github.com/go-interpreter/wagon/exec"
+	"github.com/hashicorp/golang-lru"
 )
 
 type WasmVmService struct {

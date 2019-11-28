@@ -29,8 +29,6 @@ import (
 	"strings"
 	"time"
 
-	lru "github.com/hashicorp/golang-lru"
-	evtActor "github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -41,6 +39,8 @@ import (
 	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	msgTypes "github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/p2pserver/net/protocol"
+	lru "github.com/hashicorp/golang-lru"
+	evtActor "github.com/ontio/ontology-eventbus/actor"
 )
 
 //respCache cache for some response data

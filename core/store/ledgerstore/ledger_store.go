@@ -34,7 +34,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -55,6 +54,7 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/service/wasmvm"
 	sstate "github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/DNAProject/DNA/smartcontract/storage"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 const (

@@ -26,7 +26,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
@@ -41,6 +40,7 @@ import (
 	"github.com/DNAProject/DNA/events/message"
 	p2pmsg "github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/validator/increment"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 type DbftService struct {

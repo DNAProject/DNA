@@ -32,13 +32,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/DNAProject/DNA/common"
 	cfg "github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	Err "github.com/DNAProject/DNA/http/base/error"
 	"github.com/DNAProject/DNA/http/base/rest"
 	"github.com/DNAProject/DNA/http/websocket/session"
+	"github.com/gorilla/websocket"
 )
 
 const (

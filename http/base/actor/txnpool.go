@@ -26,12 +26,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/types"
 	ontErrors "github.com/DNAProject/DNA/errors"
 	tcomn "github.com/DNAProject/DNA/txnpool/common"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 var txnPid *actor.PID

@@ -24,9 +24,9 @@ package cmd
 import (
 	"bufio"
 	"fmt"
-	"github.com/gosuri/uiprogress"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common/serialization"
+	"github.com/gosuri/uiprogress"
 	"github.com/urfave/cli"
 	"os"
 	"time"

@@ -25,12 +25,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/core/types"
 	ontErrors "github.com/DNAProject/DNA/errors"
 	netActor "github.com/DNAProject/DNA/p2pserver/actor/server"
 	ptypes "github.com/DNAProject/DNA/p2pserver/message/types"
 	txpool "github.com/DNAProject/DNA/txnpool/common"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 type TxPoolActor struct {

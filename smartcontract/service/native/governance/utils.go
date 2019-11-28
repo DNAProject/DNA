@@ -26,7 +26,6 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/ontio/ontology-crypto/vrf"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/serialization"
@@ -36,6 +35,7 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/service/native/auth"
 	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/ontio/ontology-crypto/vrf"
 )
 
 func GetPeerPoolMap(native *native.NativeService, contract common.Address, view uint32) (*PeerPoolMap, error) {

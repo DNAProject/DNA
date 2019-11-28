@@ -26,13 +26,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/account"
 	comm "github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	ct "github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/p2pserver/common"
 	mt "github.com/DNAProject/DNA/p2pserver/message/types"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 var (

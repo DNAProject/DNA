@@ -26,8 +26,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-interpreter/wagon/exec"
-	"github.com/go-interpreter/wagon/wasm"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/payload"
@@ -40,6 +38,8 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/DNAProject/DNA/vm/crossvm_codec"
 	neotypes "github.com/DNAProject/DNA/vm/neovm/types"
+	"github.com/go-interpreter/wagon/exec"
+	"github.com/go-interpreter/wagon/wasm"
 	"io"
 )
 

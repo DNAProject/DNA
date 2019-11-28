@@ -24,13 +24,13 @@ package handlers
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/ontio/ontology-crypto/keypair"
 	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
 	cliutil "github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/constants"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 type SigMutilRawTransactionReq struct {

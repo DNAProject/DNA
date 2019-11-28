@@ -22,10 +22,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/ontio/ontology-crypto/keypair"
-	s "github.com/ontio/ontology-crypto/signature"
 	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
 	"github.com/DNAProject/DNA/common/log"
+	"github.com/ontio/ontology-crypto/keypair"
+	s "github.com/ontio/ontology-crypto/signature"
 )
 
 type CreateAccountReq struct {

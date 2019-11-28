@@ -22,13 +22,13 @@
 package stateful
 
 import (
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/validator/db"
 	vatypes "github.com/DNAProject/DNA/validator/types"
+	"github.com/ontio/ontology-eventbus/actor"
 	"reflect"
 )
 

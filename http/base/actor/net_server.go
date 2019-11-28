@@ -25,10 +25,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common/log"
 	ac "github.com/DNAProject/DNA/p2pserver/actor/server"
 	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 var netServerPid *actor.PID

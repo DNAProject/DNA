@@ -22,9 +22,9 @@
 package vote
 
 import (
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/core/genesis"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 func GetValidators(txs []*types.Transaction) ([]keypair.PublicKey, error) {

@@ -24,13 +24,13 @@ package vbft
 import (
 	"fmt"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/store"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
 	"github.com/DNAProject/DNA/events/message"
+	"github.com/ontio/ontology-eventbus/actor"
 )
 
 type PendingBlock struct {

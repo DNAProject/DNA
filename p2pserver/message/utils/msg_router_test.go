@@ -24,11 +24,11 @@ package utils
 import (
 	"testing"
 
-	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/p2pserver/net/netserver"
 	"github.com/DNAProject/DNA/p2pserver/net/protocol"
+	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/stretchr/testify/assert"
 )
 

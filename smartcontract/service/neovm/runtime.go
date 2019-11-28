@@ -24,7 +24,6 @@ package neovm
 import (
 	"fmt"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/signature"
@@ -33,6 +32,7 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/event"
 	vm "github.com/DNAProject/DNA/vm/neovm"
 	vmtypes "github.com/DNAProject/DNA/vm/neovm/types"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 // HeaderGetNextConsensus put current block time to vm stack

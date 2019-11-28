@@ -29,11 +29,11 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/constants"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/errors"
+	"github.com/ontio/ontology-crypto/keypair"
 )
 
 var Version = "" //Set value when build project

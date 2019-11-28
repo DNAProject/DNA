@@ -24,9 +24,9 @@ package ledgerstore
 import (
 	"fmt"
 
-	"github.com/hashicorp/golang-lru"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/types"
+	"github.com/hashicorp/golang-lru"
 )
 
 const (
