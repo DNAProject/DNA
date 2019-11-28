@@ -43,7 +43,7 @@ var (
 		Usage:     "Manage accounts",
 		ArgsUsage: "[arguments...]",
 		Description: `Wallet management commands can be used to add, view, modify, delete, import account, and so on.
-You can use ./Ontology account --help command to view help information of wallet management command.`,
+You can use ./DNA account --help command to view help information of wallet management command.`,
 		Subcommands: []cli.Command{
 			{
 				Action:    accountCreate,
@@ -61,8 +61,8 @@ You can use ./Ontology account --help command to view help information of wallet
 					utils.WalletFileFlag,
 				},
 				Description: ` Add a new account to wallet.
-   Ontology support three type of key: ecdsa, sm2 and ed25519, and support 224、256、384、521 bits length of key in ecdsa, but only support 256 bits length of key in sm2 and ed25519.
-   Ontology support multiple signature scheme.
+   DNA support three type of key: ecdsa, sm2 and ed25519, and support 224、256、384、521 bits length of key in ecdsa, but only support 256 bits length of key in sm2 and ed25519.
+   DNA support multiple signature scheme.
    For ECDSA support SHA224withECDSA、SHA256withECDSA、SHA384withECDSA、SHA512withEdDSA、SHA3-224withECDSA、SHA3-256withECDSA、SHA3-384withECDSA、SHA3-512withECDSA、RIPEMD160withECDSA;
    For SM2 support SM3withSM2, and for SHA512withEdDSA.
    -------------------------------------------------

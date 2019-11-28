@@ -34,8 +34,8 @@ import (
 
 var SendTxCommand = cli.Command{
 	Name:        "sendtx",
-	Usage:       "Send raw transaction to Ontology",
-	Description: "Send raw transaction to Ontology.",
+	Usage:       "Send raw transaction to blockchain",
+	Description: "Send raw transaction to blockchain.",
 	ArgsUsage:   "<rawtx>",
 	Action:      sendTx,
 	Flags: []cli.Flag{
@@ -74,7 +74,7 @@ func sendTx(ctx *cli.Context) error {
 	PrintInfoMsg("Send transaction success.")
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
 	return nil
 }
 

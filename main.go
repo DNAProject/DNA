@@ -31,10 +31,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/fdlimit"
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-eventbus/actor"
-	alog "github.com/ontio/ontology-eventbus/log"
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/cmd"
 	cmdcom "github.com/DNAProject/DNA/cmd/common"
@@ -61,6 +57,10 @@ import (
 	"github.com/DNAProject/DNA/txnpool/proc"
 	"github.com/DNAProject/DNA/validator/stateful"
 	"github.com/DNAProject/DNA/validator/stateless"
+	"github.com/ethereum/go-ethereum/common/fdlimit"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-eventbus/actor"
+	alog "github.com/ontio/ontology-eventbus/log"
 	"github.com/urfave/cli"
 )
 
@@ -212,9 +212,9 @@ func initLog(ctx *cli.Context) {
 	}
 }
 
-func initConfig(ctx *cli.Context) (*config.OntologyConfig, error) {
+func initConfig(ctx *cli.Context) (*config.BlockchainConfig, error) {
 	//init ontology config from cli
-	cfg, err := cmd.SetOntologyConfig(ctx)
+	cfg, err := cmd.SetBlockchainConfig(ctx)
 	if err != nil {
 		return nil, err
 	}

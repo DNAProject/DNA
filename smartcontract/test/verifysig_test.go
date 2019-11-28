@@ -38,7 +38,7 @@ func TestVerifySig(t *testing.T) {
 	/**
 	# the code of source python.
 	Cversion = '2.0.0'
-	from ontology.interop.Ontology.Runtime import VerifyMutiSig
+	from System.interop.System.Runtime import VerifyMutiSig
 
 	def Main(data, pks_list, m, sig_list):
 	    return VerifyMutiSig(data, pks_list, m, sig_list)

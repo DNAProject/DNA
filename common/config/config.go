@@ -87,7 +87,7 @@ const (
 	NETWORK_ID_MAIN_NET      = 1
 	NETWORK_ID_POLARIS_NET   = 2
 	NETWORK_ID_SOLO_NET      = 3
-	NETWORK_NAME_MAIN_NET    = "ontology"
+	NETWORK_NAME_MAIN_NET    = "mainnet"
 	NETWORK_NAME_POLARIS_NET = "polaris"
 	NETWORK_NAME_SOLO_NET    = "testmode"
 )
@@ -272,7 +272,7 @@ var MainNetConfig = &GenesisConfig{
 	SOLO: &SOLOConfig{},
 }
 
-var DefConfig = NewOntologyConfig()
+var DefConfig = NewBlockchainConfig()
 
 type GenesisConfig struct {
 	SeedList      []string
@@ -541,7 +541,7 @@ type WebSocketConfig struct {
 	HttpKeyPath  string
 }
 
-type OntologyConfig struct {
+type BlockchainConfig struct {
 	Genesis   *GenesisConfig
 	Common    *CommonConfig
 	Consensus *ConsensusConfig
@@ -551,8 +551,8 @@ type OntologyConfig struct {
 	Ws        *WebSocketConfig
 }
 
-func NewOntologyConfig() *OntologyConfig {
-	return &OntologyConfig{
+func NewBlockchainConfig() *BlockchainConfig {
+	return &BlockchainConfig{
 		Genesis: MainNetConfig,
 		Common: &CommonConfig{
 			LogLevel:       DEFAULT_LOG_LEVEL,
@@ -598,7 +598,7 @@ func NewOntologyConfig() *OntologyConfig {
 	}
 }
 
-func (this *OntologyConfig) GetBookkeepers() ([]keypair.PublicKey, error) {
+func (this *BlockchainConfig) GetBookkeepers() ([]keypair.PublicKey, error) {
 	var bookKeepers []string
 	switch this.Genesis.ConsensusType {
 	case CONSENSUS_TYPE_VBFT:
@@ -626,7 +626,7 @@ func (this *OntologyConfig) GetBookkeepers() ([]keypair.PublicKey, error) {
 	return pubKeys, nil
 }
 
-func (this *OntologyConfig) GetDefaultNetworkId() (uint32, error) {
+func (this *BlockchainConfig) GetDefaultNetworkId() (uint32, error) {
 	defaultNetworkId, err := this.getDefNetworkIDFromGenesisConfig(this.Genesis)
 	if err != nil {
 		return 0, err
@@ -648,7 +648,7 @@ func (this *OntologyConfig) GetDefaultNetworkId() (uint32, error) {
 	return defaultNetworkId, nil
 }
 
-func (this *OntologyConfig) getDefNetworkIDFromGenesisConfig(genCfg *GenesisConfig) (uint32, error) {
+func (this *BlockchainConfig) getDefNetworkIDFromGenesisConfig(genCfg *GenesisConfig) (uint32, error) {
 	var configData []byte
 	var err error
 	switch this.Genesis.ConsensusType {

@@ -23,14 +23,14 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/DNAProject/DNA/account"
 	cmdcom "github.com/DNAProject/DNA/cmd/common"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common/config"
-	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/urfave/cli"
-	"strconv"
-	"strings"
 )
 
 var AssetCommand = cli.Command{
@@ -109,28 +109,6 @@ var AssetCommand = cli.Command{
 				utils.ApproveAssetFlag,
 				utils.ApproveAssetFromFlag,
 				utils.ApproveAssetToFlag,
-				utils.WalletFileFlag,
-			},
-		},
-		{
-			Action:    unboundOng,
-			Name:      "unboundong",
-			Usage:     "Show the balance of unbound ONG",
-			ArgsUsage: "<address|label|index>",
-			Flags: []cli.Flag{
-				utils.RPCPortFlag,
-				utils.WalletFileFlag,
-			},
-		},
-		{
-			Action:    withdrawOng,
-			Name:      "withdrawong",
-			Usage:     "Withdraw ONG",
-			ArgsUsage: "<address|label|index>",
-			Flags: []cli.Flag{
-				utils.RPCPortFlag,
-				utils.TransactionGasPriceFlag,
-				utils.TransactionGasLimitFlag,
 				utils.WalletFileFlag,
 			},
 		},
@@ -220,7 +198,7 @@ func transfer(ctx *cli.Context) error {
 	PrintInfoMsg("  Amount:%s", amountStr)
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
 	return nil
 }
 
@@ -362,7 +340,7 @@ func approve(ctx *cli.Context) error {
 	PrintInfoMsg("  Amount:%s", amountStr)
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
 	return nil
 }
 
@@ -460,90 +438,6 @@ func transferFrom(ctx *cli.Context) error {
 	PrintInfoMsg("  Amount:%s", amountStr)
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
-	return nil
-}
-
-func unboundOng(ctx *cli.Context) error {
-	SetRpcPort(ctx)
-	if ctx.NArg() < 1 {
-		PrintErrorMsg("Missing account argument.")
-		cli.ShowSubcommandHelp(ctx)
-		return nil
-	}
-	addrArg := ctx.Args().First()
-	accAddr, err := cmdcom.ParseAddress(addrArg, ctx)
-	if err != nil {
-		return err
-	}
-	fromAddr := nutils.OntContractAddress.ToBase58()
-	balanceStr, err := utils.GetAllowance("ong", fromAddr, accAddr)
-	if err != nil {
-		return err
-	}
-	balance, err := strconv.ParseUint(balanceStr, 10, 64)
-	if err != nil {
-		return err
-	}
-	balanceStr = utils.FormatOng(balance)
-	PrintInfoMsg("Unbound ONG:")
-	PrintInfoMsg("  Account:%s", accAddr)
-	PrintInfoMsg("  ONG:%s", balanceStr)
-	return nil
-}
-
-func withdrawOng(ctx *cli.Context) error {
-	SetRpcPort(ctx)
-	if ctx.NArg() < 1 {
-		PrintErrorMsg("Missing account argument.")
-		cli.ShowSubcommandHelp(ctx)
-		return nil
-	}
-	addrArg := ctx.Args().First()
-	accAddr, err := cmdcom.ParseAddress(addrArg, ctx)
-	if err != nil {
-		return err
-	}
-	fromAddr := nutils.OntContractAddress.ToBase58()
-	balance, err := utils.GetAllowance("ong", fromAddr, accAddr)
-	if err != nil {
-		return err
-	}
-
-	amount, err := strconv.ParseUint(balance, 10, 64)
-	if err != nil {
-		return err
-	}
-	if amount <= 0 {
-		return fmt.Errorf("haven't unbound ong\n")
-	}
-
-	var signer *account.Account
-	signer, err = cmdcom.GetAccount(ctx, accAddr)
-	if err != nil {
-		return err
-	}
-
-	gasPrice := ctx.Uint64(utils.TransactionGasPriceFlag.Name)
-	gasLimit := ctx.Uint64(utils.TransactionGasLimitFlag.Name)
-	networkId, err := utils.GetNetworkId()
-	if err != nil {
-		return err
-	}
-	if networkId == config.NETWORK_ID_SOLO_NET {
-		gasPrice = 0
-	}
-
-	txHash, err := utils.TransferFrom(gasPrice, gasLimit, signer, "ong", accAddr, fromAddr, accAddr, amount)
-	if err != nil {
-		return err
-	}
-
-	PrintInfoMsg("Withdraw ONG:")
-	PrintInfoMsg("  Account:%s", accAddr)
-	PrintInfoMsg("  Amount:%s", utils.FormatOng(amount))
-	PrintInfoMsg("  TxHash:%s", txHash)
-	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
 	return nil
 }

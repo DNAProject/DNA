@@ -59,8 +59,8 @@ var (
 	VM_STEP_LIMIT        int = 400000
 
 	// API Name
-	ATTRIBUTE_GETUSAGE_NAME = "Ontology.Attribute.GetUsage"
-	ATTRIBUTE_GETDATA_NAME  = "Ontology.Attribute.GetData"
+	ATTRIBUTE_GETUSAGE_NAME = "System.Attribute.GetUsage"
+	ATTRIBUTE_GETDATA_NAME  = "System.Attribute.GetData"
 
 	BLOCK_GETTRANSACTIONCOUNT_NAME       = "System.Block.GetTransactionCount"
 	BLOCK_GETTRANSACTIONS_NAME           = "System.Block.GetTransactions"
@@ -74,22 +74,22 @@ var (
 
 	HEADER_GETINDEX_NAME         = "System.Header.GetIndex"
 	HEADER_GETHASH_NAME          = "System.Header.GetHash"
-	HEADER_GETVERSION_NAME       = "Ontology.Header.GetVersion"
+	HEADER_GETVERSION_NAME       = "System.Header.GetVersion"
 	HEADER_GETPREVHASH_NAME      = "System.Header.GetPrevHash"
 	HEADER_GETTIMESTAMP_NAME     = "System.Header.GetTimestamp"
-	HEADER_GETCONSENSUSDATA_NAME = "Ontology.Header.GetConsensusData"
-	HEADER_GETNEXTCONSENSUS_NAME = "Ontology.Header.GetNextConsensus"
-	HEADER_GETMERKLEROOT_NAME    = "Ontology.Header.GetMerkleRoot"
+	HEADER_GETCONSENSUSDATA_NAME = "System.Header.GetConsensusData"
+	HEADER_GETNEXTCONSENSUS_NAME = "System.Header.GetNextConsensus"
+	HEADER_GETMERKLEROOT_NAME    = "System.Header.GetMerkleRoot"
 
 	TRANSACTION_GETHASH_NAME       = "System.Transaction.GetHash"
-	TRANSACTION_GETTYPE_NAME       = "Ontology.Transaction.GetType"
-	TRANSACTION_GETATTRIBUTES_NAME = "Ontology.Transaction.GetAttributes"
+	TRANSACTION_GETTYPE_NAME       = "System.Transaction.GetType"
+	TRANSACTION_GETATTRIBUTES_NAME = "System.Transaction.GetAttributes"
 
-	CONTRACT_CREATE_NAME            = "Ontology.Contract.Create"
-	CONTRACT_MIGRATE_NAME           = "Ontology.Contract.Migrate"
+	CONTRACT_CREATE_NAME            = "System.Contract.Create"
+	CONTRACT_MIGRATE_NAME           = "System.Contract.Migrate"
 	CONTRACT_GETSTORAGECONTEXT_NAME = "System.Contract.GetStorageContext"
 	CONTRACT_DESTROY_NAME           = "System.Contract.Destroy"
-	CONTRACT_GETSCRIPT_NAME         = "Ontology.Contract.GetScript"
+	CONTRACT_GETSCRIPT_NAME         = "System.Contract.GetScript"
 
 	STORAGE_GET_NAME                = "System.Storage.Get"
 	STORAGE_PUT_NAME                = "System.Storage.Put"
@@ -106,13 +106,13 @@ var (
 	RUNTIME_GETTRIGGER_NAME          = "System.Runtime.GetTrigger"
 	RUNTIME_SERIALIZE_NAME           = "System.Runtime.Serialize"
 	RUNTIME_DESERIALIZE_NAME         = "System.Runtime.Deserialize"
-	RUNTIME_BASE58TOADDRESS_NAME     = "Ontology.Runtime.Base58ToAddress"
-	RUNTIME_ADDRESSTOBASE58_NAME     = "Ontology.Runtime.AddressToBase58"
-	RUNTIME_GETCURRENTBLOCKHASH_NAME = "Ontology.Runtime.GetCurrentBlockHash"
-	RUNTIME_VERIFYMUTISIG_NAME       = "Ontology.Runtime.VerifyMutiSig"
+	RUNTIME_BASE58TOADDRESS_NAME     = "System.Runtime.Base58ToAddress"
+	RUNTIME_ADDRESSTOBASE58_NAME     = "System.Runtime.AddressToBase58"
+	RUNTIME_GETCURRENTBLOCKHASH_NAME = "System.Runtime.GetCurrentBlockHash"
+	RUNTIME_VERIFYMUTISIG_NAME       = "System.Runtime.VerifyMutiSig"
 
-	NATIVE_INVOKE_NAME = "Ontology.Native.Invoke"
-	WASM_INVOKE_NAME   = "Ontology.Wasm.InvokeWasm"
+	NATIVE_INVOKE_NAME = "System.Native.Invoke"
+	WASM_INVOKE_NAME   = "System.Wasm.InvokeWasm"
 
 	GETSCRIPTCONTAINER_NAME     = "System.ExecutionEngine.GetScriptContainer"
 	GETEXECUTINGSCRIPTHASH_NAME = "System.ExecutionEngine.GetExecutingScriptHash"

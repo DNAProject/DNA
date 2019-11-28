@@ -25,12 +25,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/DNAProject/DNA/cmd/utils"
-	"github.com/urfave/cli"
 	"io"
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/urfave/cli"
 )
 
 // AppHelpTemplate is the test template for the default, global app help topic.
@@ -38,7 +39,7 @@ var (
 	AppHelpTemplate = `NAME:
   {{.App.Name}} - {{.App.Usage}}
 
-	Ontology CLI is an Ontology node command line Client for starting and managing Ontology nodes,
+	Blockchain CLI is an blockchain node command line Client for starting and managing blockchain nodes,
 	managing user wallets, sending transactions, deploying and invoking contract, and so on.
 
 USAGE:
@@ -98,7 +99,7 @@ type flagGroup struct {
 
 var AppHelpFlagGroups = []flagGroup{
 	{
-		Name: "ONTOLOGY",
+		Name: "BLOCKCHAIN",
 		Flags: []cli.Flag{
 			utils.ConfigFlag,
 			utils.LogLevelFlag,

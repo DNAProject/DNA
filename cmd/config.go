@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
@@ -31,7 +32,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func SetOntologyConfig(ctx *cli.Context) (*config.OntologyConfig, error) {
+func SetBlockchainConfig(ctx *cli.Context) (*config.BlockchainConfig, error) {
 	cfg := config.DefConfig
 	err := setGenesis(ctx, cfg)
 	if err != nil {
@@ -67,7 +68,7 @@ func SetOntologyConfig(ctx *cli.Context) (*config.OntologyConfig, error) {
 	return cfg, nil
 }
 
-func setGenesis(ctx *cli.Context, cfg *config.OntologyConfig) error {
+func setGenesis(ctx *cli.Context, cfg *config.BlockchainConfig) error {
 	netWorkId := ctx.Int(utils.GetFlagName(utils.NetworkIdFlag))
 	switch netWorkId {
 	case config.NETWORK_ID_MAIN_NET:

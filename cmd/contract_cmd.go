@@ -47,7 +47,7 @@ var (
 			{
 				Action:    deployContract,
 				Name:      "deploy",
-				Usage:     "Deploy a smart contract to ontology",
+				Usage:     "Deploy a smart contract to blockchain",
 				ArgsUsage: " ",
 				Flags: []cli.Flag{
 					utils.RPCPortFlag,
@@ -69,7 +69,7 @@ var (
 				Action: invokeContract,
 				Name:   "invoke",
 				Usage:  "Invoke smart contract",
-				ArgsUsage: `Ontology contract support bytearray(need encode to hex string), string, integer, boolean parameter type.
+				ArgsUsage: `Smart contract supports bytearray(need encode to hex string), string, integer, boolean parameter type.
 
   Parameter 
      Contract parameters separate with comma ',' to split params. and must add type prefix to params.
@@ -189,7 +189,7 @@ func deployContract(ctx *cli.Context) error {
 	PrintInfoMsg("  Contract Address:%s", address.ToHexString())
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
 	return nil
 }
 
@@ -281,7 +281,7 @@ func invokeCodeContract(ctx *cli.Context) error {
 
 	PrintInfoMsg("TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
 	return nil
 }
 
@@ -380,6 +380,6 @@ func invokeContract(ctx *cli.Context) error {
 
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTips:")
-	PrintInfoMsg("  Using './ontology info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
 	return nil
 }

@@ -438,7 +438,7 @@ func Sign(data []byte, signer *account.Account) ([]byte, error) {
 	return sigData, nil
 }
 
-//SendRawTransaction send a transaction to ontology network, and return hash of the transaction
+// SendRawTransaction send a transaction to blockchain network, and return hash of the transaction
 func SendRawTransaction(tx *types.Transaction) (string, error) {
 	txData := hex.EncodeToString(common.SerializeToBytes(tx))
 	return SendRawTransactionData(txData)

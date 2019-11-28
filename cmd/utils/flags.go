@@ -37,7 +37,7 @@ const (
 )
 
 var (
-	//Ontology setting
+	//Blockchain setting
 	ConfigFlag = cli.StringFlag{
 		Name:  "config",
 		Usage: "Genesis block config `<file>`. If doesn't specifies, use main net config as default.",
@@ -120,7 +120,7 @@ var (
 	}
 	NetworkIdFlag = cli.UintFlag{
 		Name:  "networkid",
-		Usage: "Network id `<number>`. 1=ontology main net, 2=polaris test net, 3=testmode, and other for custom network",
+		Usage: "Network id `<number>`",
 		Value: config.NETWORK_ID_MAIN_NET,
 	}
 	NodePortFlag = cli.UintFlag{
@@ -199,11 +199,11 @@ var (
 	AccountPassFlag = cli.StringFlag{
 		Name:   "password,p",
 		Hidden: true,
-		Usage:  "Account `<password>` when Ontology node starts.",
+		Usage:  "Account `<password>` when blockchain node starts.",
 	}
 	AccountAddressFlag = cli.StringFlag{
 		Name:  "account,a",
-		Usage: "Account `<address>` when the Ontology node starts. If not specific, using default account instead",
+		Usage: "Account `<address>` when the blockchain node starts. If not specific, using default account instead",
 	}
 	AccountDefaultFlag = cli.BoolFlag{
 		Name:  "default,d",
@@ -401,7 +401,7 @@ var (
 	}
 	SendTxFlag = cli.BoolFlag{
 		Name:  "send,s",
-		Usage: "Send raw transaction to Ontology",
+		Usage: "Send raw transaction to blockchain",
 	}
 	ForceSendTxFlag = cli.BoolFlag{
 		Name:  "force,f",

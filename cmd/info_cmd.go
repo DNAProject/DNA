@@ -77,7 +77,7 @@ var InfoCommand = cli.Command{
 		},
 	},
 	Description: `Query information command can query information such as blocks, transactions, and transaction executions. 
-You can use the ./Ontology info block --help command to view help information.`,
+You can use the ./DNA info block --help command to view help information.`,
 }
 
 var ShowTxCommand = cli.Command{
