@@ -23,9 +23,9 @@ package handlers
 import (
 	"encoding/hex"
 	"encoding/json"
-	clisvrcom "github.com/ontio/ontology/cmd/sigsvr/common"
-	cliutil "github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common/log"
+	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
+	cliutil "github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common/log"
 )
 
 type SigDataReq struct {

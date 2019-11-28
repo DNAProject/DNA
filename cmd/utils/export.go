@@ -25,7 +25,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
-	"github.com/ontio/ontology/common/serialization"
+	"github.com/DNAProject/DNA/common/serialization"
 	"io"
 	"io/ioutil"
 )

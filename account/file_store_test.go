@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/core/types"
 	"github.com/stretchr/testify/assert"
 )
 

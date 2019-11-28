@@ -23,7 +23,7 @@ package types
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 	"github.com/stretchr/testify/assert"
 	"math"
 	"math/big"

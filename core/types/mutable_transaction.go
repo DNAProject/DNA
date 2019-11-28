@@ -23,8 +23,8 @@ package types
 
 import (
 	"errors"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/payload"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
 )
 
 type MutableTransaction struct {

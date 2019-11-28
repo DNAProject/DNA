@@ -25,7 +25,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ontio/ontology/common/constants"
+	"github.com/DNAProject/DNA/common/constants"
 	"github.com/stretchr/testify/assert"
 )
 

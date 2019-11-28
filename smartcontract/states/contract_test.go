@@ -23,7 +23,7 @@ package states
 import (
 	"testing"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 func TestContract_Serialize_Deserialize(t *testing.T) {

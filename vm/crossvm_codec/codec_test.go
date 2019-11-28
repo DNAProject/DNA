@@ -25,7 +25,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 	"github.com/stretchr/testify/assert"
 )
 

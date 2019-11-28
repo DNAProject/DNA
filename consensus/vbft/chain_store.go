@@ -25,12 +25,12 @@ import (
 	"fmt"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/store"
-	"github.com/ontio/ontology/core/store/overlaydb"
-	"github.com/ontio/ontology/events/message"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/store"
+	"github.com/DNAProject/DNA/core/store/overlaydb"
+	"github.com/DNAProject/DNA/events/message"
 )
 
 type PendingBlock struct {

@@ -27,13 +27,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/types"
-	p2pComm "github.com/ontio/ontology/p2pserver/common"
-	"github.com/ontio/ontology/p2pserver/message/msg_pack"
-	"github.com/ontio/ontology/p2pserver/peer"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/types"
+	p2pComm "github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	"github.com/DNAProject/DNA/p2pserver/peer"
 )
 
 const (

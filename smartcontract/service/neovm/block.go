@@ -21,10 +21,10 @@
 package neovm
 
 import (
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	vm "github.com/ontio/ontology/vm/neovm"
-	vmtypes "github.com/ontio/ontology/vm/neovm/types"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	vm "github.com/DNAProject/DNA/vm/neovm"
+	vmtypes "github.com/DNAProject/DNA/vm/neovm/types"
 )
 
 // BlockGetTransactionCount put block's transactions count to vm stack

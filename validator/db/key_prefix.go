@@ -24,7 +24,7 @@ package db
 import (
 	pool "github.com/valyala/bytebufferpool"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 // DataEntryPrefix

@@ -21,14 +21,14 @@
 package main
 
 import (
-	"github.com/ontio/ontology/cmd"
-	"github.com/ontio/ontology/cmd/abi"
-	cmdsvr "github.com/ontio/ontology/cmd/sigsvr"
-	clisvrcom "github.com/ontio/ontology/cmd/sigsvr/common"
-	"github.com/ontio/ontology/cmd/sigsvr/store"
-	"github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
+	"github.com/DNAProject/DNA/cmd"
+	"github.com/DNAProject/DNA/cmd/abi"
+	cmdsvr "github.com/DNAProject/DNA/cmd/sigsvr"
+	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
+	"github.com/DNAProject/DNA/cmd/sigsvr/store"
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
 	"github.com/urfave/cli"
 	"os"
 	"os/signal"

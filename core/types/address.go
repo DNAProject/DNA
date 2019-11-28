@@ -25,9 +25,9 @@ import (
 	"errors"
 
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/constants"
-	"github.com/ontio/ontology/core/program"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/constants"
+	"github.com/DNAProject/DNA/core/program"
 )
 
 func AddressFromPubKey(pubkey keypair.PublicKey) common.Address {

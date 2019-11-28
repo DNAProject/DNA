@@ -29,9 +29,9 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/core/ledger"
-	p2p "github.com/ontio/ontology/p2pserver/net/protocol"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/core/ledger"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 )
 
 type Info struct {

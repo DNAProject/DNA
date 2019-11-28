@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/p2pserver"
-	"github.com/ontio/ontology/p2pserver/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver"
+	"github.com/DNAProject/DNA/p2pserver/common"
 )
 
 func TestP2PActorServer(t *testing.T) {

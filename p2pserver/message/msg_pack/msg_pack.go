@@ -24,13 +24,13 @@ package msgpack
 import (
 	"time"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	ct "github.com/ontio/ontology/core/types"
-	msgCommon "github.com/ontio/ontology/p2pserver/common"
-	mt "github.com/ontio/ontology/p2pserver/message/types"
-	p2pnet "github.com/ontio/ontology/p2pserver/net/protocol"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	ct "github.com/DNAProject/DNA/core/types"
+	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
+	mt "github.com/DNAProject/DNA/p2pserver/message/types"
+	p2pnet "github.com/DNAProject/DNA/p2pserver/net/protocol"
 )
 
 //Peer address package

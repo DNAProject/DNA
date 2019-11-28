@@ -26,11 +26,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ontio/ontology/core/states"
-	"github.com/ontio/ontology/core/store/leveldbstore"
-	"github.com/ontio/ontology/core/store/overlaydb"
-	"github.com/ontio/ontology/smartcontract/service/native"
-	"github.com/ontio/ontology/smartcontract/storage"
+	"github.com/DNAProject/DNA/core/states"
+	"github.com/DNAProject/DNA/core/store/leveldbstore"
+	"github.com/DNAProject/DNA/core/store/overlaydb"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/storage"
 )
 
 func TestDeserializeGroup(t *testing.T) {

@@ -24,7 +24,7 @@ package types
 import (
 	"testing"
 
-	cm "github.com/ontio/ontology/common"
+	cm "github.com/DNAProject/DNA/common"
 )
 
 func Uint256ParseFromBytes(f []byte) cm.Uint256 {

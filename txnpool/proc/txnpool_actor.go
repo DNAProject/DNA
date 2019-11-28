@@ -27,18 +27,18 @@ import (
 
 	"github.com/ontio/ontology-eventbus/actor"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/ledger"
-	tx "github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	"github.com/ontio/ontology/events/message"
-	hComm "github.com/ontio/ontology/http/base/common"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
-	"github.com/ontio/ontology/smartcontract/service/neovm"
-	tc "github.com/ontio/ontology/txnpool/common"
-	"github.com/ontio/ontology/validator/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/ledger"
+	tx "github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	"github.com/DNAProject/DNA/events/message"
+	hComm "github.com/DNAProject/DNA/http/base/common"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/smartcontract/service/neovm"
+	tc "github.com/DNAProject/DNA/txnpool/common"
+	"github.com/DNAProject/DNA/validator/types"
 )
 
 // NewTxActor creates an actor to handle the transaction-based messages from

@@ -23,7 +23,7 @@ package ledgerstore
 
 import (
 	"github.com/hashicorp/golang-lru"
-	"github.com/ontio/ontology/core/states"
+	"github.com/DNAProject/DNA/core/states"
 )
 
 const (

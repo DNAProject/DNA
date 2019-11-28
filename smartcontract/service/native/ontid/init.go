@@ -21,8 +21,8 @@
 package ontid
 
 import (
-	"github.com/ontio/ontology/smartcontract/service/native"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 func Init() {

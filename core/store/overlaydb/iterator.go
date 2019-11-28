@@ -21,7 +21,7 @@
 package overlaydb
 
 import (
-	"github.com/ontio/ontology/core/store/common"
+	"github.com/DNAProject/DNA/core/store/common"
 	"github.com/syndtr/goleveldb/leveldb/comparer"
 )
 

@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	cfg "github.com/ontio/ontology/common/config"
+	cfg "github.com/DNAProject/DNA/common/config"
 	"github.com/pborman/uuid"
 )
 

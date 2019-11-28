@@ -26,12 +26,12 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	vt "github.com/ontio/ontology/validator/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	vt "github.com/DNAProject/DNA/validator/types"
 )
 
 type TXAttr struct {

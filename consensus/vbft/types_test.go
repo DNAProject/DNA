@@ -25,9 +25,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ontio/ontology/common"
-	vconfig "github.com/ontio/ontology/consensus/vbft/config"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/common"
+	vconfig "github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/DNAProject/DNA/core/types"
 )
 
 func TestBlock_getProposer(t *testing.T) {

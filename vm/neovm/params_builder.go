@@ -26,7 +26,7 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 type ParamsBuilder struct {

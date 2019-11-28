@@ -22,7 +22,7 @@
 package neovm
 
 import (
-	"github.com/ontio/ontology/vm/neovm/types"
+	"github.com/DNAProject/DNA/vm/neovm/types"
 	"testing"
 )
 

@@ -24,7 +24,7 @@ package dbft
 import (
 	"io"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 type ChangeView struct {

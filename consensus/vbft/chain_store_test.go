@@ -23,11 +23,11 @@ package vbft
 
 import (
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/genesis"
-	"github.com/ontio/ontology/core/ledger"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/genesis"
+	"github.com/DNAProject/DNA/core/ledger"
 	"os"
 	"testing"
 )

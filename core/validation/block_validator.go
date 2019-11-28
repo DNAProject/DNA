@@ -25,10 +25,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/core/types"
-	ontErrors "github.com/ontio/ontology/errors"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/core/types"
+	ontErrors "github.com/DNAProject/DNA/errors"
 )
 
 // VerifyBlock checks whether the block is valid

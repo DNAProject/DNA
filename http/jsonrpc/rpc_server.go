@@ -27,9 +27,9 @@ import (
 	"strconv"
 
 	"fmt"
-	cfg "github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/http/base/rpc"
+	cfg "github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/http/base/rpc"
 )
 
 func StartRPCServer() error {

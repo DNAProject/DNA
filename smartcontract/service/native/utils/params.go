@@ -23,7 +23,7 @@ package utils
 import (
 	"bytes"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 var (

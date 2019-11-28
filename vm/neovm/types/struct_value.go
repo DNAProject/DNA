@@ -23,8 +23,8 @@ package types
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/vm/neovm/constants"
-	"github.com/ontio/ontology/vm/neovm/errors"
+	"github.com/DNAProject/DNA/vm/neovm/constants"
+	"github.com/DNAProject/DNA/vm/neovm/errors"
 )
 
 const (

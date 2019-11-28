@@ -22,10 +22,10 @@
 package neovm
 
 import (
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	vm "github.com/ontio/ontology/vm/neovm"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	vm "github.com/DNAProject/DNA/vm/neovm"
 )
 
 // BlockChainGetHeight put blockchain's height to vm stack

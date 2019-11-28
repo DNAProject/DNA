@@ -23,17 +23,17 @@
 package websocket
 
 import (
-	"github.com/ontio/ontology/common"
-	cfg "github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/events/message"
-	bactor "github.com/ontio/ontology/http/base/actor"
-	bcomn "github.com/ontio/ontology/http/base/common"
-	Err "github.com/ontio/ontology/http/base/error"
-	"github.com/ontio/ontology/http/base/rest"
-	"github.com/ontio/ontology/http/websocket/websocket"
-	"github.com/ontio/ontology/smartcontract/event"
+	"github.com/DNAProject/DNA/common"
+	cfg "github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/events/message"
+	bactor "github.com/DNAProject/DNA/http/base/actor"
+	bcomn "github.com/DNAProject/DNA/http/base/common"
+	Err "github.com/DNAProject/DNA/http/base/error"
+	"github.com/DNAProject/DNA/http/base/rest"
+	"github.com/DNAProject/DNA/http/websocket/websocket"
+	"github.com/DNAProject/DNA/smartcontract/event"
 )
 
 var ws *websocket.WsServer

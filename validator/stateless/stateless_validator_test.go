@@ -26,14 +26,14 @@ import (
 
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/signature"
-	ctypes "github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/core/utils"
-	"github.com/ontio/ontology/errors"
-	types2 "github.com/ontio/ontology/validator/types"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/signature"
+	ctypes "github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/core/utils"
+	"github.com/DNAProject/DNA/errors"
+	types2 "github.com/DNAProject/DNA/validator/types"
 	"github.com/stretchr/testify/assert"
 )
 

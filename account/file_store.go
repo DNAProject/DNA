@@ -29,7 +29,7 @@ import (
 	"os"
 
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 /** AccountData - for wallet read and save, no crypto object included **/

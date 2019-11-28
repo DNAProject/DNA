@@ -24,8 +24,8 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/common/config"
-	rpcerr "github.com/ontio/ontology/http/base/error"
+	"github.com/DNAProject/DNA/common/config"
+	rpcerr "github.com/DNAProject/DNA/http/base/error"
 	"io/ioutil"
 	"net/http"
 	"strings"

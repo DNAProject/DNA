@@ -28,10 +28,10 @@ import (
 
 	"github.com/ontio/ontology-eventbus/actor"
 	"github.com/ontio/ontology-eventbus/mailbox"
-	"github.com/ontio/ontology/events"
-	"github.com/ontio/ontology/events/message"
-	tc "github.com/ontio/ontology/txnpool/common"
-	tp "github.com/ontio/ontology/txnpool/proc"
+	"github.com/DNAProject/DNA/events"
+	"github.com/DNAProject/DNA/events/message"
+	tc "github.com/DNAProject/DNA/txnpool/common"
+	tp "github.com/DNAProject/DNA/txnpool/proc"
 )
 
 // startActor starts an actor with the proxy and unique id,

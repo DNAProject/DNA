@@ -25,12 +25,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	tx "github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	tc "github.com/ontio/ontology/txnpool/common"
-	"github.com/ontio/ontology/validator/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	tx "github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	tc "github.com/DNAProject/DNA/txnpool/common"
+	"github.com/DNAProject/DNA/validator/types"
 )
 
 // pendingTx contains the transaction, the time of starting verifying,

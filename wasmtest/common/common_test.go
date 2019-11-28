@@ -22,7 +22,7 @@ package common
 
 import (
 	"encoding/json"
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

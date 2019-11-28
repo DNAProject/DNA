@@ -24,15 +24,15 @@ package ledger
 import (
 	"fmt"
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/states"
-	"github.com/ontio/ontology/core/store"
-	"github.com/ontio/ontology/core/store/ledgerstore"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/smartcontract/event"
-	cstate "github.com/ontio/ontology/smartcontract/states"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/states"
+	"github.com/DNAProject/DNA/core/store"
+	"github.com/DNAProject/DNA/core/store/ledgerstore"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/smartcontract/event"
+	cstate "github.com/DNAProject/DNA/smartcontract/states"
 )
 
 var DefLedger *Ledger

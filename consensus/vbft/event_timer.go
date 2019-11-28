@@ -28,7 +28,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology/common/log"
+	"github.com/DNAProject/DNA/common/log"
 )
 
 type TimerEventType int

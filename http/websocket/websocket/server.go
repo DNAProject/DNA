@@ -33,12 +33,12 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/ontio/ontology/common"
-	cfg "github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	Err "github.com/ontio/ontology/http/base/error"
-	"github.com/ontio/ontology/http/base/rest"
-	"github.com/ontio/ontology/http/websocket/session"
+	"github.com/DNAProject/DNA/common"
+	cfg "github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	Err "github.com/DNAProject/DNA/http/base/error"
+	"github.com/DNAProject/DNA/http/base/rest"
+	"github.com/DNAProject/DNA/http/websocket/session"
 )
 
 const (

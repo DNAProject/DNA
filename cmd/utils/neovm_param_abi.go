@@ -24,7 +24,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/cmd/abi"
+	"github.com/DNAProject/DNA/cmd/abi"
 	"strconv"
 	"strings"
 )

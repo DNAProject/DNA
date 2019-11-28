@@ -22,12 +22,12 @@
 package actor
 
 import (
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/smartcontract/event"
-	cstate "github.com/ontio/ontology/smartcontract/states"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/smartcontract/event"
+	cstate "github.com/DNAProject/DNA/smartcontract/states"
 )
 
 const (

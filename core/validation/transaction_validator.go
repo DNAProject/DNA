@@ -25,15 +25,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/constants"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/core/types"
-	ontErrors "github.com/ontio/ontology/errors"
-	"github.com/ontio/ontology/smartcontract/service/wasmvm"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/constants"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/core/types"
+	ontErrors "github.com/DNAProject/DNA/errors"
+	"github.com/DNAProject/DNA/smartcontract/service/wasmvm"
 )
 
 // VerifyTransaction verifys received single transaction

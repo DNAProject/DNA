@@ -28,13 +28,13 @@ import (
 	"os"
 
 	"github.com/gosuri/uiprogress"
-	"github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/common/serialization"
-	"github.com/ontio/ontology/core/genesis"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/common/serialization"
+	"github.com/DNAProject/DNA/core/genesis"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/types"
 	"github.com/urfave/cli"
 )
 

@@ -21,7 +21,7 @@
 
 package types
 
-import "github.com/ontio/ontology/common"
+import "github.com/DNAProject/DNA/common"
 
 type SmartCodeEvent struct {
 	TxHash common.Uint256

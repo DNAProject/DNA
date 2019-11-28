@@ -22,10 +22,10 @@
 package storage
 
 import (
-	comm "github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/store/common"
-	"github.com/ontio/ontology/core/store/overlaydb"
+	comm "github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/store/common"
+	"github.com/DNAProject/DNA/core/store/overlaydb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 

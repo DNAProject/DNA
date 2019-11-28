@@ -22,11 +22,11 @@ package sigsvr
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/cmd"
-	"github.com/ontio/ontology/cmd/sigsvr/store"
-	"github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/cmd"
+	"github.com/DNAProject/DNA/cmd/sigsvr/store"
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common"
 	"github.com/urfave/cli"
 )
 

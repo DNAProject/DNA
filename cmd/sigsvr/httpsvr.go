@@ -24,8 +24,8 @@ package sigsvr
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/cmd/sigsvr/common"
-	"github.com/ontio/ontology/common/log"
+	"github.com/DNAProject/DNA/cmd/sigsvr/common"
+	"github.com/DNAProject/DNA/common/log"
 	"io/ioutil"
 	"net/http"
 )

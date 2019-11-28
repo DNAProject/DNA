@@ -25,8 +25,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 type RegisterCandidateParam struct {

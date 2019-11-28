@@ -24,9 +24,9 @@ package vconfig
 import (
 	"testing"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
 )
 
 func constructConfig() (*config.VBFTConfig, error) {

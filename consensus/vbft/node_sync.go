@@ -26,9 +26,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/ledger"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/ledger"
 )
 
 type SyncCheckReq struct {

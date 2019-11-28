@@ -23,8 +23,8 @@ package crossvm_codec
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
 	"math/big"
 	"reflect"
 )

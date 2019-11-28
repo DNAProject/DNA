@@ -25,7 +25,7 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/ontio/ontology/common/serialization"
+	"github.com/DNAProject/DNA/common/serialization"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -23,9 +23,9 @@ package neovm
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	vm "github.com/ontio/ontology/vm/neovm"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	vm "github.com/DNAProject/DNA/vm/neovm"
 )
 
 // HeaderGetHash put header's hash to vm stack

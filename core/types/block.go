@@ -25,7 +25,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 type Block struct {

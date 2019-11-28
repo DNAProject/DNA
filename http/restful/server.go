@@ -23,7 +23,7 @@
 package restful
 
 import (
-	"github.com/ontio/ontology/http/restful/restful"
+	"github.com/DNAProject/DNA/http/restful/restful"
 )
 
 //start restful

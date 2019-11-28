@@ -25,10 +25,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/store/ledgerstore"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/store/ledgerstore"
 	"github.com/stretchr/testify/assert"
 )
 

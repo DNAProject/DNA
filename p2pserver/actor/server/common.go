@@ -22,8 +22,8 @@
 package server
 
 import (
-	types "github.com/ontio/ontology/p2pserver/common"
-	ptypes "github.com/ontio/ontology/p2pserver/message/types"
+	types "github.com/DNAProject/DNA/p2pserver/common"
+	ptypes "github.com/DNAProject/DNA/p2pserver/message/types"
 )
 
 //stop net server

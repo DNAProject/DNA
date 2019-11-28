@@ -30,17 +30,17 @@ import (
 
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-crypto/vrf"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/consensus/vbft/config"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/core/states"
-	scommon "github.com/ontio/ontology/core/store/common"
-	"github.com/ontio/ontology/core/store/overlaydb"
-	gov "github.com/ontio/ontology/smartcontract/service/native/governance"
-	nutils "github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/core/states"
+	scommon "github.com/DNAProject/DNA/core/store/common"
+	"github.com/DNAProject/DNA/core/store/overlaydb"
+	gov "github.com/DNAProject/DNA/smartcontract/service/native/governance"
+	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 func SignMsg(account *account.Account, msg ConsensusMsg) ([]byte, error) {

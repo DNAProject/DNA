@@ -22,10 +22,10 @@
 package utils
 
 import (
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/errors"
-	"github.com/ontio/ontology/smartcontract/event"
-	"github.com/ontio/ontology/smartcontract/service/native"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/errors"
+	"github.com/DNAProject/DNA/smartcontract/event"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
 )
 
 func AddCommonEvent(native *native.NativeService, contract common.Address, name string, params interface{}) {

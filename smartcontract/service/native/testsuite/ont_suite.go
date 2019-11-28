@@ -27,13 +27,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/types"
-	utils2 "github.com/ontio/ontology/core/utils"
-	"github.com/ontio/ontology/smartcontract"
-	"github.com/ontio/ontology/smartcontract/service/native"
-	"github.com/ontio/ontology/smartcontract/storage"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/types"
+	utils2 "github.com/DNAProject/DNA/core/utils"
+	"github.com/DNAProject/DNA/smartcontract"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/storage"
 )
 
 func RandomAddress() common.Address {

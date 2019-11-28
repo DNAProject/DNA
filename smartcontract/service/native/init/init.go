@@ -25,16 +25,16 @@ import (
 	"bytes"
 	"math/big"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/smartcontract/service/native/auth"
-	params "github.com/ontio/ontology/smartcontract/service/native/global_params"
-	"github.com/ontio/ontology/smartcontract/service/native/governance"
-	"github.com/ontio/ontology/smartcontract/service/native/ong"
-	"github.com/ontio/ontology/smartcontract/service/native/ont"
-	"github.com/ontio/ontology/smartcontract/service/native/ontid"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
-	"github.com/ontio/ontology/smartcontract/service/neovm"
-	vm "github.com/ontio/ontology/vm/neovm"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/smartcontract/service/native/auth"
+	params "github.com/DNAProject/DNA/smartcontract/service/native/global_params"
+	"github.com/DNAProject/DNA/smartcontract/service/native/governance"
+	"github.com/DNAProject/DNA/smartcontract/service/native/ong"
+	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
+	"github.com/DNAProject/DNA/smartcontract/service/native/ontid"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/smartcontract/service/neovm"
+	vm "github.com/DNAProject/DNA/vm/neovm"
 )
 
 var (

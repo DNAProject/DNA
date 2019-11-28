@@ -29,7 +29,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 var (

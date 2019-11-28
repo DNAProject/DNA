@@ -24,7 +24,7 @@ package abi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/common/log"
+	"github.com/DNAProject/DNA/common/log"
 	"io/ioutil"
 	"strings"
 )

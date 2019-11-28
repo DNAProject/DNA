@@ -25,12 +25,12 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/consensus/vbft/config"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/p2pserver/message/msg_pack"
-	p2pmsg "github.com/ontio/ontology/p2pserver/message/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	p2pmsg "github.com/DNAProject/DNA/p2pserver/message/types"
 )
 
 func (self *Server) GetCurrentBlockNo() uint32 {

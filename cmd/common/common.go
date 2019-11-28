@@ -23,11 +23,11 @@ package common
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/password"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/password"
 	"github.com/urfave/cli"
 	"strconv"
 )

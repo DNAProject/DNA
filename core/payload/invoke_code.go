@@ -24,7 +24,7 @@ package payload
 import (
 	"io"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 // InvokeCode is an implementation of transaction payload for invoke smartcontract

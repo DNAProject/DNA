@@ -21,7 +21,7 @@
 
 package actor
 
-import "github.com/ontio/ontology/core/types"
+import "github.com/DNAProject/DNA/core/types"
 
 type StartConsensus struct{}
 type StopConsensus struct{}

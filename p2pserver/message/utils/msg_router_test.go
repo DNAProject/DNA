@@ -25,10 +25,10 @@ import (
 	"testing"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/p2pserver/message/types"
-	"github.com/ontio/ontology/p2pserver/net/netserver"
-	"github.com/ontio/ontology/p2pserver/net/protocol"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver/message/types"
+	"github.com/DNAProject/DNA/p2pserver/net/netserver"
+	"github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/stretchr/testify/assert"
 )
 

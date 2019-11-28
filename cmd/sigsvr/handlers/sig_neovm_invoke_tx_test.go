@@ -23,8 +23,8 @@ package handlers
 
 import (
 	"encoding/json"
-	clisvrcom "github.com/ontio/ontology/cmd/sigsvr/common"
-	"github.com/ontio/ontology/cmd/utils"
+	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
+	"github.com/DNAProject/DNA/cmd/utils"
 	"testing"
 )
 

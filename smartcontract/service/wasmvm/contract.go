@@ -23,9 +23,9 @@ package wasmvm
 
 import (
 	"github.com/go-interpreter/wagon/exec"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/errors"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/errors"
 )
 
 func ContractCreate(proc *exec.Process,

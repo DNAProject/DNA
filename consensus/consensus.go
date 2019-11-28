@@ -23,11 +23,11 @@ package consensus
 
 import (
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/consensus/dbft"
-	"github.com/ontio/ontology/consensus/solo"
-	"github.com/ontio/ontology/consensus/vbft"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/consensus/dbft"
+	"github.com/DNAProject/DNA/consensus/solo"
+	"github.com/DNAProject/DNA/consensus/vbft"
 )
 
 type ConsensusService interface {

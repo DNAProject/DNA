@@ -22,8 +22,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/ontio/ontology/account"
-	clisvrcom "github.com/ontio/ontology/cmd/sigsvr/common"
+	"github.com/DNAProject/DNA/account"
+	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
 	"os"
 	"testing"
 )

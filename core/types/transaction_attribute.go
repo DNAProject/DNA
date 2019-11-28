@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 type TransactionAttributeUsage byte

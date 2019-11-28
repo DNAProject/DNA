@@ -24,9 +24,9 @@ package utils
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/ontio/ontology/cmd/abi"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/vm/neovm"
+	"github.com/DNAProject/DNA/cmd/abi"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/vm/neovm"
 	"testing"
 )
 

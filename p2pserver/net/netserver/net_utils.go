@@ -30,9 +30,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/p2pserver/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver/common"
 )
 
 // createListener creates a net listener on the port

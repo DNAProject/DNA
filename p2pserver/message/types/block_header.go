@@ -25,9 +25,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ontio/ontology/common"
-	ct "github.com/ontio/ontology/core/types"
-	comm "github.com/ontio/ontology/p2pserver/common"
+	"github.com/DNAProject/DNA/common"
+	ct "github.com/DNAProject/DNA/core/types"
+	comm "github.com/DNAProject/DNA/p2pserver/common"
 )
 
 type BlkHeader struct {

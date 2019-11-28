@@ -25,9 +25,9 @@ import (
 	"encoding/json"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-crypto/signature"
-	"github.com/ontio/ontology/cmd/abi"
-	clisvrcom "github.com/ontio/ontology/cmd/sigsvr/common"
-	nutils "github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/cmd/abi"
+	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
+	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"testing"
 )
 

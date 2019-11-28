@@ -22,10 +22,10 @@
 package event
 
 import (
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/events"
-	"github.com/ontio/ontology/events/message"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/events"
+	"github.com/DNAProject/DNA/events/message"
 )
 
 const (

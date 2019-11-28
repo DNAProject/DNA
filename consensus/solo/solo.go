@@ -28,17 +28,17 @@ import (
 
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	actorTypes "github.com/ontio/ontology/consensus/actor"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/events"
-	"github.com/ontio/ontology/events/message"
-	"github.com/ontio/ontology/validator/increment"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	actorTypes "github.com/DNAProject/DNA/consensus/actor"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/events"
+	"github.com/DNAProject/DNA/events/message"
+	"github.com/DNAProject/DNA/validator/increment"
 )
 
 /*

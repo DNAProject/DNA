@@ -23,8 +23,8 @@ package neovm
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/common"
-	vm "github.com/ontio/ontology/vm/neovm"
+	"github.com/DNAProject/DNA/common"
+	vm "github.com/DNAProject/DNA/vm/neovm"
 )
 
 // StorageContext store smart contract address

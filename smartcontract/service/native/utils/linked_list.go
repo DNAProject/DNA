@@ -22,10 +22,10 @@ package utils
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/common"
-	cstates "github.com/ontio/ontology/core/states"
-	"github.com/ontio/ontology/errors"
-	"github.com/ontio/ontology/smartcontract/service/native"
+	"github.com/DNAProject/DNA/common"
+	cstates "github.com/DNAProject/DNA/core/states"
+	"github.com/DNAProject/DNA/errors"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
 )
 
 type LinkedlistNode struct {

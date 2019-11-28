@@ -23,8 +23,8 @@ package neovm
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/vm/neovm/errors"
-	"github.com/ontio/ontology/vm/neovm/types"
+	"github.com/DNAProject/DNA/vm/neovm/errors"
+	"github.com/DNAProject/DNA/vm/neovm/types"
 )
 
 const initialStackCap = 64 // to avoid reallocation

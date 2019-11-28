@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/consensus/vbft/config"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/core/types"
 )
 
 func constructProposalMsgTest(acc *account.Account) *blockProposalMsg {

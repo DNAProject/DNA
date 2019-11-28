@@ -26,9 +26,9 @@ import (
 	"io"
 
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/errors"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/errors"
 )
 
 type ConsensusPayload struct {

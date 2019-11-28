@@ -25,12 +25,12 @@ import (
 	"time"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	p2pcommon "github.com/ontio/ontology/p2pserver/common"
-	tc "github.com/ontio/ontology/txnpool/common"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	p2pcommon "github.com/DNAProject/DNA/p2pserver/common"
+	tc "github.com/DNAProject/DNA/txnpool/common"
 )
 
 const txnPoolReqTimeout = p2pcommon.ACTOR_TIMEOUT * time.Second

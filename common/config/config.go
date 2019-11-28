@@ -30,10 +30,10 @@ import (
 	"io"
 
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/constants"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/errors"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/constants"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/errors"
 )
 
 var Version = "" //Set value when build project

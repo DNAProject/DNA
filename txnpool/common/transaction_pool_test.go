@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/types"
 	"github.com/stretchr/testify/assert"
 )
 

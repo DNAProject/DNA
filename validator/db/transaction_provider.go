@@ -22,8 +22,8 @@
 package db
 
 import (
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/types"
 )
 
 type TransactionProvider interface {

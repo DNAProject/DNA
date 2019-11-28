@@ -22,7 +22,7 @@
 package neovm
 
 import (
-	"github.com/ontio/ontology/common/config"
+	"github.com/DNAProject/DNA/common/config"
 	"sync"
 )
 

@@ -22,8 +22,8 @@
 package types
 
 import (
-	"github.com/ontio/ontology/vm/neovm/constants"
-	"github.com/ontio/ontology/vm/neovm/errors"
+	"github.com/DNAProject/DNA/vm/neovm/constants"
+	"github.com/DNAProject/DNA/vm/neovm/errors"
 )
 
 type ArrayValue struct {

@@ -24,8 +24,8 @@ package overlaydb
 import (
 	"crypto/sha256"
 
-	comm "github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/store/common"
+	comm "github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/store/common"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 

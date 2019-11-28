@@ -28,16 +28,16 @@ import (
 	"time"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/genesis"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/types"
-	tc "github.com/ontio/ontology/txnpool/common"
-	tp "github.com/ontio/ontology/txnpool/proc"
-	"github.com/ontio/ontology/validator/stateful"
-	"github.com/ontio/ontology/validator/stateless"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/genesis"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/types"
+	tc "github.com/DNAProject/DNA/txnpool/common"
+	tp "github.com/DNAProject/DNA/txnpool/proc"
+	"github.com/DNAProject/DNA/validator/stateful"
+	"github.com/DNAProject/DNA/validator/stateless"
 )
 
 func TestMain(m *testing.M) {

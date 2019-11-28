@@ -25,9 +25,9 @@ import (
 	"reflect"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/validation"
-	vatypes "github.com/ontio/ontology/validator/types"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/validation"
+	vatypes "github.com/DNAProject/DNA/validator/types"
 )
 
 // Validator wraps validator actor's pid

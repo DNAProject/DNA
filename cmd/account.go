@@ -26,9 +26,9 @@ import (
 	"fmt"
 	"github.com/ontio/ontology-crypto/keypair"
 	s "github.com/ontio/ontology-crypto/signature"
-	"github.com/ontio/ontology/cmd/common"
-	"github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common/config"
+	"github.com/DNAProject/DNA/cmd/common"
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common/config"
 	"github.com/urfave/cli"
 	"strings"
 )

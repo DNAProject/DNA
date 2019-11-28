@@ -29,15 +29,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/p2pserver/common"
-	"github.com/ontio/ontology/p2pserver/common/set"
-	"github.com/ontio/ontology/p2pserver/message/msg_pack"
-	"github.com/ontio/ontology/p2pserver/message/types"
-	"github.com/ontio/ontology/p2pserver/net/protocol"
-	"github.com/ontio/ontology/p2pserver/peer"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/common/set"
+	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	"github.com/DNAProject/DNA/p2pserver/message/types"
+	"github.com/DNAProject/DNA/p2pserver/net/protocol"
+	"github.com/DNAProject/DNA/p2pserver/peer"
 )
 
 //NewNetServer return the net object in p2p

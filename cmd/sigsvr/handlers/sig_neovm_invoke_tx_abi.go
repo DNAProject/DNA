@@ -23,11 +23,11 @@ package handlers
 import (
 	"encoding/hex"
 	"encoding/json"
-	clisvrcom "github.com/ontio/ontology/cmd/sigsvr/common"
-	cliutil "github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	httpcom "github.com/ontio/ontology/http/base/common"
+	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
+	cliutil "github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	httpcom "github.com/DNAProject/DNA/http/base/common"
 )
 
 type SigNeoVMInvokeTxAbiReq struct {

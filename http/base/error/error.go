@@ -22,7 +22,7 @@
 // Package error privides error code for http
 package error
 
-import ontErrors "github.com/ontio/ontology/errors"
+import ontErrors "github.com/DNAProject/DNA/errors"
 
 const (
 	SUCCESS            int64 = 0

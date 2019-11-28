@@ -26,10 +26,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ontio/ontology/common"
-	storcomm "github.com/ontio/ontology/core/store/common"
-	leveldb "github.com/ontio/ontology/core/store/leveldbstore"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/common"
+	storcomm "github.com/DNAProject/DNA/core/store/common"
+	leveldb "github.com/DNAProject/DNA/core/store/leveldbstore"
+	"github.com/DNAProject/DNA/core/types"
 	pool "github.com/valyala/bytebufferpool"
 )
 

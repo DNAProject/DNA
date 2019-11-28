@@ -24,7 +24,7 @@ package merkle
 import (
 	"crypto/sha256"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 var debugCheck = false

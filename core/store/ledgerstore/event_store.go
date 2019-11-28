@@ -26,12 +26,12 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/common/serialization"
-	scom "github.com/ontio/ontology/core/store/common"
-	"github.com/ontio/ontology/core/store/leveldbstore"
-	"github.com/ontio/ontology/smartcontract/event"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/common/serialization"
+	scom "github.com/DNAProject/DNA/core/store/common"
+	"github.com/DNAProject/DNA/core/store/leveldbstore"
+	"github.com/DNAProject/DNA/smartcontract/event"
 )
 
 //Saving event notifies gen by smart contract execution

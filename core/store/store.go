@@ -23,13 +23,13 @@ package store
 
 import (
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/states"
-	"github.com/ontio/ontology/core/store/overlaydb"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/smartcontract/event"
-	cstates "github.com/ontio/ontology/smartcontract/states"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/states"
+	"github.com/DNAProject/DNA/core/store/overlaydb"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/smartcontract/event"
+	cstates "github.com/DNAProject/DNA/smartcontract/states"
 )
 
 type ExecuteResult struct {

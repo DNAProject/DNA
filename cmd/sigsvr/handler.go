@@ -21,7 +21,7 @@
 
 package sigsvr
 
-import "github.com/ontio/ontology/cmd/sigsvr/handlers"
+import "github.com/DNAProject/DNA/cmd/sigsvr/handlers"
 
 func init() {
 	DefCliRpcSvr.RegHandler("createaccount", handlers.CreateAccount)

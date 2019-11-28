@@ -24,8 +24,8 @@ package utils
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/payload"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
 	"reflect"
 	"strconv"
 	"strings"

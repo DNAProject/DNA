@@ -27,12 +27,12 @@ import (
 	"time"
 
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/consensus/vbft/config"
-	"github.com/ontio/ontology/core/ledger"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/core/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/DNAProject/DNA/core/ledger"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/core/types"
 )
 
 type ConsensusMsgPayload struct {

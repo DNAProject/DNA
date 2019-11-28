@@ -23,11 +23,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/account"
-	cmdcom "github.com/ontio/ontology/cmd/common"
-	"github.com/ontio/ontology/cmd/utils"
-	"github.com/ontio/ontology/common/config"
-	nutils "github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/account"
+	cmdcom "github.com/DNAProject/DNA/cmd/common"
+	"github.com/DNAProject/DNA/cmd/utils"
+	"github.com/DNAProject/DNA/common/config"
+	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/urfave/cli"
 	"strconv"
 	"strings"

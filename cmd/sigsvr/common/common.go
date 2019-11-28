@@ -24,8 +24,8 @@ package common
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/account"
-	"github.com/ontio/ontology/cmd/sigsvr/store"
+	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/cmd/sigsvr/store"
 )
 
 var DefWalletStore *store.WalletStore

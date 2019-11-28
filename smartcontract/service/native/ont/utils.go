@@ -24,13 +24,13 @@ package ont
 import (
 	"fmt"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	cstates "github.com/ontio/ontology/core/states"
-	"github.com/ontio/ontology/errors"
-	"github.com/ontio/ontology/smartcontract/event"
-	"github.com/ontio/ontology/smartcontract/service/native"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	cstates "github.com/DNAProject/DNA/core/states"
+	"github.com/DNAProject/DNA/errors"
+	"github.com/DNAProject/DNA/smartcontract/event"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 const (

@@ -29,13 +29,13 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/config"
-	"github.com/ontio/ontology/common/constants"
-	cstates "github.com/ontio/ontology/core/states"
-	"github.com/ontio/ontology/smartcontract/service/native"
-	"github.com/ontio/ontology/smartcontract/service/native/global_params"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/config"
+	"github.com/DNAProject/DNA/common/constants"
+	cstates "github.com/DNAProject/DNA/core/states"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/service/native/global_params"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 const (

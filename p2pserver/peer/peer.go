@@ -29,11 +29,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	comm "github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/p2pserver/common"
-	conn "github.com/ontio/ontology/p2pserver/link"
-	"github.com/ontio/ontology/p2pserver/message/types"
+	comm "github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	conn "github.com/DNAProject/DNA/p2pserver/link"
+	"github.com/DNAProject/DNA/p2pserver/message/types"
 )
 
 // PeerCom provides the basic information of a peer

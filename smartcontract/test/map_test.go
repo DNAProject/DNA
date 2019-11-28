@@ -23,9 +23,9 @@ package test
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/smartcontract"
-	"github.com/ontio/ontology/vm/neovm"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/smartcontract"
+	"github.com/DNAProject/DNA/vm/neovm"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

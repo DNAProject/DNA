@@ -22,7 +22,7 @@
 package account
 
 import (
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 )
 
 type ClientStore interface {

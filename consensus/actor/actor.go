@@ -26,11 +26,11 @@ import (
 	"time"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/core/types"
-	ontErrors "github.com/ontio/ontology/errors"
-	netActor "github.com/ontio/ontology/p2pserver/actor/server"
-	ptypes "github.com/ontio/ontology/p2pserver/message/types"
-	txpool "github.com/ontio/ontology/txnpool/common"
+	"github.com/DNAProject/DNA/core/types"
+	ontErrors "github.com/DNAProject/DNA/errors"
+	netActor "github.com/DNAProject/DNA/p2pserver/actor/server"
+	ptypes "github.com/DNAProject/DNA/p2pserver/message/types"
+	txpool "github.com/DNAProject/DNA/txnpool/common"
 )
 
 type TxPoolActor struct {

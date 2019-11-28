@@ -27,11 +27,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	tc "github.com/ontio/ontology/txnpool/common"
-	vt "github.com/ontio/ontology/validator/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	tc "github.com/DNAProject/DNA/txnpool/common"
+	vt "github.com/DNAProject/DNA/validator/types"
 	"github.com/stretchr/testify/assert"
 )
 

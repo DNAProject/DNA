@@ -23,9 +23,9 @@ package global_params
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/errors"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/errors"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 type Param struct {

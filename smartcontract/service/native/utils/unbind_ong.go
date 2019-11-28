@@ -21,7 +21,7 @@
 
 package utils
 
-import "github.com/ontio/ontology/common/constants"
+import "github.com/DNAProject/DNA/common/constants"
 
 var (
 	TIME_INTERVAL     = constants.UNBOUND_TIME_INTERVAL

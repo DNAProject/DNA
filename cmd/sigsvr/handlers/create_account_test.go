@@ -21,7 +21,7 @@
 package handlers
 
 import (
-	clisvrcom "github.com/ontio/ontology/cmd/sigsvr/common"
+	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
 	"testing"
 )
 

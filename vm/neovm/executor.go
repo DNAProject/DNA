@@ -27,11 +27,11 @@ import (
 	"fmt"
 
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/signature"
-	"github.com/ontio/ontology/vm/neovm/constants"
-	"github.com/ontio/ontology/vm/neovm/errors"
-	"github.com/ontio/ontology/vm/neovm/types"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/signature"
+	"github.com/DNAProject/DNA/vm/neovm/constants"
+	"github.com/DNAProject/DNA/vm/neovm/errors"
+	"github.com/DNAProject/DNA/vm/neovm/types"
 	"golang.org/x/crypto/ripemd160"
 )
 

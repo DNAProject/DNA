@@ -23,7 +23,7 @@ package auth
 
 import (
 	"bytes"
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 	"testing"
 )
 

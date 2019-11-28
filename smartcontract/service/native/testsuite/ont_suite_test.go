@@ -21,12 +21,12 @@
 package testsuite
 
 import (
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/smartcontract/service/native"
-	_ "github.com/ontio/ontology/smartcontract/service/native/init"
-	"github.com/ontio/ontology/smartcontract/service/native/ont"
-	"github.com/ontio/ontology/smartcontract/service/native/utils"
-	"github.com/ontio/ontology/smartcontract/storage"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
+	_ "github.com/DNAProject/DNA/smartcontract/service/native/init"
+	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
+	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/smartcontract/storage"
 	"github.com/stretchr/testify/assert"
 
 	"testing"

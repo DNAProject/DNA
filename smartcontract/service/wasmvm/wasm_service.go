@@ -23,14 +23,14 @@ package wasmvm
 import (
 	"github.com/go-interpreter/wagon/exec"
 	"github.com/hashicorp/golang-lru"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/store"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	"github.com/ontio/ontology/smartcontract/context"
-	"github.com/ontio/ontology/smartcontract/event"
-	"github.com/ontio/ontology/smartcontract/states"
-	"github.com/ontio/ontology/smartcontract/storage"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/store"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	"github.com/DNAProject/DNA/smartcontract/context"
+	"github.com/DNAProject/DNA/smartcontract/event"
+	"github.com/DNAProject/DNA/smartcontract/states"
+	"github.com/DNAProject/DNA/smartcontract/storage"
 )
 
 type WasmVmService struct {

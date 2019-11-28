@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ontio/ontology/account"
+	"github.com/DNAProject/DNA/account"
 )
 
 func constructMsg() *blockProposalMsg {

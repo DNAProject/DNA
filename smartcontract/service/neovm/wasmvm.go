@@ -22,14 +22,14 @@ package neovm
 
 import (
 	"fmt"
-	"github.com/ontio/ontology/core/utils"
+	"github.com/DNAProject/DNA/core/utils"
 	"reflect"
 
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/vm/crossvm_codec"
-	vm "github.com/ontio/ontology/vm/neovm"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/vm/crossvm_codec"
+	vm "github.com/DNAProject/DNA/vm/neovm"
 )
 
 //neovm contract call wasmvm contract

@@ -26,9 +26,9 @@ import (
 	"time"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/common/log"
-	ac "github.com/ontio/ontology/p2pserver/actor/server"
-	"github.com/ontio/ontology/p2pserver/common"
+	"github.com/DNAProject/DNA/common/log"
+	ac "github.com/DNAProject/DNA/p2pserver/actor/server"
+	"github.com/DNAProject/DNA/p2pserver/common"
 )
 
 var netServerPid *actor.PID

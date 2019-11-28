@@ -23,9 +23,9 @@ package types
 
 import (
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
+	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
 )
 
 // message

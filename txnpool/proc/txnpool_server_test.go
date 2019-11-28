@@ -26,12 +26,12 @@ import (
 	"time"
 
 	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/ontio/ontology/core/payload"
-	"github.com/ontio/ontology/core/types"
-	"github.com/ontio/ontology/errors"
-	tc "github.com/ontio/ontology/txnpool/common"
-	"github.com/ontio/ontology/validator/stateless"
-	vt "github.com/ontio/ontology/validator/types"
+	"github.com/DNAProject/DNA/core/payload"
+	"github.com/DNAProject/DNA/core/types"
+	"github.com/DNAProject/DNA/errors"
+	tc "github.com/DNAProject/DNA/txnpool/common"
+	"github.com/DNAProject/DNA/validator/stateless"
+	vt "github.com/DNAProject/DNA/validator/types"
 	"github.com/stretchr/testify/assert"
 )
 

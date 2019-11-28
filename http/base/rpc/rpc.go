@@ -25,9 +25,9 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology/common/log"
-	"github.com/ontio/ontology/http/base/common"
-	berr "github.com/ontio/ontology/http/base/error"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/http/base/common"
+	berr "github.com/DNAProject/DNA/http/base/error"
 	"io"
 	"io/ioutil"
 	"net/http"
