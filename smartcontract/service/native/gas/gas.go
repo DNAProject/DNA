@@ -19,7 +19,7 @@
  * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ont
+package gas
 
 import (
 	"fmt"
@@ -38,24 +38,24 @@ const (
 	APPROVE_FLAG  byte = 2
 )
 
-func InitOnt() {
-	native.Contracts[utils.OntContractAddress] = RegisterOntContract
+func InitGas() {
+	native.Contracts[utils.GasContractAddress] = RegisterGasContract
 }
 
-func RegisterOntContract(native *native.NativeService) {
-	native.Register(INIT_NAME, OntInit)
-	native.Register(TRANSFER_NAME, OntTransfer)
-	native.Register(APPROVE_NAME, OntApprove)
-	native.Register(TRANSFERFROM_NAME, OntTransferFrom)
-	native.Register(NAME_NAME, OntName)
-	native.Register(SYMBOL_NAME, OntSymbol)
-	native.Register(DECIMALS_NAME, OntDecimals)
-	native.Register(TOTALSUPPLY_NAME, OntTotalSupply)
-	native.Register(BALANCEOF_NAME, OntBalanceOf)
-	native.Register(ALLOWANCE_NAME, OntAllowance)
+func RegisterGasContract(native *native.NativeService) {
+	native.Register(INIT_NAME, GasInit)
+	native.Register(TRANSFER_NAME, GasTransfer)
+	native.Register(APPROVE_NAME, GasApprove)
+	native.Register(TRANSFERFROM_NAME, GasTransferFrom)
+	native.Register(NAME_NAME, GasName)
+	native.Register(SYMBOL_NAME, GasSymbol)
+	native.Register(DECIMALS_NAME, GasDecimals)
+	native.Register(TOTALSUPPLY_NAME, GasTotalSupply)
+	native.Register(BALANCEOF_NAME, GasBalanceOf)
+	native.Register(ALLOWANCE_NAME, GasAllowance)
 }
 
-func OntInit(native *native.NativeService) ([]byte, error) {
+func GasInit(native *native.NativeService) ([]byte, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	amount, err := utils.GetStorageUInt64(native, GenTotalSupplyKey(contract))
 	if err != nil {
@@ -63,7 +63,7 @@ func OntInit(native *native.NativeService) ([]byte, error) {
 	}
 
 	if amount > 0 {
-		return utils.BYTE_FALSE, errors.NewErr("Init ont has been completed!")
+		return utils.BYTE_FALSE, errors.NewErr("Init has been completed!")
 	}
 
 	distribute := make(map[common.Address]uint64)
@@ -97,8 +97,8 @@ func OntInit(native *native.NativeService) ([]byte, error) {
 		}
 		distribute[addr] += value
 	}
-	if sum != constants.ONT_TOTAL_SUPPLY {
-		return utils.BYTE_FALSE, fmt.Errorf("wrong config. total supply %d != %d", sum, constants.ONT_TOTAL_SUPPLY)
+	if sum != constants.GAS_TOTAL_SUPPLY {
+		return utils.BYTE_FALSE, fmt.Errorf("wrong config. total supply %d != %d", sum, constants.GAS_TOTAL_SUPPLY)
 	}
 
 	for addr, val := range distribute {
@@ -107,12 +107,12 @@ func OntInit(native *native.NativeService) ([]byte, error) {
 		native.CacheDB.Put(balanceKey, item.ToArray())
 		AddNotifications(native, contract, &State{To: addr, Value: val})
 	}
-	native.CacheDB.Put(GenTotalSupplyKey(contract), utils.GenUInt64StorageItem(constants.ONT_TOTAL_SUPPLY).ToArray())
+	native.CacheDB.Put(GenTotalSupplyKey(contract), utils.GenUInt64StorageItem(constants.GAS_TOTAL_SUPPLY).ToArray())
 
 	return utils.BYTE_TRUE, nil
 }
 
-func OntTransfer(native *native.NativeService) ([]byte, error) {
+func GasTransfer(native *native.NativeService) ([]byte, error) {
 	var transfers Transfers
 	source := common.NewZeroCopySource(native.Input)
 	if err := transfers.Deserialization(source); err != nil {
@@ -123,8 +123,8 @@ func OntTransfer(native *native.NativeService) ([]byte, error) {
 		if v.Value == 0 {
 			continue
 		}
-		if v.Value > constants.ONT_TOTAL_SUPPLY {
-			return utils.BYTE_FALSE, fmt.Errorf("transfer ont amount:%d over totalSupply:%d", v.Value, constants.ONT_TOTAL_SUPPLY)
+		if v.Value > constants.GAS_TOTAL_SUPPLY {
+			return utils.BYTE_FALSE, fmt.Errorf("transfer ont amount:%d over totalSupply:%d", v.Value, constants.GAS_TOTAL_SUPPLY)
 		}
 		fromBalance, toBalance, err := Transfer(native, contract, &v)
 		if err != nil {
@@ -144,17 +144,17 @@ func OntTransfer(native *native.NativeService) ([]byte, error) {
 	return utils.BYTE_TRUE, nil
 }
 
-func OntTransferFrom(native *native.NativeService) ([]byte, error) {
+func GasTransferFrom(native *native.NativeService) ([]byte, error) {
 	var state TransferFrom
 	source := common.NewZeroCopySource(native.Input)
 	if err := state.Deserialization(source); err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[OntTransferFrom] State deserialize error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[GasTransferFrom] State deserialize error!")
 	}
 	if state.Value == 0 {
 		return utils.BYTE_FALSE, nil
 	}
-	if state.Value > constants.ONT_TOTAL_SUPPLY {
-		return utils.BYTE_FALSE, fmt.Errorf("transferFrom ont amount:%d over totalSupply:%d", state.Value, constants.ONT_TOTAL_SUPPLY)
+	if state.Value > constants.GAS_TOTAL_SUPPLY {
+		return utils.BYTE_FALSE, fmt.Errorf("transferFrom amount:%d over totalSupply:%d", state.Value, constants.GAS_TOTAL_SUPPLY)
 	}
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	fromBalance, toBalance, err := TransferedFrom(native, contract, &state)
@@ -171,14 +171,14 @@ func OntTransferFrom(native *native.NativeService) ([]byte, error) {
 	return utils.BYTE_TRUE, nil
 }
 
-func OntApprove(native *native.NativeService) ([]byte, error) {
+func GasApprove(native *native.NativeService) ([]byte, error) {
 	var state State
 	source := common.NewZeroCopySource(native.Input)
 	if err := state.Deserialization(source); err != nil {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[OngApprove] state deserialize error!")
 	}
-	if state.Value > constants.ONT_TOTAL_SUPPLY {
-		return utils.BYTE_FALSE, fmt.Errorf("approve ont amount:%d over totalSupply:%d", state.Value, constants.ONT_TOTAL_SUPPLY)
+	if state.Value > constants.GAS_TOTAL_SUPPLY {
+		return utils.BYTE_FALSE, fmt.Errorf("approve amount:%d over totalSupply:%d", state.Value, constants.GAS_TOTAL_SUPPLY)
 	}
 	if native.ContextRef.CheckWitness(state.From) == false {
 		return utils.BYTE_FALSE, errors.NewErr("authentication failed!")
@@ -188,32 +188,32 @@ func OntApprove(native *native.NativeService) ([]byte, error) {
 	return utils.BYTE_TRUE, nil
 }
 
-func OntName(native *native.NativeService) ([]byte, error) {
-	return []byte(constants.ONT_NAME), nil
+func GasName(native *native.NativeService) ([]byte, error) {
+	return []byte(constants.GAS_NAME), nil
 }
 
-func OntDecimals(native *native.NativeService) ([]byte, error) {
-	return common.BigIntToNeoBytes(big.NewInt(int64(constants.ONT_DECIMALS))), nil
+func GasDecimals(native *native.NativeService) ([]byte, error) {
+	return common.BigIntToNeoBytes(big.NewInt(int64(constants.GAS_DECIMALS))), nil
 }
 
-func OntSymbol(native *native.NativeService) ([]byte, error) {
-	return []byte(constants.ONT_SYMBOL), nil
+func GasSymbol(native *native.NativeService) ([]byte, error) {
+	return []byte(constants.GAS_SYMBOL), nil
 }
 
-func OntTotalSupply(native *native.NativeService) ([]byte, error) {
+func GasTotalSupply(native *native.NativeService) ([]byte, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
 	amount, err := utils.GetStorageUInt64(native, GenTotalSupplyKey(contract))
 	if err != nil {
-		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[OntTotalSupply] get totalSupply error!")
+		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[TotalSupply] get totalSupply error!")
 	}
 	return common.BigIntToNeoBytes(big.NewInt(int64(amount))), nil
 }
 
-func OntBalanceOf(native *native.NativeService) ([]byte, error) {
+func GasBalanceOf(native *native.NativeService) ([]byte, error) {
 	return GetBalanceValue(native, TRANSFER_FLAG)
 }
 
-func OntAllowance(native *native.NativeService) ([]byte, error) {
+func GasAllowance(native *native.NativeService) ([]byte, error) {
 	return GetBalanceValue(native, APPROVE_FLAG)
 }
 
@@ -261,12 +261,12 @@ func grantOng(native *native.NativeService, contract, address common.Address, ba
 	if balance != 0 {
 		value := utils.CalcUnbindOng(balance, startOffset, endOffset)
 
-		args, err := getApproveArgs(native, contract, utils.OngContractAddress, address, value)
+		args, err := getApproveArgs(native, contract, utils.GasContractAddress, address, value)
 		if err != nil {
 			return err
 		}
 
-		if _, err := native.NativeCall(utils.OngContractAddress, "approve", args); err != nil {
+		if _, err := native.NativeCall(utils.GasContractAddress, "approve", args); err != nil {
 			return err
 		}
 	}

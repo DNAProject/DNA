@@ -40,7 +40,7 @@ var (
 var (
 	funcs           = []string{"foo1", "foo2"}
 	role            = "role"
-	OntContractAddr = utils.OntContractAddress
+	GasContractAddr = utils.GasContractAddress
 )
 
 func init() {
@@ -74,7 +74,7 @@ func TestSerialization_Init(t *testing.T) {
 
 func TestSerialization_Transfer(t *testing.T) {
 	param := &TransferParam{
-		ContractAddr:  OntContractAddr,
+		ContractAddr:  GasContractAddr,
 		NewAdminOntID: newAdmin,
 	}
 	sink := common.NewZeroCopySink(nil)
@@ -91,7 +91,7 @@ func TestSerialization_Transfer(t *testing.T) {
 
 func TestSerialization_AssignFuncs(t *testing.T) {
 	param := &FuncsToRoleParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: GasContractAddr,
 		AdminOntID:   admin,
 		Role:         []byte("role"),
 		FuncNames:    funcs,
@@ -110,7 +110,7 @@ func TestSerialization_AssignFuncs(t *testing.T) {
 
 func TestSerialization_AssignOntIDs(t *testing.T) {
 	param := &OntIDsToRoleParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: GasContractAddr,
 		AdminOntID:   admin,
 		Role:         []byte(role),
 		Persons:      [][]byte{[]byte{0x03, 0x04, 0x05, 0x06}, []byte{0x07, 0x08, 0x09, 0x0a}},
@@ -128,7 +128,7 @@ func TestSerialization_AssignOntIDs(t *testing.T) {
 
 func TestSerialization_Delegate(t *testing.T) {
 	param := &DelegateParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: GasContractAddr,
 		From:         p1,
 		To:           p2,
 		Role:         []byte(role),
@@ -147,7 +147,7 @@ func TestSerialization_Delegate(t *testing.T) {
 
 func TestSerialization_Withdraw(t *testing.T) {
 	param := &WithdrawParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: GasContractAddr,
 		Initiator:    p1,
 		Delegate:     p2,
 		Role:         []byte(role),
@@ -164,7 +164,7 @@ func TestSerialization_Withdraw(t *testing.T) {
 
 func TestSerialization_VerifyToken(t *testing.T) {
 	param := &VerifyTokenParam{
-		ContractAddr: OntContractAddr,
+		ContractAddr: GasContractAddr,
 		Caller:       p1,
 		Fn:           "foo1",
 	}

@@ -46,7 +46,7 @@ func TestSigNativeInvokeTx(t *testing.T) {
 	invokeReq := &SigNativeInvokeTxReq{
 		GasPrice: 0,
 		GasLimit: 40000,
-		Address:  nutils.OntContractAddress.ToHexString(),
+		Address:  nutils.GasContractAddress.ToHexString(),
 		Method:   "transfer",
 		Version:  0,
 		Params: []interface{}{

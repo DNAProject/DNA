@@ -36,10 +36,10 @@ import (
 	"github.com/DNAProject/DNA/core/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/governance"
-	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/neovm"
 	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 )
 
 const (
@@ -48,10 +48,8 @@ const (
 )
 
 var (
-	ONTToken   = newGoverningToken()
-	ONGToken   = newUtilityToken()
-	ONTTokenID = ONTToken.Hash()
-	ONGTokenID = ONGToken.Hash()
+	GasToken   = newUtilityToken()
+	GASTokenID = GasToken.Hash()
 )
 
 var GenBlockTime = (config.DEFAULT_GEN_BLOCK_TIME * time.Second)
@@ -98,8 +96,7 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	}
 
 	//block
-	ont := newGoverningToken()
-	ong := newUtilityToken()
+	gas := newUtilityToken()
 	param := newParamContract()
 	oid := deployOntIDContract()
 	auth := deployAuthContract()
@@ -108,13 +105,11 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	genesisBlock := &types.Block{
 		Header: genesisHeader,
 		Transactions: []*types.Transaction{
-			ont,
-			ong,
+			gas,
 			param,
 			oid,
 			auth,
 			govConfigTx,
-			newGoverningInit(),
 			newUtilityInit(),
 			newParamInit(),
 			govConfig,
@@ -124,24 +119,11 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	return genesisBlock, nil
 }
 
-func newGoverningToken() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.OntContractAddress[:], "ONT", "1.0",
-		"DNA Dev Team", "contact@ont.io", "Blockchain Network ONT Token", payload.NEOVM_TYPE)
-	if err != nil {
-		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
-	}
-	tx, err := mutable.IntoImmutable()
-	if err != nil {
-		panic("construct genesis governing token transaction error ")
-	}
-	return tx
-}
-
 func newUtilityToken() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.OngContractAddress[:], "ONG", "1.0",
+	mutable, err := utils.NewDeployTransaction(nutils.GasContractAddress[:], "GAS", "1.0",
 		"DNA Dev Team", "contact@onchain.com", "Blockchain Network Gas", payload.NEOVM_TYPE)
 	if err != nil {
-		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
+		panic("[NewDeployTransaction] construct genesis utility token transaction error ")
 	}
 	tx, err := mutable.IntoImmutable()
 	if err != nil {
@@ -203,7 +185,7 @@ func deployOntIDContract() *types.Transaction {
 	return tx
 }
 
-func newGoverningInit() *types.Transaction {
+func newUtilityInit() *types.Transaction {
 	bookkeepers, _ := config.DefConfig.GetBookkeepers()
 
 	var addr common.Address
@@ -230,21 +212,11 @@ func newGoverningInit() *types.Transaction {
 		nutils.EncodeVarUint(args, part.value)
 	}
 
-	mutable := utils.BuildNativeTransaction(nutils.OntContractAddress, ont.INIT_NAME, args.Bytes())
+	mutable := utils.BuildNativeTransaction(nutils.GasContractAddress, gas.INIT_NAME, args.Bytes())
 	tx, err := mutable.IntoImmutable()
 	if err != nil {
 		panic("construct genesis governing token transaction error ")
 	}
-	return tx
-}
-
-func newUtilityInit() *types.Transaction {
-	mutable := utils.BuildNativeTransaction(nutils.OngContractAddress, ont.INIT_NAME, []byte{})
-	tx, err := mutable.IntoImmutable()
-	if err != nil {
-		panic("construct genesis utility token transaction error ")
-	}
-
 	return tx
 }
 

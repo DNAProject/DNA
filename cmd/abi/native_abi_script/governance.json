@@ -277,17 +277,6 @@
       "returnType":"Bool"
     },
     {
-      "name":"withdrawOng",
-      "parameters":
-      [
-        {
-          "name":"Address",
-          "type":"Address"
-        }
-      ],
-      "returnType":"Bool"
-    },
-    {
       "name":"commitDpos",
       "parameters":
       [

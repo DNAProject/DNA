@@ -36,14 +36,14 @@ import (
 var AssetCommand = cli.Command{
 	Name:        "asset",
 	Usage:       "Handle assets",
-	Description: "Asset management commands can check account balance, ONT/ONG transfers, extract ONGs, and view unbound ONGs, and so on.",
+	Description: "Asset management commands can check account balance, transfer Gas, and so on.",
 	Subcommands: []cli.Command{
 		{
 			Action:      transfer,
 			Name:        "transfer",
-			Usage:       "Transfer ont or ong to another account",
+			Usage:       "Transfer asset to another account",
 			ArgsUsage:   " ",
-			Description: "Transfer ont or ong to another account. If from address does not specified, using default account",
+			Description: "Transfer asset to another account. If from address does not specified, using default account",
 			Flags: []cli.Flag{
 				utils.RPCPortFlag,
 				utils.TransactionGasPriceFlag,
@@ -127,7 +127,7 @@ func transfer(ctx *cli.Context) error {
 
 	asset := ctx.String(utils.GetFlagName(utils.TransactionAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_GAS
 	}
 	from := ctx.String(utils.TransactionFromFlag.Name)
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
@@ -143,10 +143,7 @@ func transfer(ctx *cli.Context) error {
 	var amount uint64
 	amountStr := ctx.String(utils.TransactionAmountFlag.Name)
 	switch strings.ToLower(asset) {
-	case "ont":
-		amount = utils.ParseOnt(amountStr)
-		amountStr = utils.FormatOnt(amount)
-	case "ong":
+	case "gas":
 		amount = utils.ParseOng(amountStr)
 		amountStr = utils.FormatOng(amount)
 	default:
@@ -220,13 +217,12 @@ func getBalance(ctx *cli.Context) error {
 		return err
 	}
 
-	ong, err := strconv.ParseUint(balance.Ong, 10, 64)
+	gas, err := strconv.ParseUint(balance.Gas, 10, 64)
 	if err != nil {
 		return err
 	}
 	PrintInfoMsg("BalanceOf:%s", accAddr)
-	PrintInfoMsg("  ONT:%s", balance.Ont)
-	PrintInfoMsg("  ONG:%s", utils.FormatOng(ong))
+	PrintInfoMsg("  GAS:%s", utils.FormatOng(gas))
 	return nil
 }
 
@@ -241,7 +237,7 @@ func getAllowance(ctx *cli.Context) error {
 	}
 	asset := ctx.String(utils.GetFlagName(utils.ApproveAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_GAS
 	}
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
 	if err != nil {
@@ -256,8 +252,7 @@ func getAllowance(ctx *cli.Context) error {
 		return err
 	}
 	switch strings.ToLower(asset) {
-	case "ont":
-	case "ong":
+	case "gas":
 		balance, err := strconv.ParseUint(balanceStr, 10, 64)
 		if err != nil {
 			return err

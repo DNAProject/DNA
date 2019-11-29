@@ -26,6 +26,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
+	"math/rand"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/constants"
@@ -36,29 +43,21 @@ import (
 	cutils "github.com/DNAProject/DNA/core/utils"
 	httpcom "github.com/DNAProject/DNA/http/base/common"
 	rpccommon "github.com/DNAProject/DNA/http/base/common"
-	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
+	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	cstates "github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/ontio/ontology-crypto/keypair"
 	sig "github.com/ontio/ontology-crypto/signature"
-	"io"
-	"math/rand"
-	"sort"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (
 	VERSION_TRANSACTION    = byte(0)
-	VERSION_CONTRACT_ONT   = byte(0)
-	VERSION_CONTRACT_ONG   = byte(0)
+	VERSION_CONTRACT_GAS   = byte(0)
 	CONTRACT_TRANSFER      = "transfer"
 	CONTRACT_TRANSFER_FROM = "transferFrom"
 	CONTRACT_APPROVE       = "approve"
 
-	ASSET_ONT = "ont"
-	ASSET_ONG = "ong"
+	ASSET_GAS = "gas"
 )
 
 func init() {
@@ -90,10 +89,8 @@ func GetAccountBalance(address, asset string) (uint64, error) {
 	}
 	var balance uint64
 	switch strings.ToLower(asset) {
-	case "ont":
-		balance, err = strconv.ParseUint(balances.Ont, 10, 64)
-	case "ong":
-		balance, err = strconv.ParseUint(balances.Ong, 10, 64)
+	case "gas":
+		balance, err = strconv.ParseUint(balances.Gas, 10, 64)
 	default:
 		return 0, fmt.Errorf("unsupport asset:%s", asset)
 	}
@@ -187,7 +184,7 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 	if err != nil {
 		return nil, fmt.Errorf("To address:%s invalid:%s", to, err)
 	}
-	var state = &ont.State{
+	var state = &gas.State{
 		From:  fromAddr,
 		To:    toAddr,
 		Value: amount,
@@ -195,12 +192,9 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 	var version byte
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case ASSET_ONT:
-		version = VERSION_CONTRACT_ONT
-		contractAddr = utils.OntContractAddress
-	case ASSET_ONG:
-		version = VERSION_CONTRACT_ONG
-		contractAddr = utils.OngContractAddress
+	case ASSET_GAS:
+		version = VERSION_CONTRACT_GAS
+		contractAddr = utils.GasContractAddress
 	default:
 		return nil, fmt.Errorf("Unsupport asset:%s", asset)
 	}
@@ -221,8 +215,8 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 	if err != nil {
 		return nil, fmt.Errorf("to address:%s invalid:%s", to, err)
 	}
-	var sts []*ont.State
-	sts = append(sts, &ont.State{
+	var sts []*gas.State
+	sts = append(sts, &gas.State{
 		From:  fromAddr,
 		To:    toAddr,
 		Value: amount,
@@ -230,12 +224,9 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 	var version byte
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case ASSET_ONT:
-		version = VERSION_CONTRACT_ONT
-		contractAddr = utils.OntContractAddress
-	case ASSET_ONG:
-		version = VERSION_CONTRACT_ONG
-		contractAddr = utils.OngContractAddress
+	case ASSET_GAS:
+		version = VERSION_CONTRACT_GAS
+		contractAddr = utils.GasContractAddress
 	default:
 		return nil, fmt.Errorf("unsupport asset:%s", asset)
 	}
@@ -260,7 +251,7 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 	if err != nil {
 		return nil, fmt.Errorf("to address:%s invalid:%s", to, err)
 	}
-	transferFrom := &ont.TransferFrom{
+	transferFrom := &gas.TransferFrom{
 		Sender: senderAddr,
 		From:   fromAddr,
 		To:     toAddr,
@@ -269,12 +260,9 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 	var version byte
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case ASSET_ONT:
-		version = VERSION_CONTRACT_ONT
-		contractAddr = utils.OntContractAddress
-	case ASSET_ONG:
-		version = VERSION_CONTRACT_ONG
-		contractAddr = utils.OngContractAddress
+	case ASSET_GAS:
+		version = VERSION_CONTRACT_GAS
+		contractAddr = utils.GasContractAddress
 	default:
 		return nil, fmt.Errorf("unsupport asset:%s", asset)
 	}

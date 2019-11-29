@@ -31,7 +31,6 @@ import (
 	bactor "github.com/DNAProject/DNA/http/base/actor"
 	bcomn "github.com/DNAProject/DNA/http/base/common"
 	berr "github.com/DNAProject/DNA/http/base/error"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"strconv"
 )
 
@@ -512,46 +511,6 @@ func GetAllowance(cmd map[string]interface{}) map[string]interface{} {
 	rsp, err := bcomn.GetAllowance(asset, fromAddr, toAddr)
 	if err != nil {
 		return ResponsePack(berr.INVALID_PARAMS)
-	}
-	resp["Result"] = rsp
-	return resp
-}
-
-//get unbound ong
-func GetUnboundOng(cmd map[string]interface{}) map[string]interface{} {
-	resp := ResponsePack(berr.SUCCESS)
-	toAddrStr, ok := cmd["Addr"].(string)
-	if !ok {
-		return ResponsePack(berr.INVALID_PARAMS)
-	}
-	toAddr, err := bcomn.GetAddress(toAddrStr)
-	if err != nil {
-		return ResponsePack(berr.INVALID_PARAMS)
-	}
-	fromAddr := utils.OntContractAddress
-	rsp, err := bcomn.GetAllowance("ong", fromAddr, toAddr)
-	if err != nil {
-		return ResponsePack(berr.INVALID_PARAMS)
-	}
-	bcomn.GetGrantOng(toAddr)
-	resp["Result"] = rsp
-	return resp
-}
-
-//get grant ong
-func GetGrantOng(cmd map[string]interface{}) map[string]interface{} {
-	resp := ResponsePack(berr.SUCCESS)
-	toAddrStr, ok := cmd["Addr"].(string)
-	if !ok {
-		return ResponsePack(berr.INVALID_PARAMS)
-	}
-	toAddr, err := bcomn.GetAddress(toAddrStr)
-	if err != nil {
-		return ResponsePack(berr.INVALID_PARAMS)
-	}
-	rsp, err := bcomn.GetGrantOng(toAddr)
-	if err != nil {
-		return ResponsePack(berr.INTERNAL_ERROR)
 	}
 	resp["Result"] = rsp
 	return resp

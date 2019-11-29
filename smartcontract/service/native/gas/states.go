@@ -19,7 +19,7 @@
  * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package ont
+package gas
 
 import (
 	"github.com/DNAProject/DNA/common"

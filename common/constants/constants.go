@@ -41,10 +41,10 @@ const (
 
 // ong constants
 const (
-	ONG_NAME         = "ONG Token"
-	ONG_SYMBOL       = "ONG"
-	ONG_DECIMALS     = 9
-	ONG_TOTAL_SUPPLY = uint64(1000000000000000000)
+	GAS_NAME         = "Gas"
+	GAS_SYMBOL       = "GAS"
+	GAS_DECIMALS     = 9
+	GAS_TOTAL_SUPPLY = uint64(1000000000000000000)
 )
 
 // ont/ong unbound model constants

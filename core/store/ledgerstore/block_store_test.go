@@ -24,17 +24,18 @@ package ledgerstore
 import (
 	"crypto/sha256"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/core/utils"
-	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
+	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestExtractHeaderHeight(t *testing.T) {
@@ -368,14 +369,14 @@ func TestBlock(t *testing.T) {
 }
 
 func transferTx(from, to common.Address, amount uint64) (*types.Transaction, error) {
-	var sts []ont.State
-	sts = append(sts, ont.State{
+	var sts []gas.State
+	sts = append(sts, gas.State{
 		From:  from,
 		To:    to,
 		Value: amount,
 	})
 	var cversion byte
-	return invokeSmartContractTx(0, 30000, cversion, nutils.OntContractAddress, "transfer", []interface{}{sts})
+	return invokeSmartContractTx(0, 30000, cversion, nutils.GasContractAddress, "transfer", []interface{}{sts})
 }
 
 func invokeSmartContractTx(gasPrice,

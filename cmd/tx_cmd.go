@@ -23,13 +23,12 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
+	"strings"
+
 	cmdcom "github.com/DNAProject/DNA/cmd/common"
 	"github.com/DNAProject/DNA/cmd/utils"
 	"github.com/DNAProject/DNA/common"
-	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/urfave/cli"
-	"strconv"
-	"strings"
 )
 
 var SendTxCommand = cli.Command{
@@ -85,7 +84,6 @@ var TxCommond = cli.Command{
 		TransferTxCommond,
 		ApproveTxCommond,
 		TransferFromTxCommond,
-		WithdrawONGTxCommond,
 	},
 	Description: "Build transaction",
 }
@@ -142,23 +140,6 @@ var TransferFromTxCommond = cli.Command{
 	},
 }
 
-var WithdrawONGTxCommond = cli.Command{
-	Action:      withdrawONGTx,
-	Name:        "withdrawong",
-	Usage:       "Build Withdraw ONG transaction",
-	Description: "Build Withdraw ONG transaction",
-	ArgsUsage:   "<address|label|index>",
-	Flags: []cli.Flag{
-		utils.RPCPortFlag,
-		utils.WalletFileFlag,
-		utils.TransactionGasPriceFlag,
-		utils.TransactionGasLimitFlag,
-		utils.TransactionPayerFlag,
-		utils.WithdrawONGAmountFlag,
-		utils.WithdrawONGReceiveAccountFlag,
-	},
-}
-
 func transferTx(ctx *cli.Context) error {
 	if !ctx.IsSet(utils.GetFlagName(utils.TransactionToFlag)) ||
 		!ctx.IsSet(utils.GetFlagName(utils.TransactionFromFlag)) ||
@@ -173,7 +154,7 @@ func transferTx(ctx *cli.Context) error {
 
 	asset := ctx.String(utils.GetFlagName(utils.TransactionAssetFlag))
 	if asset == "" {
-		asset = utils.ASSET_ONT
+		asset = utils.ASSET_GAS
 	}
 	from := ctx.String(utils.GetFlagName(utils.TransactionFromFlag))
 	fromAddr, err := cmdcom.ParseAddress(from, ctx)
@@ -394,93 +375,6 @@ func transferFromTx(ctx *cli.Context) error {
 	sink := common.ZeroCopySink{}
 	tx.Serialization(&sink)
 	PrintInfoMsg("TransferFrom raw tx:")
-	PrintInfoMsg(hex.EncodeToString(sink.Bytes()))
-	return nil
-}
-
-func withdrawONGTx(ctx *cli.Context) error {
-	SetRpcPort(ctx)
-	if ctx.NArg() < 1 {
-		PrintErrorMsg("Missing account argument.")
-		cli.ShowSubcommandHelp(ctx)
-		return nil
-	}
-	addrArg := ctx.Args().First()
-	accAddr, err := cmdcom.ParseAddress(addrArg, ctx)
-	if err != nil {
-		return err
-	}
-
-	fromAddr := nutils.OntContractAddress.ToBase58()
-
-	var amount uint64
-	amountStr := ctx.String(utils.GetFlagName(utils.TransferFromAmountFlag))
-	if amountStr == "" {
-		balance, err := utils.GetAllowance("ong", fromAddr, accAddr)
-		if err != nil {
-			return err
-		}
-		amount, err = strconv.ParseUint(balance, 10, 64)
-		if err != nil {
-			return err
-		}
-		if amount <= 0 {
-			return fmt.Errorf("haven't unbound ong")
-		}
-		amountStr = utils.FormatOng(amount)
-	} else {
-		amount = utils.ParseOng(amountStr)
-		if amount <= 0 {
-			return fmt.Errorf("haven't unbound ong")
-		}
-		amountStr = utils.FormatOng(amount)
-	}
-
-	var payer common.Address
-	payerAddr := ctx.String(utils.GetFlagName(utils.TransactionPayerFlag))
-	if payerAddr != "" {
-		payerAddr, err = cmdcom.ParseAddress(payerAddr, ctx)
-		if err != nil {
-			return err
-		}
-	} else {
-		payerAddr = accAddr
-	}
-	payer, err = common.AddressFromBase58(payerAddr)
-	if err != nil {
-		return fmt.Errorf("invalid payer address:%s", err)
-	}
-
-	var receiveAddr string
-	receive := ctx.String(utils.GetFlagName(utils.WithdrawONGReceiveAccountFlag))
-	if receive == "" {
-		receiveAddr = accAddr
-	} else {
-		receiveAddr, err = cmdcom.ParseAddress(receive, ctx)
-		if err != nil {
-			return err
-		}
-	}
-
-	gasPrice := ctx.Uint64(utils.TransactionGasPriceFlag.Name)
-	gasLimit := ctx.Uint64(utils.TransactionGasLimitFlag.Name)
-
-	PrintInfoMsg("Withdraw account:%s", accAddr)
-	PrintInfoMsg("Receive account:%s", receiveAddr)
-	PrintInfoMsg("Withdraw ONG amount:%v", amount)
-	mutTx, err := utils.TransferFromTx(gasPrice, gasLimit, "ong", accAddr, fromAddr, receiveAddr, amount)
-	if err != nil {
-		return err
-	}
-
-	mutTx.Payer = payer
-	tx, err := mutTx.IntoImmutable()
-	if err != nil {
-		return fmt.Errorf("IntoImmutable error:%s", err)
-	}
-	sink := common.ZeroCopySink{}
-	tx.Serialization(&sink)
-	PrintInfoMsg("Withdraw raw tx:")
 	PrintInfoMsg(hex.EncodeToString(sink.Bytes()))
 	return nil
 }

@@ -21,60 +21,60 @@
 package testsuite
 
 import (
+	"testing"
+
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	_ "github.com/DNAProject/DNA/smartcontract/service/native/init"
-	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/storage"
 	"github.com/stretchr/testify/assert"
-
-	"testing"
 )
 
-func setOntBalance(db *storage.CacheDB, addr common.Address, value uint64) {
-	balanceKey := ont.GenBalanceKey(utils.OntContractAddress, addr)
+func setBalance(db *storage.CacheDB, addr common.Address, value uint64) {
+	balanceKey := gas.GenBalanceKey(utils.GasContractAddress, addr)
 	item := utils.GenUInt64StorageItem(value)
 	db.Put(balanceKey, item.ToArray())
 }
 
-func ontBalanceOf(native *native.NativeService, addr common.Address) int {
+func getBalanceOf(native *native.NativeService, addr common.Address) int {
 	sink := common.NewZeroCopySink(nil)
 	utils.EncodeAddress(sink, addr)
 	native.Input = sink.Bytes()
-	buf, _ := ont.OntBalanceOf(native)
+	buf, _ := gas.GasBalanceOf(native)
 	val := common.BigIntFromNeoBytes(buf)
 	return int(val.Uint64())
 }
 
-func ontTransfer(native *native.NativeService, from, to common.Address, value uint64) error {
+func makeTransfer(native *native.NativeService, from, to common.Address, value uint64) error {
 	native.Tx.SignedAddr = append(native.Tx.SignedAddr, from)
 
-	state := ont.State{from, to, value}
-	native.Input = common.SerializeToBytes(&ont.Transfers{States: []ont.State{state}})
+	state := gas.State{from, to, value}
+	native.Input = common.SerializeToBytes(&gas.Transfers{States: []gas.State{state}})
 
-	_, err := ont.OntTransfer(native)
+	_, err := gas.GasTransfer(native)
 	return err
 }
 
 func TestTransfer(t *testing.T) {
-	InvokeNativeContract(t, utils.OntContractAddress, func(native *native.NativeService) ([]byte, error) {
+	InvokeNativeContract(t, utils.GasContractAddress, func(native *native.NativeService) ([]byte, error) {
 		a := RandomAddress()
 		b := RandomAddress()
 		c := RandomAddress()
-		setOntBalance(native.CacheDB, a, 10000)
+		setBalance(native.CacheDB, a, 10000)
 
-		assert.Equal(t, ontBalanceOf(native, a), 10000)
-		assert.Equal(t, ontBalanceOf(native, b), 0)
-		assert.Equal(t, ontBalanceOf(native, c), 0)
+		assert.Equal(t, getBalanceOf(native, a), 10000)
+		assert.Equal(t, getBalanceOf(native, b), 0)
+		assert.Equal(t, getBalanceOf(native, c), 0)
 
-		assert.Nil(t, ontTransfer(native, a, b, 10))
-		assert.Equal(t, ontBalanceOf(native, a), 9990)
-		assert.Equal(t, ontBalanceOf(native, b), 10)
+		assert.Nil(t, makeTransfer(native, a, b, 10))
+		assert.Equal(t, getBalanceOf(native, a), 9990)
+		assert.Equal(t, getBalanceOf(native, b), 10)
 
-		assert.Nil(t, ontTransfer(native, b, c, 10))
-		assert.Equal(t, ontBalanceOf(native, b), 0)
-		assert.Equal(t, ontBalanceOf(native, c), 10)
+		assert.Nil(t, makeTransfer(native, b, c, 10))
+		assert.Equal(t, getBalanceOf(native, b), 0)
+		assert.Equal(t, getBalanceOf(native, c), 10)
 
 		return nil, nil
 	})

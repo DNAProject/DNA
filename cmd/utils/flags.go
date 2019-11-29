@@ -340,7 +340,7 @@ var (
 	TransactionAssetFlag = cli.StringFlag{
 		Name:  "asset",
 		Usage: "Asset of ONT or ONG",
-		Value: ASSET_ONT,
+		Value: ASSET_GAS,
 	}
 	TransactionFromFlag = cli.StringFlag{
 		Name:  "from",

@@ -63,7 +63,6 @@ const (
 	WHITE_NODE                       = "whiteNode"
 	QUIT_NODE                        = "quitNode"
 	WITHDRAW                         = "withdraw"
-	WITHDRAW_ONG                     = "withdrawOng"
 	WITHDRAW_FEE                     = "withdrawFee"
 	COMMIT_DPOS                      = "commitDpos"
 	UPDATE_CONFIG                    = "updateConfig"
@@ -105,7 +104,7 @@ const (
 )
 
 // candidate fee must >= 1 ONG
-var MIN_CANDIDATE_FEE = uint64(math.Pow(10, constants.ONG_DECIMALS))
+var MIN_CANDIDATE_FEE = uint64(math.Pow(10, constants.GAS_DECIMALS))
 var AUTHORIZE_INFO_POOL = []byte{118, 111, 116, 101, 73, 110, 102, 111, 80, 111, 111, 108}
 var Xi = []uint32{
 	0, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1100000, 1200000, 1300000, 1400000,
@@ -133,7 +132,6 @@ func RegisterGovernanceContract(native *native.NativeService) {
 	native.Register(UNAUTHORIZE_FOR_PEER, UnAuthorizeForPeer)
 	native.Register(WITHDRAW, Withdraw)
 	native.Register(QUIT_NODE, QuitNode)
-	native.Register(WITHDRAW_ONG, WithdrawOng)
 	native.Register(CHANGE_MAX_AUTHORIZATION, ChangeMaxAuthorization)
 	native.Register(SET_PEER_COST, SetPeerCost)
 	native.Register(WITHDRAW_FEE, WithdrawFee)
@@ -1251,49 +1249,6 @@ func TransferPenalty(native *native.NativeService) ([]byte, error) {
 		return nil, fmt.Errorf("withdrawPenaltyStake, withdraw penaltyStake error: %v", err)
 	}
 
-	return utils.BYTE_TRUE, nil
-}
-
-//Withdraw unbounded ONG according to deposit ONT in this governance contract
-func WithdrawOng(native *native.NativeService) ([]byte, error) {
-	params := new(WithdrawOngParam)
-	if err := params.Deserialization(common.NewZeroCopySource(native.Input)); err != nil {
-		return utils.BYTE_FALSE, fmt.Errorf("deserialize, deserialize transferPenaltyParam error: %v", err)
-	}
-	contract := native.ContextRef.CurrentContext().ContractAddress
-
-	//check witness
-	err := utils.ValidateOwner(native, params.Address)
-	if err != nil {
-		return utils.BYTE_FALSE, fmt.Errorf("withdrawOng, checkWitness error: %v", err)
-	}
-
-	// ont transfer to trigger unboundong
-	err = appCallTransferOnt(native, utils.GovernanceContractAddress, utils.GovernanceContractAddress, 1)
-	if err != nil {
-		return utils.BYTE_FALSE, fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
-	}
-
-	totalStake, err := getTotalStake(native, contract, params.Address)
-	if err != nil {
-		return utils.BYTE_FALSE, fmt.Errorf("getTotalStake, get totalStake error: %v", err)
-	}
-
-	preTimeOffset := totalStake.TimeOffset
-	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
-
-	amount := utils.CalcUnbindOng(totalStake.Stake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, totalStake.Address, amount)
-	if err != nil {
-		return utils.BYTE_FALSE, fmt.Errorf("appCallTransferFromOng, transfer from ong error: %v", err)
-	}
-
-	totalStake.TimeOffset = timeOffset
-
-	err = putTotalStake(native, contract, totalStake)
-	if err != nil {
-		return utils.BYTE_FALSE, fmt.Errorf("putTotalStake, put totalStake error: %v", err)
-	}
 	return utils.BYTE_TRUE, nil
 }
 

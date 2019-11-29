@@ -577,7 +577,7 @@ func depositTotalStake(native *native.NativeService, contract common.Address, ad
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
 	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, totalStake.Address, amount)
+	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.GasContractAddress, totalStake.Address, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOng, transfer from ong error: %v", err)
 	}
@@ -606,7 +606,7 @@ func withdrawTotalStake(native *native.NativeService, contract common.Address, a
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
 	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, totalStake.Address, amount)
+	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.GasContractAddress, totalStake.Address, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOng, transfer from ong error: %v", err)
 	}
@@ -667,7 +667,7 @@ func withdrawPenaltyStake(native *native.NativeService, contract common.Address,
 		return fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
 	}
 	//ong approve
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.OntContractAddress, address, amount+preAmount)
+	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.GasContractAddress, address, amount+preAmount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOng, transfer from ong error: %v", err)
 	}

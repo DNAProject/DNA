@@ -26,32 +26,28 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/DNAProject/DNA/common"
-	"github.com/DNAProject/DNA/common/constants"
 	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
 	cutils "github.com/DNAProject/DNA/core/utils"
 	ontErrors "github.com/DNAProject/DNA/errors"
 	bactor "github.com/DNAProject/DNA/http/base/actor"
 	"github.com/DNAProject/DNA/smartcontract/event"
-	"github.com/DNAProject/DNA/smartcontract/service/native/ont"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	cstate "github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/DNAProject/DNA/vm/neovm"
 	"github.com/ontio/ontology-crypto/keypair"
-	"io"
-	"strings"
-	"time"
 )
 
 const MAX_SEARCH_HEIGHT uint32 = 100
 const MAX_REQUEST_BODY_SIZE = 1 << 20
 
 type BalanceOfRsp struct {
-	Ont    string `json:"ont"`
-	Ong    string `json:"ong"`
+	Gas    string `json:"gas"`
 	Height string `json:"height"`
 }
 
@@ -283,43 +279,21 @@ func GetBlockInfo(block *types.Block) BlockInfo {
 }
 
 func GetBalance(address common.Address) (*BalanceOfRsp, error) {
-	balances, height, err := GetContractBalance(0, []common.Address{utils.OntContractAddress, utils.OngContractAddress}, address, true)
+	balances, height, err := GetContractBalance(0, []common.Address{utils.GasContractAddress}, address, true)
 	if err != nil {
-		return nil, fmt.Errorf("get ont balance error:%s", err)
+		return nil, fmt.Errorf("get balance error:%s", err)
 	}
 	return &BalanceOfRsp{
-		Ont:    fmt.Sprintf("%d", balances[0]),
-		Ong:    fmt.Sprintf("%d", balances[1]),
+		Gas:    fmt.Sprintf("%d", balances[0]),
 		Height: fmt.Sprintf("%d", height),
 	}, nil
-}
-
-func GetGrantOng(addr common.Address) (string, error) {
-	key := append([]byte(ont.UNBOUND_TIME_OFFSET), addr[:]...)
-	value, err := ledger.DefLedger.GetStorageItem(utils.OntContractAddress, key)
-	if err != nil {
-		value = []byte{0, 0, 0, 0}
-	}
-	source := common.NewZeroCopySource(value)
-	v, eof := source.NextUint32()
-	if eof {
-		return fmt.Sprintf("%v", 0), io.ErrUnexpectedEOF
-	}
-	onts, _, err := GetContractBalance(0, []common.Address{utils.OntContractAddress}, addr, false)
-	if err != nil {
-		return fmt.Sprintf("%v", 0), err
-	}
-	boundong := utils.CalcUnbindOng(onts[0], v, uint32(time.Now().Unix())-constants.GENESIS_BLOCK_TIMESTAMP)
-	return fmt.Sprintf("%v", boundong), nil
 }
 
 func GetAllowance(asset string, from, to common.Address) (string, error) {
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
-	case "ont":
-		contractAddr = utils.OntContractAddress
-	case "ong":
-		contractAddr = utils.OngContractAddress
+	case "gas":
+		contractAddr = utils.GasContractAddress
 	default:
 		return "", fmt.Errorf("unsupport asset")
 	}
