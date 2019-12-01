@@ -38,10 +38,10 @@ import (
 
 func setupSigSvr() *cli.App {
 	app := cli.NewApp()
-	app.Usage = "Ontology Sig server"
+	app.Usage = "DNA Sig server"
 	app.Action = startSigSvr
 	app.Version = config.Version
-	app.Copyright = "Copyright in 2018 The Ontology Authors"
+	app.Copyright = "Copyright in 2019 The DNA Dev Team"
 	app.Flags = []cli.Flag{
 		utils.LogLevelFlag,
 		utils.CliWalletDirFlag,

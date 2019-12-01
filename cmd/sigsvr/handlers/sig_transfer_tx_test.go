@@ -38,7 +38,7 @@ func TestSigTransferTransaction(t *testing.T) {
 	sigReq := &SigTransferTransactionReq{
 		GasLimit: 0,
 		GasPrice: 0,
-		Asset:    "ont",
+		Asset:    "gas",
 		From:     defAcc.Address.ToBase58(),
 		To:       acc.Address.ToBase58(),
 		Amount:   "10",

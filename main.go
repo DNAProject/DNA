@@ -66,10 +66,10 @@ import (
 
 func setupAPP() *cli.App {
 	app := cli.NewApp()
-	app.Usage = "Ontology CLI"
-	app.Action = startOntology
+	app.Usage = "DNA CLI"
+	app.Action = startDNA
 	app.Version = config.Version
-	app.Copyright = "Copyright in 2018 The Ontology Authors"
+	app.Copyright = "Copyright in 2019 The DNA Dev Team"
 	app.Commands = []cli.Command{
 		cmd.AccountCommand,
 		cmd.InfoCommand,
@@ -143,7 +143,7 @@ func main() {
 	}
 }
 
-func startOntology(ctx *cli.Context) {
+func startDNA(ctx *cli.Context) {
 	initLog(ctx)
 
 	log.Infof("ontology version %s", config.Version)
