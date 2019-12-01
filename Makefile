@@ -6,7 +6,7 @@ BUILD_NODE_PAR = -ldflags "-X github.com/DNAProject/DNA/common/config.Version=$(
 ARCH=$(shell uname -m)
 DBUILD=docker build
 DRUN=docker run
-DOCKER_NS ?= ontio
+DOCKER_NS ?= dna
 DOCKER_TAG=$(ARCH)-$(VERSION)
 
 SRC_FILES = $(shell git ls-files | grep -e .go$ | grep -v _test.go)
@@ -15,7 +15,7 @@ ABI=$(TOOLS)/abi
 NATIVE_ABI_SCRIPT=./cmd/abi/native_abi_script
 
 DNA: $(SRC_FILES)
-	$(GC)  $(BUILD_NODE_PAR) -o DNA main.go
+	$(GC)  $(BUILD_NODE_PAR) -o dnaNode main.go
  
 sigsvr: $(SRC_FILES) abi 
 	$(GC)  $(BUILD_NODE_PAR) -o sigsvr sigsvr.go
@@ -33,13 +33,13 @@ all: DNA tools
 DNA-cross: DNA-windows DNA-linux DNA-darwin
 
 DNA-windows:
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GC) $(BUILD_NODE_PAR) -o DNA-windows-amd64.exe main.go
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(GC) $(BUILD_NODE_PAR) -o dnaNode-windows-amd64.exe main.go
 
 DNA-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GC) $(BUILD_NODE_PAR) -o DNA-linux-amd64 main.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GC) $(BUILD_NODE_PAR) -o dnaNode-linux-amd64 main.go
 
 DNA-darwin:
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GC) $(BUILD_NODE_PAR) -o DNA-darwin-amd64 main.go
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(GC) $(BUILD_NODE_PAR) -o dnaNode-darwin-amd64 main.go
 
 tools-cross: tools-windows tools-linux tools-darwin
 
@@ -63,11 +63,11 @@ all-cross: DNA-cross tools-cross abi
 format:
 	$(GOFMT) -w main.go
 
-docker/payload: docker/build/bin/DNA docker/Dockerfile
+docker/payload: docker/build/bin/dnaNode docker/Dockerfile
 	@echo "Building DNA payload"
 	@mkdir -p $@
 	@cp docker/Dockerfile $@
-	@cp docker/build/bin/DNA $@
+	@cp docker/build/bin/dnaNode $@
 	@touch $@
 
 docker/build/bin/%: Makefile
@@ -79,7 +79,7 @@ docker/build/bin/%: Makefile
 		-v $(GOPATH)/src:/go/src \
 		-w /go/src/github.com/DNAProject/DNA \
 		golang:1.9.5-stretch \
-		$(GC)  $(BUILD_NODE_PAR) -o docker/build/bin/DNA main.go
+		$(GC)  $(BUILD_NODE_PAR) -o docker/build/bin/dnaNode main.go
 	@touch $@
 
 docker: Makefile docker/payload docker/Dockerfile 
@@ -90,5 +90,5 @@ docker: Makefile docker/payload docker/Dockerfile
 
 clean:
 	rm -rf *.8 *.o *.out *.6 *exe coverage
-	rm -rf DNA DNA-* tools docker/payload docker/build
+	rm -rf dnaNode DNA-* tools docker/payload docker/build
 
