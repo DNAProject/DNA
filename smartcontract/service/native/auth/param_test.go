@@ -25,10 +25,9 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -109,7 +108,7 @@ func TestSerialization_AssignFuncs(t *testing.T) {
 }
 
 func TestSerialization_AssignOntIDs(t *testing.T) {
-	param := &OntIDsToRoleParam{
+	param := &DIDsToRoleParam{
 		ContractAddr: GasContractAddr,
 		AdminOntID:   admin,
 		Role:         []byte(role),
@@ -118,7 +117,7 @@ func TestSerialization_AssignOntIDs(t *testing.T) {
 	bf := common.NewZeroCopySink(nil)
 	param.Serialization(bf)
 	rd := common.NewZeroCopySource(bf.Bytes())
-	param2 := new(OntIDsToRoleParam)
+	param2 := new(DIDsToRoleParam)
 	if err := param2.Deserialization(rd); err != nil {
 		t.Fatal(err)
 	}

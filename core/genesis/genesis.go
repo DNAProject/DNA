@@ -173,7 +173,7 @@ func deployAuthContract() *types.Transaction {
 }
 
 func deployOntIDContract() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.OntIDContractAddress[:], "OID", "1.0",
+	mutable, err := utils.NewDeployTransaction(nutils.DIDContractAddress[:], "OID", "1.0",
 		"DNA Dev Team", "contact@ont.io", "Blockchain Network ONT ID", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis governing token transaction error ")

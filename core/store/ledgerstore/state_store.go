@@ -37,7 +37,7 @@ import (
 	"github.com/DNAProject/DNA/core/store/leveldbstore"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
 	"github.com/DNAProject/DNA/merkle"
-	"github.com/DNAProject/DNA/smartcontract/service/native/ontid"
+	"github.com/DNAProject/DNA/smartcontract/service/native/did"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
@@ -419,14 +419,14 @@ func (self *StateStore) Close() error {
 func (self *StateStore) CheckStorage() error {
 	db := self.store
 
-	prefix := append([]byte{byte(scom.ST_STORAGE)}, utils.OntIDContractAddress[:]...) //prefix of new storage key
-	flag := append(prefix, ontid.FIELD_VERSION)
+	prefix := append([]byte{byte(scom.ST_STORAGE)}, utils.DIDContractAddress[:]...) //prefix of new storage key
+	flag := append(prefix, did.FIELD_VERSION)
 	val, err := db.Get(flag)
 	if err == nil {
 		item := &states.StorageItem{}
 		source := common.NewZeroCopySource(val)
 		err := item.Deserialization(source)
-		if err == nil && item.Value[0] == ontid.FLAG_VERSION {
+		if err == nil && item.Value[0] == did.FLAG_VERSION {
 			return nil
 		} else if err == nil {
 			return errors.New("check ontid storage: invalid version flag")
@@ -451,7 +451,7 @@ func (self *StateStore) CheckStorage() error {
 	}
 
 	tag := states.StorageItem{}
-	tag.Value = []byte{ontid.FLAG_VERSION}
+	tag.Value = []byte{did.FLAG_VERSION}
 	buf := common.NewZeroCopySink(nil)
 	tag.Serialization(buf)
 	db.BatchPut(flag, buf.Bytes())

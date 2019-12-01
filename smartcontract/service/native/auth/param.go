@@ -130,7 +130,7 @@ func (this *FuncsToRoleParam) Deserialization(source *common.ZeroCopySource) err
 	return nil
 }
 
-type OntIDsToRoleParam struct {
+type DIDsToRoleParam struct {
 	ContractAddr common.Address
 	AdminOntID   []byte
 	Role         []byte
@@ -138,7 +138,7 @@ type OntIDsToRoleParam struct {
 	KeyNo        uint64
 }
 
-func (this *OntIDsToRoleParam) Serialization(sink *common.ZeroCopySink) {
+func (this *DIDsToRoleParam) Serialization(sink *common.ZeroCopySink) {
 	serializeAddress(sink, this.ContractAddr)
 	sink.WriteVarBytes(this.AdminOntID)
 	sink.WriteVarBytes(this.Role)
@@ -150,7 +150,7 @@ func (this *OntIDsToRoleParam) Serialization(sink *common.ZeroCopySink) {
 	utils.EncodeVarUint(sink, this.KeyNo)
 }
 
-func (this *OntIDsToRoleParam) Deserialization(source *common.ZeroCopySource) error {
+func (this *DIDsToRoleParam) Deserialization(source *common.ZeroCopySource) error {
 	var err error
 	var pLen uint64
 	if this.ContractAddr, err = utils.DecodeAddress(source); err != nil {

@@ -206,7 +206,7 @@ func AssignFuncsToRole(native *native.NativeService) ([]byte, error) {
 	return utils.BYTE_TRUE, nil
 }
 
-func assignToRole(native *native.NativeService, param *OntIDsToRoleParam) (bool, error) {
+func assignToRole(native *native.NativeService, param *DIDsToRoleParam) (bool, error) {
 	//check admin's permission
 	admin, err := getContractAdmin(native, param.ContractAddr)
 	if err != nil {
@@ -240,9 +240,9 @@ func assignToRole(native *native.NativeService, param *OntIDsToRoleParam) (bool,
 		if p == nil {
 			continue
 		}
-		tokens, err := getOntIDToken(native, param.ContractAddr, p)
+		tokens, err := getDIDToken(native, param.ContractAddr, p)
 		if err != nil {
-			return false, fmt.Errorf("getOntIDToken failed: %v", err)
+			return false, fmt.Errorf("getDIDToken failed: %v", err)
 		}
 		if tokens == nil {
 			tokens = new(roleTokens)
@@ -260,7 +260,7 @@ func assignToRole(native *native.NativeService, param *OntIDsToRoleParam) (bool,
 				continue
 			}
 		}
-		err = putOntIDToken(native, param.ContractAddr, p, tokens)
+		err = putDIDToken(native, param.ContractAddr, p, tokens)
 		if err != nil {
 			return false, err
 		}
@@ -270,7 +270,7 @@ func assignToRole(native *native.NativeService, param *OntIDsToRoleParam) (bool,
 
 func AssignOntIDsToRole(native *native.NativeService) ([]byte, error) {
 	//deserialize param
-	param := new(OntIDsToRoleParam)
+	param := new(DIDsToRoleParam)
 	source := common.NewZeroCopySource(native.Input)
 	if err := param.Deserialization(source); err != nil {
 		return nil, fmt.Errorf("[assignOntIDsToRole] deserialize param failed: %v", err)
@@ -304,7 +304,7 @@ func AssignOntIDsToRole(native *native.NativeService) ([]byte, error) {
 }
 
 func getAuthToken(native *native.NativeService, contractAddr common.Address, ontID, role []byte) (*AuthToken, error) {
-	tokens, err := getOntIDToken(native, contractAddr, ontID)
+	tokens, err := getDIDToken(native, contractAddr, ontID)
 	if err != nil {
 		return nil, fmt.Errorf("get token failed, caused by %v", err)
 	}
@@ -575,9 +575,9 @@ func verifyToken(native *native.NativeService, contractAddr common.Address, call
 	}
 
 	//check if caller has the permanent auth token
-	tokens, err := getOntIDToken(native, contractAddr, caller)
+	tokens, err := getDIDToken(native, contractAddr, caller)
 	if err != nil {
-		return false, fmt.Errorf("getOntIDToken failed: %v", err)
+		return false, fmt.Errorf("getDIDToken failed: %v", err)
 	}
 	if tokens != nil {
 		for _, token := range tokens.tokens {
@@ -645,7 +645,7 @@ func verifySig(native *native.NativeService, ontID []byte, keyNo uint64) (bool, 
 	sink.WriteVarBytes(ontID)
 	utils.EncodeVarUint(sink, keyNo)
 	args := sink.Bytes()
-	ret, err := native.NativeCall(utils.OntIDContractAddress, "verifySignature", args)
+	ret, err := native.NativeCall(utils.DIDContractAddress, "verifySignature", args)
 	if err != nil {
 		return false, err
 	}

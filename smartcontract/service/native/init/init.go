@@ -27,13 +27,13 @@ import (
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/auth"
+	"github.com/DNAProject/DNA/smartcontract/service/native/did"
+	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	params "github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/governance"
-	"github.com/DNAProject/DNA/smartcontract/service/native/ontid"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/neovm"
 	vm "github.com/DNAProject/DNA/vm/neovm"
-	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 )
 
 var (
@@ -43,7 +43,7 @@ var (
 func init() {
 	gas.InitGas()
 	params.InitGlobalParams()
-	ontid.Init()
+	did.Init()
 	auth.Init()
 	governance.InitGovernance()
 }

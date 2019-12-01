@@ -268,8 +268,8 @@ var (
 		Usage: "Pub key list of multi `<addresses>`, separate addreses with comma `,`",
 	}
 	IdentityFlag = cli.BoolFlag{
-		Name:  "ontid",
-		Usage: "create an ONT ID instead of account",
+		Name:  "did",
+		Usage: "create an DID instead of account",
 	}
 
 	//SmartContract setting
