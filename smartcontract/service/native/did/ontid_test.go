@@ -76,7 +76,7 @@ func CaseRegID(t *testing.T, n *native.NativeService) {
 	a := account.NewAccount("")
 
 	// 1. register invalid id, should fail
-	if err := regID(n, "did:ont:abcd1234", a); err == nil {
+	if err := regID(n, "did:dna:abcd1234", a); err == nil {
 		t.Error("invalid id registered")
 	}
 

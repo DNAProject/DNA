@@ -66,7 +66,7 @@ func CaseController(t *testing.T, n *native.NativeService) {
 	}
 
 	// 5. register with invalid id, should fail
-	if err := regControlledID(n, "did:ont::123", id0, 1, a0.Address); err == nil {
+	if err := regControlledID(n, "did:dna::123", id0, 1, a0.Address); err == nil {
 		t.Error("invalid id registered")
 	}
 

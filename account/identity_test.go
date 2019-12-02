@@ -26,7 +26,7 @@ import (
 	"testing"
 )
 
-var id = "did:ont:TSS6S4Xhzt5wtvRBTm4y3QCTRqB4BnU7vT"
+var id = "did:dna:TSS6S4Xhzt5wtvRBTm4y3QCTRqB4BnU7vT"
 
 func TestCreate(t *testing.T) {
 	nonce, _ := hex.DecodeString("4c6b58adc6b8c6774eee0eb07dac4e198df87aae28f8932db3982edf3ff026e4")
@@ -47,11 +47,11 @@ func TestVerify(t *testing.T) {
 	}
 
 	invalid := []string{
-		"did:ont:",
+		"did:dna:",
 		"did:else:TSS6S4Xhzt5wtvRBTm4y3QCTRqB4BnU7vT",
 		"TSS6S4Xhzt5wtvRBTm4y3QCTRqB4BnU7vT",
 		"did:else:TSS6S4Xhzt5wtvRBTm4y3QCT",
-		"did:ont:TSS6S4Xhzt5wtvRBTm4y3QCTRqB4BnU7vt",
+		"did:dna:TSS6S4Xhzt5wtvRBTm4y3QCTRqB4BnU7vt",
 	}
 
 	for _, v := range invalid {

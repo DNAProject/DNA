@@ -72,7 +72,7 @@ func VerifyID(id string) bool {
 	if len(id) < 9 {
 		return false
 	}
-	if id[0:8] != "did:ont:" {
+	if id[0:8] != "did:dna:" {
 		return false
 	}
 	buf, err := base58.BitcoinEncoding.Decode([]byte(id[8:]))

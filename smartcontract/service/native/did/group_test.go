@@ -34,9 +34,9 @@ import (
 )
 
 func TestDeserializeGroup(t *testing.T) {
-	id0 := []byte("did:ont:ARY2ekof1eCSetcimGdjqyzUYaVDDPVWmw")
-	id1 := []byte("did:ont:ASbxtSqrpmydpjqCUGDiQp2mzsfd4zFArs")
-	id2 := []byte("did:ont:AGxc3cdeB6QFvmZXzWhGwzuvohNtqaaaDw")
+	id0 := []byte("did:dna:ARY2ekof1eCSetcimGdjqyzUYaVDDPVWmw")
+	id1 := []byte("did:dna:ASbxtSqrpmydpjqCUGDiQp2mzsfd4zFArs")
+	id2 := []byte("did:dna:AGxc3cdeB6QFvmZXzWhGwzuvohNtqaaaDw")
 	g_ := &Group{
 		Threshold: 1,
 		Members: []interface{}{
@@ -51,9 +51,7 @@ func TestDeserializeGroup(t *testing.T) {
 		},
 	}
 
-	data, _ := hex.DecodeString("01022a6469643a6f6e743a41525932656b6f6631654353657463696d47646a71797a5559615644445056576d775a01022a6469643a6f6e743a4153627874537172706d7964706a7143554744695170326d7a736664347a464172732a6469643a6f6e743a414778633363646542365146766d5a587a576847777a75766f684e7471616161447701020101")
-
-	g, err := deserializeGroup(data)
+	g, err := deserializeGroup(g_.Serialize())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,6 +134,7 @@ func TestDeserializeGroup2(t *testing.T) {
 }
 
 func TestSigners(t *testing.T) {
+	// FIXME: change to did:dna:
 	id0 := []byte("did:ont:ARY2ekof1eCSetcimGdjqyzUYaVDDPVWmw")
 	id1 := []byte("did:ont:ASbxtSqrpmydpjqCUGDiQp2mzsfd4zFArs")
 	id2 := []byte("did:ont:AGxc3cdeB6QFvmZXzWhGwzuvohNtqaaaDw")
