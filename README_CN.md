@@ -14,7 +14,7 @@ DNA是go语言实现的基于区块链技术的去中心化的分布式网络协
 * 基于IPFS的分布式存储和文件共享解决方案
 * 节点访问权限控制
 * P2P连接链路加密
-* 多种共识算法支持 (DBFT/RBFT/SBFT)
+* 多种共识算法支持 (DBFT/VBFT)
 * 可配置区块生成时间
 * 可配置电子货币模型
 * 可配置的分区共识(进行中)
@@ -47,10 +47,9 @@ $ glide install
 $ make
 ```
 
-成功编译后会生成两个可以执行程序
+成功编译后会生成可执行程序
 
-* `node`: 节点程序
-* `nodectl`: 以命令行方式提供的节点控制程序
+* `dnaNode`: 节点程序
 
 # 部署
 
@@ -65,8 +64,7 @@ $ make
 
 1. 将相关文件复制到目标主机，包括：
     - 默认配置文件`config.json`
-    - 节点程序`node`
-    - 节点控制程序`nodectl`
+    - 节点程序`dnaNode`
 
 2. 设置每个节点网络连接的端口号（推荐不做修改，使用默认端口配置）
     - `NodePort`为的P2P连接端口号（默认20338）
@@ -78,23 +76,21 @@ $ make
 4. 创建钱包文件
     - 通过命令行程序，在每个主机上分别创建节点运行所需的钱包文件wallet.dat 
       
-        `$ ./nodectl wallet -c -p password` 
-
-        注：通过-p参数设置钱包密码
+        `$ ./dnaNode account add -d` 
 
 5. 记账人配置
     - 为每个节点创建钱包时会显示钱包的公钥信息，将所有节点的公钥信息分别填写到每个节点的配置文件的`BookKeepers`项中
     
         注：每个节点的钱包公钥信息也可以通过命令行程序查看：
     
-        `$ ./nodectl wallet -l -p password` 
+        `$ ./dnaNode account list -v` 
 
 
 多机部署配置完成，每个节点目录结构如下
 
 ```shell
 $ ls
-config.json node nodectl wallet.dat
+config.json dnaNode wallet.dat
 ```
 
 一个配置文件片段如下, 其中10.0.1.100、10.0.1.101等都是种子节点地址:
@@ -127,8 +123,7 @@ $ cat config.json
 
 在单机上创建4个不同的目录，类似多机部署的方法分别在每个目录下存放以下文件：
 - 默认配置文件`config.json`
-- 节点程序`node`
-- 节点控制程序`nodectl`
+- 节点程序`dnaNode`
 - 钱包文件`wallet.dat`
 与多机配置不同的是，需要保证本机上端口不冲突, 请使用者自行修改个端口值。
 
@@ -138,23 +133,19 @@ $ cat config.json
 $ tree
 ├── node1
 │   ├── config.json
-│   ├── node
-│   ├── nodectl
+│   ├── dnaNode
 │   └── wallet.dat
 ├── node2
 │   ├── config.json
-│   ├── node
-│   ├── nodectl
+│   ├── dnaNode
 │   └── wallet.dat
 ├── node3
 │   ├── config.json
-│   ├── node
-│   ├── nodectl
+│   ├── dnaNode
 │   └── wallet.dat
 └── node4
     ├── config.json
-    ├── node
-    ├── nodectl
+│   ├── dnaNode
     └── wallet.dat
 ```
 - 配置文件参考
@@ -259,65 +250,12 @@ $ cat node[1234]/config.json
 以任意顺序运行每个节点node程序，并在出现`Password:`提示后输入节点的钱包密码
 
 ```shell
-$ ./node
+$ ./dnaNode
 $ - 输入你的钱包口令
 ```
 
-## 在开放公共环境中测试DNA
- 
-1. 交易 :
-```
-./nodectl --ip 139.219.65.178 --port 10336 test -tx perf -num 10
-```
+了解更多请运行 `./dnaNode --help`.
 
-2. 注册,分发,交易资产 :
-```
-./nodectl --ip 139.219.65.178 --port 10336 test -tx full
-```
-
-3. 查询区块信息 :
-```
-./nodectl --ip 139.219.65.178 --port 10336 info -height 10
-```
-
-4. 查询交易信息 :
-```
-./nodectl --ip 139.219.65.178 --port 10336 info -txhash d438896f07786b74281bc70259b0caaccb87460171104ea17473b5e802033a98
-```
-
-......
-
-了解更多请运行 `./nodectl --h`.
-
-## 测试环境
-
-我们在云上部署了DNA供大家使用
-
-主要功能包括：
-1. 区块链相关信息查询
-    - 区块信息
-    - 交易信息
-    - 节点信息
-2. 资产操作
-    - 注册资产
-    - 发型资产
-    - 转账
-3. 测试交易发送
-
-使用方式参见：
-
-[forum.DNAProject.com/DNA节点控制工具](https://forum.dnaproject.org/t/dna-nodectl/57)
-
-可用节点如下：
-```
-IP               PORT
-----------------------
-139.219.65.178:  10336
-139.219.99.201:  10336
-139.219.96.154:  10336
-```
-
-注：以上环境仅供测试使用，数据可能丢失或重置，我们不保证测试数据安全，请用户注意备份数据。
 
 # 贡献代码
 
@@ -374,4 +312,4 @@ IP               PORT
 
 # 许可证
 
-DNA遵守Apache License, 版本2.0。 详细信息请查看项目根目录下的LICENSE文件。
+DNA遵守LGPL License, 版本3.0。 详细信息请查看项目根目录下的LICENSE文件。

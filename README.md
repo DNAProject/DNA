@@ -65,14 +65,14 @@ To run DNA successfully, at least 4 nodes are required. The four nodes can be de
 ## Configurations for multi-hosts deployment
 
  We can do a quick multi-host deployment by modifying the default configuration file `config.json`. Change the IP address in `SeedList` section to the seed node's IP address, and then copy the changed file to the hosts that you will run on.
- On each host, put the executable program `node`, `nodectl` and the configuration file `config.json` into the same directory. Like :
+ On each host, put the executable program `dnaNode` and the configuration file `config.json` into the same directory. Like :
  
 ```shell
 $ ls
-config.json node nodectl
+config.json dnaNode
 
 ```
- Each node also needs a `wallet.dat` to run. The quickest way to generate wallets is to run `./nodectl wallet -c -p YourPassword` on each host.
+ Each node also needs a `wallet.dat` to run. The quickest way to generate wallets is to run `./dnaNode account add -d` on each host.
  Then, change the `BookKeepers` field to the 4 nodes' wallet public keys, which you can get from the last command's echo. The public key sequence does not matter.
  Now all configurations are completed.
  
@@ -106,7 +106,7 @@ $ cat config.json
 
 ## Configurations for single-host deployment
 
- Copy the executable file `node`, `nodectl` and configuration file `config.json` to 4 different directories on the single host. Then change each `config.json` file as following.
+ Copy the executable file `dnaNode` and configuration file `config.json` to 4 different directories on the single host. Then change each `config.json` file as following.
  *	The SeedList section should be same in all `config.json`.
  *	For the seed node, the `NodePort` is the same with the port in `SeedList` part.
  *	For each non-seed node, the `NodePort` should have different ports.
@@ -120,23 +120,19 @@ $ cat config.json
 $ tree
 ├── node1
 │   ├── config.json
-│   ├── node
-│   ├── nodectl
+│   ├── dnaNode
 │   └── wallet.dat
 ├── node2
 │   ├── config.json
-│   ├── node
-│   ├── nodectl
+│   ├── dnaNode
 │   └── wallet.dat
 ├── node3
 │   ├── config.json
-│   ├── node
-│   ├── nodectl
+│   ├── dnaNode
 │   └── wallet.dat
 └── node4
     ├── config.json
-    ├── node
-    ├── nodectl
+    ├── dnaNode
     └── wallet.dat
 ```
 
@@ -245,44 +241,8 @@ $ ./node
 $ - input you wallet password
 ```
 
-## Testing DNA in an open environment
- 
- We also provide an open testing environment. It supports the operation below:
+Run `./dnaNode --help` for more details.
 
-1. make some transactions :
-```
-./nodectl --ip 139.219.65.178 --port 10336 test -tx perf -num 10
-```
-
-2. register, issue, transfer assert :
-```
-./nodectl --ip 139.219.65.178 --port 10336 test -tx full
-```
-
-3. look up block's information :
-```
-./nodectl --ip 139.219.65.178 --port 10336 info -height 10
-```
-
-4. look up transaction's information :
-```
-./nodectl --ip 139.219.65.178 --port 10336 info -txhash d438896f07786b74281bc70259b0caaccb87460171104ea17473b5e802033a98
-```
-
-......
-
-Run `./nodectl --h` for more details.
-
-Some other available nodes for testing:
-```
-IP               PORT
-----------------------
-139.219.65.178:  10336
-139.219.99.201:  10336
-139.219.96.154:  10336
-```
-
- `Notice: The nodes above are intended to be used for public testing only. The data saved on the testing chain maybe be reset at any time. Keep in mind to back up the data by yourself to avoid data loss.`
 
 # Contributing
 
@@ -323,4 +283,4 @@ looks like this:
 
 # License
 
-DNA is licensed under the Apache License, Version 2.0. See LICENSE for the full license text.
+DNA blockchain is licensed under the LGPL License, Version 3.0. See LICENSE for the full license text.
