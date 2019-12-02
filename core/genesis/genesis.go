@@ -34,12 +34,12 @@ import (
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/core/utils"
+	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	"github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/governance"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/neovm"
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 )
 
 const (
