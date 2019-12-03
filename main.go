@@ -146,7 +146,7 @@ func main() {
 func startDNA(ctx *cli.Context) {
 	initLog(ctx)
 
-	log.Infof("ontology version %s", config.Version)
+	log.Infof("version %s", config.Version)
 
 	setMaxOpenFiles()
 
@@ -453,7 +453,7 @@ func waitToExit(db *ledger.Ledger) {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	go func() {
 		for sig := range sc {
-			log.Infof("Ontology received exit signal: %v.", sig.String())
+			log.Infof("received exit signal: %v.", sig.String())
 			log.Infof("closing ledger...")
 			db.Close()
 			close(exit)
