@@ -86,13 +86,9 @@ func ParseOnt(rawAmount string) uint64 {
 
 func CheckAssetAmount(asset string, amount uint64) error {
 	switch strings.ToLower(asset) {
-	case "ont":
-		if amount > constants.ONT_TOTAL_SUPPLY {
-			return fmt.Errorf("amount:%d larger than ONT total supply:%d", amount, constants.ONT_TOTAL_SUPPLY)
-		}
-	case "ong":
+	case "gas":
 		if amount > constants.GAS_TOTAL_SUPPLY {
-			return fmt.Errorf("amount:%d larger than ONG total supply:%d", amount, constants.GAS_TOTAL_SUPPLY)
+			return fmt.Errorf("amount:%d larger than GAS total supply:%d", amount, constants.GAS_TOTAL_SUPPLY)
 		}
 	default:
 		return fmt.Errorf("unknown asset:%s", asset)
