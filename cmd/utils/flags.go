@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	DEFAULT_EXPORT_FILE   = "./OntBlocks.dat"
+	DEFAULT_EXPORT_FILE   = "./DNABlocks.dat"
 	DEFAULT_ABI_PATH      = "./abi"
 	DEFAULT_EXPORT_HEIGHT = 0
 	DEFAULT_WALLET_PATH   = "./wallet_data"
@@ -41,6 +41,7 @@ var (
 	ConfigFlag = cli.StringFlag{
 		Name:  "config",
 		Usage: "Genesis block config `<file>`. If doesn't specifies, use main net config as default.",
+		Value: config.DEFAULT_CONFIG_FILE_NAME,
 	}
 	LogLevelFlag = cli.UintFlag{
 		Name:  "loglevel",

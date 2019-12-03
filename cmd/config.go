@@ -53,30 +53,10 @@ func SetBlockchainConfig(ctx *cli.Context) (*config.BlockchainConfig, error) {
 		cfg.P2PNode.NetworkMagic = config.GetNetworkMagic(cfg.P2PNode.NetworkId)
 		cfg.Common.GasPrice = 0
 	}
-	if cfg.P2PNode.NetworkId == config.NETWORK_ID_MAIN_NET ||
-		cfg.P2PNode.NetworkId == config.NETWORK_ID_POLARIS_NET {
-		defNetworkId, err := cfg.GetDefaultNetworkId()
-		if err != nil {
-			return nil, fmt.Errorf("GetDefaultNetworkId error:%s", err)
-		}
-		if defNetworkId != cfg.P2PNode.NetworkId {
-			cfg.P2PNode.NetworkId = defNetworkId
-			cfg.P2PNode.NetworkMagic = config.GetNetworkMagic(defNetworkId)
-			cfg.P2PNode.NetworkName = config.GetNetworkName(defNetworkId)
-		}
-	}
 	return cfg, nil
 }
 
 func setGenesis(ctx *cli.Context, cfg *config.BlockchainConfig) error {
-	netWorkId := ctx.Int(utils.GetFlagName(utils.NetworkIdFlag))
-	switch netWorkId {
-	case config.NETWORK_ID_MAIN_NET:
-		cfg.Genesis = config.MainNetConfig
-	case config.NETWORK_ID_POLARIS_NET:
-		cfg.Genesis = config.PolarisConfig
-	}
-
 	if ctx.Bool(utils.GetFlagName(utils.EnableTestModeFlag)) {
 		cfg.Genesis.ConsensusType = config.CONSENSUS_TYPE_SOLO
 		cfg.Genesis.SOLO.GenBlockTime = ctx.Uint(utils.GetFlagName(utils.TestModeGenBlockTimeFlag))
@@ -92,13 +72,13 @@ func setGenesis(ctx *cli.Context, cfg *config.BlockchainConfig) error {
 
 	genesisFile := ctx.String(utils.GetFlagName(utils.ConfigFlag))
 	if !common.FileExisted(genesisFile) {
-		return nil
+		return fmt.Errorf("load genesis file failed")
 	}
 
 	newGenesisCfg := config.NewGenesisConfig()
 	err := utils.GetJsonObjectFromFile(genesisFile, newGenesisCfg)
 	if err != nil {
-		return err
+		return fmt.Errorf("load genesis from %s failed: %s", genesisFile, err)
 	}
 	cfg.Genesis = newGenesisCfg
 	log.Infof("Load genesis config:%s", genesisFile)

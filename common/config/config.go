@@ -22,10 +22,7 @@
 package config
 
 import (
-	"crypto/sha256"
-	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -71,7 +68,7 @@ const (
 	DEFAULT_CLI_RPC_PORT                    = uint(20000)
 	DEFUALT_CLI_RPC_ADDRESS                 = "127.0.0.1"
 	DEFAULT_GAS_LIMIT                       = 20000
-	DEFAULT_GAS_PRICE                       = 500
+	DEFAULT_GAS_PRICE                       = 0
 	DEFAULT_WASM_GAS_FACTOR                 = uint64(10)
 	DEFAULT_WASM_MAX_STEPCOUNT              = uint64(8000000)
 
@@ -112,24 +109,12 @@ func GetNetworkMagic(id uint32) uint32 {
 	return id
 }
 
-var STATE_HASH_CHECK_HEIGHT = map[uint32]uint32{
-	NETWORK_ID_MAIN_NET:    constants.STATE_HASH_HEIGHT_MAINNET, //Network main
-	NETWORK_ID_POLARIS_NET: constants.STATE_HASH_HEIGHT_POLARIS, //Network polaris
-	NETWORK_ID_SOLO_NET:    0,                                   //Network solo
-}
-
 func GetStateHashCheckHeight(id uint32) uint32 {
-	return STATE_HASH_CHECK_HEIGHT[id]
-}
-
-var OPCODE_HASKEY_ENABLE_HEIGHT = map[uint32]uint32{
-	NETWORK_ID_MAIN_NET:    constants.OPCODE_HEIGHT_UPDATE_FIRST_MAINNET, //Network main
-	NETWORK_ID_POLARIS_NET: constants.OPCODE_HEIGHT_UPDATE_FIRST_POLARIS, //Network polaris
-	NETWORK_ID_SOLO_NET:    0,                                            //Network solo
+	return 0
 }
 
 func GetOpcodeUpdateCheckHeight(id uint32) uint32 {
-	return OPCODE_HASKEY_ENABLE_HEIGHT[id]
+	return 0
 }
 
 func GetNetworkName(id uint32) string {
@@ -138,138 +123,6 @@ func GetNetworkName(id uint32) string {
 		return name
 	}
 	return fmt.Sprintf("%d", id)
-}
-
-var PolarisConfig = &GenesisConfig{
-	SeedList: []string{
-		"polaris1.ont.io:20338",
-		"polaris2.ont.io:20338",
-		"polaris3.ont.io:20338",
-		"polaris4.ont.io:20338"},
-	ConsensusType: CONSENSUS_TYPE_VBFT,
-	VBFT: &VBFTConfig{
-		N:                    7,
-		C:                    2,
-		K:                    7,
-		L:                    112,
-		BlockMsgDelay:        10000,
-		HashMsgDelay:         10000,
-		PeerHandshakeTimeout: 10,
-		MaxBlockChangeView:   3000,
-		AdminOntID:           "did:dna:AMAx993nE6NEqZjwBssUfopxnnvTdob9ij",
-		MinInitStake:         10000,
-		VrfValue:             "1c9810aa9822e511d5804a9c4db9dd08497c31087b0daafa34d768a3253441fa20515e2f30f81741102af0ca3cefc4818fef16adb825fbaa8cad78647f3afb590e",
-		VrfProof:             "c57741f934042cb8d8b087b44b161db56fc3ffd4ffb675d36cd09f83935be853d8729f3f5298d12d6fd28d45dde515a4b9d7f67682d182ba5118abf451ff1988",
-		Peers: []*VBFTPeerStakeInfo{
-			{
-				Index:      1,
-				PeerPubkey: "037c9e6c6a446b6b296f89b722cbf686b81e0a122444ef05f0f87096777663284b",
-				Address:    "AXmQDzzvpEtPkNwBEFsREzApTTDZFW6frD",
-				InitPos:    10000,
-			},
-			{
-				Index:      2,
-				PeerPubkey: "03dff4c63267ae5e23da44ace1bc47d0da1eb8d36fd71181dcccf0e872cb7b31fa",
-				Address:    "AY5W6p4jHeZG2jjW6nS1p4KDUhcqLkU6jz",
-				InitPos:    20000,
-			},
-			{
-				Index:      3,
-				PeerPubkey: "0205bc592aa9121428c4144fcd669ece1fa73fee440616c75624967f83fb881050",
-				Address:    "ALZVrZrFqoSvqyi38n7mpPoeDp7DMtZ9b6",
-				InitPos:    30000,
-			},
-			{
-				Index:      4,
-				PeerPubkey: "030a34dcb075d144df1f65757b85acaf053395bb47b019970607d2d1cdd222525c",
-				Address:    "AMogjmLf2QohTcGST7niV75ekZfj44SKme",
-				InitPos:    40000,
-			},
-			{
-				Index:      5,
-				PeerPubkey: "021844159f97d81da71da52f84e8451ee573c83b296ff2446387b292e44fba5c98",
-				Address:    "AZzQTkZvjy7ih9gjvwU8KYiZZyNoy6jE9p",
-				InitPos:    30000,
-			},
-			{
-				Index:      6,
-				PeerPubkey: "020cc76feb375d6ea8ec9ff653bab18b6bbc815610cecc76e702b43d356f885835",
-				Address:    "AKEqQKmxCsjWJz8LPGryXzb6nN5fkK1WDY",
-				InitPos:    20000,
-			},
-			{
-				Index:      7,
-				PeerPubkey: "03aa4d52b200fd91ca12deff46505c4608a0f66d28d9ae68a342c8a8c1266de0f9",
-				Address:    "AQNpGWz4oHHFBejtBbakeR43DHfen7cm8L",
-				InitPos:    10000,
-			},
-		},
-	},
-	DBFT: &DBFTConfig{},
-	SOLO: &SOLOConfig{},
-}
-
-var MainNetConfig = &GenesisConfig{
-	SeedList: []string{
-		"seed1.dna.io:20338",
-		"seed2.dna.io:20338",
-		"seed3.dna.io:20338",
-		"seed4.dna.io:20338",
-		"seed5.dna.io:20338"},
-	ConsensusType: CONSENSUS_TYPE_VBFT,
-	VBFT: &VBFTConfig{
-		N:                    7,
-		C:                    2,
-		K:                    7,
-		L:                    112,
-		BlockMsgDelay:        10000,
-		HashMsgDelay:         10000,
-		PeerHandshakeTimeout: 10,
-		MaxBlockChangeView:   120000,
-		AdminOntID:           "did:dna:AdjfcJgwru2FD8kotCPvLDXYzRjqFjc9Tb",
-		MinInitStake:         100000,
-		VrfValue:             "1c9810aa9822e511d5804a9c4db9dd08497c31087b0daafa34d768a3253441fa20515e2f30f81741102af0ca3cefc4818fef16adb825fbaa8cad78647f3afb590e",
-		VrfProof:             "c57741f934042cb8d8b087b44b161db56fc3ffd4ffb675d36cd09f83935be853d8729f3f5298d12d6fd28d45dde515a4b9d7f67682d182ba5118abf451ff1988",
-		Peers: []*VBFTPeerStakeInfo{
-			{
-				Index:      1,
-				PeerPubkey: "03348c8fe64e1defb408676b6e320038bd2e592c802e27c3d7e88e68270076c2f7",
-				Address:    "AZavFr7sQ4em2NmqWDjLMY34tHMQzATWgx",
-			},
-			{
-				Index:      2,
-				PeerPubkey: "03afd920a3b4ce2e7175a32c0d092153d1a11ef5e0dcc14e71c85101b95518d5d7",
-				Address:    "AM9jHMV7xY4HWH2dWmzyxrtnbi6ErNt7oL",
-			},
-			{
-				Index:      3,
-				PeerPubkey: "03e818b65a66d983a99497e06c6552ee5067229e85ba1cec60c5477dc3d568ed43",
-				Address:    "ATECwFPNRZFydFR1yUjb6RTLfVcKGKWRmp",
-			},
-			{
-				Index:      4,
-				PeerPubkey: "02375e44e500f9cfe8bd2f4afa4a016a8a902567996c919b9d1ce4f5d4f930f145",
-				Address:    "AKMxTuHQtt5YspXNPwkQNP5ZY66c4LY5BR",
-			},
-			{
-				Index:      5,
-				PeerPubkey: "03af040c09af5e06cf966f73fc99e8f4372f1510fe6e4376824452a99b85695a9c",
-				Address:    "AT4fXp36Ui22Lbh5ZJUCRBFDJ7axkLyUFM",
-			},
-			{
-				Index:      6,
-				PeerPubkey: "034ee2a4368e999fc7c04e7e3a9073162d47712382f1690d6a67e7e1c475cd0ff3",
-				Address:    "ANLRokqieUtrUMave66FcNy2cxV7Whf4UN",
-			},
-			{
-				Index:      7,
-				PeerPubkey: "0327f9e0fb3b894027c52caf3d31d9ac5f676d3cf892c933ac107ed7447fb6e65b",
-				Address:    "AVRD9QmkYNq8n8DXc9AqpZnUEYhjg1aq5L",
-			},
-		},
-	},
-	DBFT: &DBFTConfig{},
-	SOLO: &SOLOConfig{},
 }
 
 var DefConfig = NewBlockchainConfig()
@@ -285,7 +138,7 @@ type GenesisConfig struct {
 func NewGenesisConfig() *GenesisConfig {
 	return &GenesisConfig{
 		SeedList:      make([]string, 0),
-		ConsensusType: CONSENSUS_TYPE_DBFT,
+		ConsensusType: CONSENSUS_TYPE_SOLO,
 		VBFT:          &VBFTConfig{},
 		DBFT:          &DBFTConfig{},
 		SOLO:          &SOLOConfig{},
@@ -553,7 +406,7 @@ type BlockchainConfig struct {
 
 func NewBlockchainConfig() *BlockchainConfig {
 	return &BlockchainConfig{
-		Genesis: MainNetConfig,
+		Genesis: NewGenesisConfig(),
 		Common: &CommonConfig{
 			LogLevel:       DEFAULT_LOG_LEVEL,
 			EnableEventLog: DEFAULT_ENABLE_EVENT_LOG,
@@ -624,46 +477,4 @@ func (this *BlockchainConfig) GetBookkeepers() ([]keypair.PublicKey, error) {
 	}
 	keypair.SortPublicKeys(pubKeys)
 	return pubKeys, nil
-}
-
-func (this *BlockchainConfig) GetDefaultNetworkId() (uint32, error) {
-	defaultNetworkId, err := this.getDefNetworkIDFromGenesisConfig(this.Genesis)
-	if err != nil {
-		return 0, err
-	}
-	mainNetId, err := this.getDefNetworkIDFromGenesisConfig(MainNetConfig)
-	if err != nil {
-		return 0, err
-	}
-	polaridId, err := this.getDefNetworkIDFromGenesisConfig(PolarisConfig)
-	if err != nil {
-		return 0, err
-	}
-	switch defaultNetworkId {
-	case mainNetId:
-		return NETWORK_ID_MAIN_NET, nil
-	case polaridId:
-		return NETWORK_ID_POLARIS_NET, nil
-	}
-	return defaultNetworkId, nil
-}
-
-func (this *BlockchainConfig) getDefNetworkIDFromGenesisConfig(genCfg *GenesisConfig) (uint32, error) {
-	var configData []byte
-	var err error
-	switch this.Genesis.ConsensusType {
-	case CONSENSUS_TYPE_VBFT:
-		configData, err = json.Marshal(genCfg.VBFT)
-	case CONSENSUS_TYPE_DBFT:
-		configData, err = json.Marshal(genCfg.DBFT)
-	case CONSENSUS_TYPE_SOLO:
-		return NETWORK_ID_SOLO_NET, nil
-	default:
-		return 0, fmt.Errorf("unknown consensus type:%s", this.Genesis.ConsensusType)
-	}
-	if err != nil {
-		return 0, fmt.Errorf("json.Marshal error:%s", err)
-	}
-	data := sha256.Sum256(configData)
-	return binary.LittleEndian.Uint32(data[0:4]), nil
 }
