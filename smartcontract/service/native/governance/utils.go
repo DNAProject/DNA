@@ -325,8 +325,8 @@ func CheckVBFTConfig(configuration *config.VBFTConfig) error {
 	if configuration.K < 2*configuration.C+1 {
 		return fmt.Errorf("initConfig. K can not be less than 2*C+1 in config")
 	}
-	if configuration.N < configuration.K || configuration.K < 7 {
-		return fmt.Errorf("initConfig. config not match N >= K >= 7")
+	if configuration.N < configuration.K || configuration.K < 4 {
+		return fmt.Errorf("initConfig. config not match N >= K >= 4")
 	}
 	if configuration.BlockMsgDelay < 5000 {
 		return fmt.Errorf("initConfig. BlockMsgDelay must >= 5000")

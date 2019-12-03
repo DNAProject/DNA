@@ -1068,8 +1068,8 @@ func UpdateConfig(native *native.NativeService) ([]byte, error) {
 	if 4*configuration.K > globalParam.CandidateNum {
 		return utils.BYTE_FALSE, fmt.Errorf("updateConfig. 4*K can not be more than candidateNum")
 	}
-	if configuration.N < configuration.K || configuration.K < 7 {
-		return utils.BYTE_FALSE, fmt.Errorf("updateConfig. config not match N >= K >= 7")
+	if configuration.N < configuration.K || configuration.K < 4 {
+		return utils.BYTE_FALSE, fmt.Errorf("updateConfig. config not match N >= K >= 4")
 	}
 	if configuration.BlockMsgDelay < 5000 {
 		return utils.BYTE_FALSE, fmt.Errorf("updateConfig. BlockMsgDelay must >= 5000")
