@@ -141,7 +141,9 @@ func NewGenesisConfig() *GenesisConfig {
 		ConsensusType: CONSENSUS_TYPE_SOLO,
 		VBFT:          &VBFTConfig{},
 		DBFT:          &DBFTConfig{},
-		SOLO:          &SOLOConfig{},
+		SOLO: &SOLOConfig{
+			GenBlockTime: DEFAULT_GEN_BLOCK_TIME,
+		},
 	}
 }
 
