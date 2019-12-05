@@ -203,7 +203,7 @@ func newUtilityInit() *types.Transaction {
 	distribute := []struct {
 		addr  common.Address
 		value uint64
-	}{{addr, constants.ONT_TOTAL_SUPPLY}}
+	}{{addr, constants.GAS_TOTAL_SUPPLY}}
 
 	args := common.NewZeroCopySink(nil)
 	nutils.EncodeVarUint(args, uint64(len(distribute)))
