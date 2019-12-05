@@ -105,7 +105,7 @@ func checksum(data []byte) []byte {
 }
 
 type Identity struct {
-	ID      string       `json:"ontid"`
+	ID      string       `json:"did"`
 	Label   string       `json:"label,omitempty"`
 	Lock    bool         `json:"lock"`
 	Control []Controller `json:"controls,omitempty"`

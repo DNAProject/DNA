@@ -193,7 +193,7 @@ func accountCreate(ctx *cli.Context) error {
 		if err != nil {
 			return fmt.Errorf("error saving to %s: %s", optionFile, err)
 		}
-		PrintInfoMsg("ONT ID created: %s", id.ID)
+		PrintInfoMsg("DID created: %s", id.ID)
 		PrintInfoMsg("Bind public key: %s", id.Control[0].Public)
 		return nil
 	}
