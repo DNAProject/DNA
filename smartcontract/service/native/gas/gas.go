@@ -27,7 +27,6 @@ import (
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/constants"
-	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
@@ -148,14 +147,8 @@ func GasTransferFrom(native *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("transferFrom amount:%d over totalSupply:%d", state.Value, constants.GAS_TOTAL_SUPPLY)
 	}
 	contract := native.ContextRef.CurrentContext().ContractAddress
-	fromBalance, toBalance, err := TransferedFrom(native, contract, &state)
+	_, _, err := TransferedFrom(native, contract, &state)
 	if err != nil {
-		return utils.BYTE_FALSE, err
-	}
-	if err := grantOng(native, contract, state.From, fromBalance); err != nil {
-		return utils.BYTE_FALSE, err
-	}
-	if err := grantOng(native, contract, state.To, toBalance); err != nil {
 		return utils.BYTE_FALSE, err
 	}
 	AddNotifications(native, contract, &State{From: state.From, To: state.To, Value: state.Value})
@@ -230,40 +223,6 @@ func GetBalanceValue(native *native.NativeService, flag byte) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.NewDetailErr(err, errors.ErrNoCode, "[GetBalanceValue] address parse error!")
 	}
 	return common.BigIntToNeoBytes(big.NewInt(int64(amount))), nil
-}
-
-func grantOng(native *native.NativeService, contract, address common.Address, balance uint64) error {
-	startOffset, err := getUnboundOffset(native, contract, address)
-	if err != nil {
-		return err
-	}
-	if native.Time <= constants.GENESIS_BLOCK_TIMESTAMP {
-		return nil
-	}
-	endOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
-	if endOffset < startOffset {
-		errstr := fmt.Sprintf("grant Ong error: wrong timestamp endOffset: %d < startOffset: %d", endOffset, startOffset)
-		log.Error(errstr)
-		return errors.NewErr(errstr)
-	} else if endOffset == startOffset {
-		return nil
-	}
-
-	if balance != 0 {
-		value := utils.CalcUnbindOng(balance, startOffset, endOffset)
-
-		args, err := getApproveArgs(native, contract, utils.GasContractAddress, address, value)
-		if err != nil {
-			return err
-		}
-
-		if _, err := native.NativeCall(utils.GasContractAddress, "approve", args); err != nil {
-			return err
-		}
-	}
-
-	native.CacheDB.Put(genAddressUnboundOffsetKey(contract, address), utils.GenUInt32StorageItem(endOffset).ToArray())
-	return nil
 }
 
 func getApproveArgs(native *native.NativeService, contract, ongContract, address common.Address, value uint64) ([]byte, error) {
