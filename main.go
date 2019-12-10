@@ -288,6 +288,10 @@ func initTxPool(ctx *cli.Context) (*proc.TXPoolServer, error) {
 	stlValidator.Register(txPoolServer.GetPID(tc.VerifyRspActor))
 	stlValidator2, _ := stateless.NewValidator("stateless_validator2")
 	stlValidator2.Register(txPoolServer.GetPID(tc.VerifyRspActor))
+	stlValidator3, _ := stateless.NewValidator("stateless_validator3")
+	stlValidator3.Register(txPoolServer.GetPID(tc.VerifyRspActor))
+	stlValidator4, _ := stateless.NewValidator("stateless_validator4")
+	stlValidator4.Register(txPoolServer.GetPID(tc.VerifyRspActor))
 	stfValidator, _ := stateful.NewValidator("stateful_validator")
 	stfValidator.Register(txPoolServer.GetPID(tc.VerifyRspActor))
 
