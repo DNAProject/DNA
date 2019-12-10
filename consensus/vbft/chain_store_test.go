@@ -36,6 +36,41 @@ import (
 
 var testBookkeeperAccounts []*account.Account
 
+var testGenesisConfig = &config.GenesisConfig{
+	SeedList: []string{
+		"localhost:20338",
+		"localhost:20438",
+		"localhost:20538",
+		"localhost:20638",
+		"localhost:20738"},
+	ConsensusType: config.CONSENSUS_TYPE_VBFT,
+	VBFT: &config.VBFTConfig{
+		N:                    7,
+		C:                    2,
+		K:                    7,
+		L:                    112,
+		BlockMsgDelay:        10000,
+		HashMsgDelay:         10000,
+		PeerHandshakeTimeout: 10,
+		MaxBlockChangeView:   120000,
+		AdminOntID:           "did:ont:AdjfcJgwru2FD8kotCPvLDXYzRjqFjc9Tb",
+		MinInitStake:         100000,
+		VrfValue:             "",
+		VrfProof:             "",
+		Peers: []*config.VBFTPeerStakeInfo{
+			{ Index: 1, },
+			{ Index: 2, },
+			{ Index: 3, },
+			{ Index: 4, },
+			{ Index: 5, },
+			{ Index: 6, },
+			{ Index: 7, },
+		},
+	},
+	DBFT: &config.DBFTConfig{},
+	SOLO: &config.SOLOConfig{},
+}
+
 func newTestChainStore(t *testing.T) *ChainStore {
 	log.InitLog(log.InfoLog, log.Stdout)
 	var err error
@@ -58,12 +93,14 @@ func newTestChainStore(t *testing.T) *ChainStore {
 		}
 	}
 
+	config.DefConfig.Genesis = testGenesisConfig
 	genesisConfig := config.DefConfig.Genesis
 
 	// update peers in genesis
 	for i, p := range genesisConfig.VBFT.Peers {
-		if i > 0 && i <= len(testBookkeeperAccounts) {
-			p.PeerPubkey = vconfig.PubkeyID(testBookkeeperAccounts[i-1].PublicKey)
+		if i < len(testBookkeeperAccounts) {
+			p.PeerPubkey = vconfig.PubkeyID(testBookkeeperAccounts[i].PublicKey)
+			p.Address = testBookkeeperAccounts[i].Address.ToBase58()
 		}
 	}
 	block, err := genesis.BuildGenesisBlock(bookkeepers, genesisConfig)
