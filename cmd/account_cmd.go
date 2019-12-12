@@ -43,7 +43,7 @@ var (
 		Usage:     "Manage accounts",
 		ArgsUsage: "[arguments...]",
 		Description: `Wallet management commands can be used to add, view, modify, delete, import account, and so on.
-You can use ./DNA account --help command to view help information of wallet management command.`,
+You can use ./dnaNode account --help command to view help information of wallet management command.`,
 		Subcommands: []cli.Command{
 			{
 				Action:    accountCreate,

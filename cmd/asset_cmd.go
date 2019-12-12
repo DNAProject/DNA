@@ -195,7 +195,7 @@ func transfer(ctx *cli.Context) error {
 	PrintInfoMsg("  Amount:%s", amountStr)
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './dnaNode info status %s' to query transaction status.", txHash)
 	return nil
 }
 
@@ -335,7 +335,7 @@ func approve(ctx *cli.Context) error {
 	PrintInfoMsg("  Amount:%s", amountStr)
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './dnaNode info status %s' to query transaction status.", txHash)
 	return nil
 }
 
@@ -433,6 +433,6 @@ func transferFrom(ctx *cli.Context) error {
 	PrintInfoMsg("  Amount:%s", amountStr)
 	PrintInfoMsg("  TxHash:%s", txHash)
 	PrintInfoMsg("\nTip:")
-	PrintInfoMsg("  Using './DNA info status %s' to query transaction status.", txHash)
+	PrintInfoMsg("  Using './dnaNode info status %s' to query transaction status.", txHash)
 	return nil
 }
