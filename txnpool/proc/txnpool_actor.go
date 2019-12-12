@@ -28,15 +28,11 @@ import (
 	"github.com/ontio/ontology-eventbus/actor"
 
 	"github.com/DNAProject/DNA/common"
-	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/core/ledger"
 	tx "github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/events/message"
-	hComm "github.com/DNAProject/DNA/http/base/common"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
-	"github.com/DNAProject/DNA/smartcontract/service/neovm"
 	tc "github.com/DNAProject/DNA/txnpool/common"
 	"github.com/DNAProject/DNA/validator/types"
 )
@@ -63,17 +59,6 @@ func NewVerifyRspActor(s *TXPoolServer) *VerifyRspActor {
 	return a
 }
 
-// isBalanceEnough checks if the tranactor has enough to cover gas cost
-func isBalanceEnough(address common.Address, gas uint64) bool {
-	balance, _, err := hComm.GetContractBalance(0, []common.Address{utils.GasContractAddress}, address, false)
-	if err != nil {
-		log.Debugf("failed to get contract balance %s err %v",
-			address.ToHexString(), err)
-		return false
-	}
-	return balance[0] >= gas
-}
-
 func replyTxResult(txResultCh chan *tc.TxResult, hash common.Uint256,
 	err errors.ErrCode, desc string) {
 	result := &tc.TxResult{
@@ -90,29 +75,10 @@ func replyTxResult(txResultCh chan *tc.TxResult, hash common.Uint256,
 
 // preExecCheck checks whether preExec pass
 func preExecCheck(txn *tx.Transaction) (bool, string) {
-	result, err := ledger.DefLedger.PreExecuteContract(txn)
+	_, err := ledger.DefLedger.PreExecuteContract(txn)
 	if err != nil {
 		log.Debugf("preExecCheck: failed to preExecuteContract tx %x err %v",
 			txn.Hash(), err)
-	}
-	if txn.GasLimit < result.Gas {
-		log.Debugf("preExecCheck: transaction's gasLimit %d is less than preExec gasLimit %d",
-			txn.GasLimit, result.Gas)
-		return false, fmt.Sprintf("transaction's gasLimit %d is less than preExec gasLimit %d",
-			txn.GasLimit, result.Gas)
-	}
-	gas, overflow := common.SafeMul(txn.GasPrice, result.Gas)
-	if overflow {
-		log.Debugf("preExecCheck: gasPrice %d preExec gasLimit %d overflow",
-			txn.GasPrice, result.Gas)
-		return false, fmt.Sprintf("gasPrice %d preExec gasLimit %d overflow",
-			txn.GasPrice, result.Gas)
-	}
-	if !isBalanceEnough(txn.Payer, gas) {
-		log.Debugf("preExecCheck: transactor %s has no balance enough to cover gas cost %d",
-			txn.Payer.ToHexString(), gas)
-		return false, fmt.Sprintf("transactor %s has no balance enough to cover gas cost %d",
-			txn.Payer.ToHexString(), gas)
 	}
 	return true, ""
 }
@@ -153,41 +119,6 @@ func (ta *TxActor) handleTransaction(sender tc.SenderType, self *actor.PID,
 				"transaction pool is full")
 		}
 	} else {
-		if _, overflow := common.SafeMul(txn.GasLimit, txn.GasPrice); overflow {
-			log.Debugf("handleTransaction: gasLimit %v, gasPrice %v overflow",
-				txn.GasLimit, txn.GasPrice)
-			if sender == tc.HttpSender && txResultCh != nil {
-				replyTxResult(txResultCh, txn.Hash(), errors.ErrUnknown,
-					fmt.Sprintf("gasLimit %d * gasPrice %d overflow",
-						txn.GasLimit, txn.GasPrice))
-			}
-			return
-		}
-
-		gasLimitConfig := config.DefConfig.Common.GasLimit
-		gasPriceConfig := ta.server.getGasPrice()
-		if txn.GasLimit < gasLimitConfig || txn.GasPrice < gasPriceConfig {
-			log.Debugf("handleTransaction: invalid gasLimit %v, gasPrice %v",
-				txn.GasLimit, txn.GasPrice)
-			if sender == tc.HttpSender && txResultCh != nil {
-				replyTxResult(txResultCh, txn.Hash(), errors.ErrUnknown,
-					fmt.Sprintf("Please input gasLimit >= %d and gasPrice >= %d",
-						gasLimitConfig, gasPriceConfig))
-			}
-			return
-		}
-
-		if txn.TxType == tx.Deploy && txn.GasLimit < neovm.CONTRACT_CREATE_GAS {
-			log.Debugf("handleTransaction: deploy tx invalid gasLimit %v, gasPrice %v",
-				txn.GasLimit, txn.GasPrice)
-			if sender == tc.HttpSender && txResultCh != nil {
-				replyTxResult(txResultCh, txn.Hash(), errors.ErrUnknown,
-					fmt.Sprintf("Deploy tx gaslimit should >= %d",
-						neovm.CONTRACT_CREATE_GAS))
-			}
-			return
-		}
-
 		if !ta.server.disablePreExec {
 			if ok, desc := preExecCheck(txn); !ok {
 				log.Debugf("handleTransaction: preExecCheck tx %x failed", txn.Hash())
