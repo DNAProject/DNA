@@ -59,8 +59,8 @@ var (
 	VM_STEP_LIMIT        int = 400000
 
 	// API Name
-	ATTRIBUTE_GETUSAGE_NAME = "System.Attribute.GetUsage"
-	ATTRIBUTE_GETDATA_NAME  = "System.Attribute.GetData"
+	ATTRIBUTE_GETUSAGE_NAME = "DNA.Attribute.GetUsage"
+	ATTRIBUTE_GETDATA_NAME  = "DNA.Attribute.GetData"
 
 	BLOCK_GETTRANSACTIONCOUNT_NAME       = "System.Block.GetTransactionCount"
 	BLOCK_GETTRANSACTIONS_NAME           = "System.Block.GetTransactions"
@@ -74,22 +74,22 @@ var (
 
 	HEADER_GETINDEX_NAME         = "System.Header.GetIndex"
 	HEADER_GETHASH_NAME          = "System.Header.GetHash"
-	HEADER_GETVERSION_NAME       = "System.Header.GetVersion"
+	HEADER_GETVERSION_NAME       = "DNA.Header.GetVersion"
 	HEADER_GETPREVHASH_NAME      = "System.Header.GetPrevHash"
 	HEADER_GETTIMESTAMP_NAME     = "System.Header.GetTimestamp"
-	HEADER_GETCONSENSUSDATA_NAME = "System.Header.GetConsensusData"
-	HEADER_GETNEXTCONSENSUS_NAME = "System.Header.GetNextConsensus"
-	HEADER_GETMERKLEROOT_NAME    = "System.Header.GetMerkleRoot"
+	HEADER_GETCONSENSUSDATA_NAME = "DNA.Header.GetConsensusData"
+	HEADER_GETNEXTCONSENSUS_NAME = "DNA.Header.GetNextConsensus"
+	HEADER_GETMERKLEROOT_NAME    = "DNA.Header.GetMerkleRoot"
 
 	TRANSACTION_GETHASH_NAME       = "System.Transaction.GetHash"
-	TRANSACTION_GETTYPE_NAME       = "System.Transaction.GetType"
-	TRANSACTION_GETATTRIBUTES_NAME = "System.Transaction.GetAttributes"
+	TRANSACTION_GETTYPE_NAME       = "DNA.Transaction.GetType"
+	TRANSACTION_GETATTRIBUTES_NAME = "DNA.Transaction.GetAttributes"
 
-	CONTRACT_CREATE_NAME            = "System.Contract.Create"
-	CONTRACT_MIGRATE_NAME           = "System.Contract.Migrate"
+	CONTRACT_CREATE_NAME            = "DNA.Contract.Create"
+	CONTRACT_MIGRATE_NAME           = "DNA.Contract.Migrate"
 	CONTRACT_GETSTORAGECONTEXT_NAME = "System.Contract.GetStorageContext"
 	CONTRACT_DESTROY_NAME           = "System.Contract.Destroy"
-	CONTRACT_GETSCRIPT_NAME         = "System.Contract.GetScript"
+	CONTRACT_GETSCRIPT_NAME         = "DNA.Contract.GetScript"
 
 	STORAGE_GET_NAME                = "System.Storage.Get"
 	STORAGE_PUT_NAME                = "System.Storage.Put"
@@ -106,13 +106,13 @@ var (
 	RUNTIME_GETTRIGGER_NAME          = "System.Runtime.GetTrigger"
 	RUNTIME_SERIALIZE_NAME           = "System.Runtime.Serialize"
 	RUNTIME_DESERIALIZE_NAME         = "System.Runtime.Deserialize"
-	RUNTIME_BASE58TOADDRESS_NAME     = "System.Runtime.Base58ToAddress"
-	RUNTIME_ADDRESSTOBASE58_NAME     = "System.Runtime.AddressToBase58"
-	RUNTIME_GETCURRENTBLOCKHASH_NAME = "System.Runtime.GetCurrentBlockHash"
-	RUNTIME_VERIFYMUTISIG_NAME       = "System.Runtime.VerifyMutiSig"
+	RUNTIME_BASE58TOADDRESS_NAME     = "DNA.Runtime.Base58ToAddress"
+	RUNTIME_ADDRESSTOBASE58_NAME     = "DNA.Runtime.AddressToBase58"
+	RUNTIME_GETCURRENTBLOCKHASH_NAME = "DNA.Runtime.GetCurrentBlockHash"
+	RUNTIME_VERIFYMUTISIG_NAME       = "DNA.Runtime.VerifyMutiSig"
 
-	NATIVE_INVOKE_NAME = "System.Native.Invoke"
-	WASM_INVOKE_NAME   = "System.Wasm.InvokeWasm"
+	NATIVE_INVOKE_NAME = "DNA.Native.Invoke"
+	WASM_INVOKE_NAME   = "DNA.Wasm.InvokeWasm"
 
 	GETSCRIPTCONTAINER_NAME     = "System.ExecutionEngine.GetScriptContainer"
 	GETEXECUTINGSCRIPTHASH_NAME = "System.ExecutionEngine.GetExecutingScriptHash"
