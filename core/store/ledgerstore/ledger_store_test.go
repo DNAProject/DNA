@@ -23,13 +23,15 @@ package ledgerstore
 
 import (
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
 	"github.com/DNAProject/DNA/core/genesis"
 	"github.com/ontio/ontology-crypto/keypair"
-	"os"
-	"testing"
 )
 
 var testBlockStore *BlockStore
@@ -83,36 +85,62 @@ func TestMain(m *testing.M) {
 	os.RemoveAll("ActorLog")
 }
 
-func TestInitLedgerStoreWithGenesisBlock(t *testing.T) {
-	acc1 := account.NewAccount("")
-	acc2 := account.NewAccount("")
-	acc3 := account.NewAccount("")
-	acc4 := account.NewAccount("")
-	acc5 := account.NewAccount("")
-	acc6 := account.NewAccount("")
-	acc7 := account.NewAccount("")
+var testGenesisConfig = &config.GenesisConfig{
+	SeedList: []string{
+		"localhost:20338",
+		"localhost:20438",
+		"localhost:20538",
+		"localhost:20638",
+		"localhost:20738"},
+	ConsensusType: config.CONSENSUS_TYPE_VBFT,
+	VBFT: &config.VBFTConfig{
+		N:                    7,
+		C:                    2,
+		K:                    7,
+		L:                    112,
+		BlockMsgDelay:        10000,
+		HashMsgDelay:         10000,
+		PeerHandshakeTimeout: 10,
+		MaxBlockChangeView:   120000,
+		AdminOntID:           "did:ont:AdjfcJgwru2FD8kotCPvLDXYzRjqFjc9Tb",
+		MinInitStake:         100000,
+		VrfValue:             "",
+		VrfProof:             "",
+		Peers: []*config.VBFTPeerStakeInfo{
+			{Index: 1},
+			{Index: 2},
+			{Index: 3},
+			{Index: 4},
+			{Index: 5},
+			{Index: 6},
+			{Index: 7},
+		},
+	},
+	DBFT: &config.DBFTConfig{},
+	SOLO: &config.SOLOConfig{},
+}
 
-	bookkeepers := []keypair.PublicKey{acc1.PublicKey, acc2.PublicKey, acc3.PublicKey, acc4.PublicKey, acc5.PublicKey, acc6.PublicKey, acc7.PublicKey}
-	//bookkeeper, err := types.AddressFromBookkeepers(bookkeepers)
-	//if err != nil {
-	//	t.Errorf("AddressFromBookkeepers error %s", err)
-	//	return
-	//}
+func TestInitLedgerStoreWithGenesisBlock(t *testing.T) {
+	var bookkeepers []keypair.PublicKey
+	testBookkeeperAccounts := make([]*account.Account, 0)
+	for i := 0; i < 7; i++ {
+		acc := account.NewAccount("")
+		testBookkeeperAccounts = append(testBookkeeperAccounts, acc)
+		bookkeepers = append(bookkeepers, acc.PublicKey)
+	}
+
+	config.DefConfig.Genesis = testGenesisConfig
 	genesisConfig := config.DefConfig.Genesis
+
+	// update peers in genesis
+	for i, p := range genesisConfig.VBFT.Peers {
+		if i < len(testBookkeeperAccounts) {
+			p.PeerPubkey = vconfig.PubkeyID(testBookkeeperAccounts[i].PublicKey)
+			p.Address = testBookkeeperAccounts[i].Address.ToBase58()
+		}
+	}
+
 	block, err := genesis.BuildGenesisBlock(bookkeepers, genesisConfig)
-	//header := &types.Header{
-	//	Version:          123,
-	//	PrevBlockHash:    common.Uint256{},
-	//	TransactionsRoot: common.Uint256{},
-	//	Timestamp:        uint32(uint32(time.Date(2017, time.February, 23, 0, 0, 0, 0, time.UTC).Unix())),
-	//	Height:           uint32(0),
-	//	ConsensusData:    1234567890,
-	//	NextBookkeeper:   bookkeeper,
-	//}
-	//block := &types.Block{
-	//	Header:       header,
-	//	Transactions: []*types.Transaction{},
-	//}
 
 	err = testLedgerStore.InitLedgerStoreWithGenesisBlock(block, bookkeepers)
 	if err != nil {

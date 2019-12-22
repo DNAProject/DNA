@@ -22,7 +22,7 @@
 package types
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/constants"
@@ -40,7 +40,7 @@ func AddressFromMultiPubKeys(pubkeys []keypair.PublicKey, m int) (common.Address
 	var addr common.Address
 	n := len(pubkeys)
 	if !(1 <= m && m <= n && n > 1 && n <= constants.MULTI_SIG_MAX_PUBKEY_SIZE) {
-		return addr, errors.New("wrong multi-sig param")
+		return addr, fmt.Errorf("wrong multi-sig param (%d,%d)", m, n)
 	}
 
 	prog, err := program.ProgramFromMultiPubKey(pubkeys, m)

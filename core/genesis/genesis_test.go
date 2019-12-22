@@ -21,13 +21,16 @@
 package genesis
 
 import (
+	"os"
+	"testing"
+
+	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 )
 
 func TestMain(m *testing.M) {
@@ -36,10 +39,62 @@ func TestMain(m *testing.M) {
 	os.RemoveAll("./ActorLog")
 }
 
+var testGenesisConfig = &config.GenesisConfig{
+	SeedList: []string{
+		"localhost:20338",
+		"localhost:20438",
+		"localhost:20538",
+		"localhost:20638",
+		"localhost:20738"},
+	ConsensusType: config.CONSENSUS_TYPE_VBFT,
+	VBFT: &config.VBFTConfig{
+		N:                    7,
+		C:                    2,
+		K:                    7,
+		L:                    112,
+		BlockMsgDelay:        10000,
+		HashMsgDelay:         10000,
+		PeerHandshakeTimeout: 10,
+		MaxBlockChangeView:   120000,
+		AdminOntID:           "did:ont:AdjfcJgwru2FD8kotCPvLDXYzRjqFjc9Tb",
+		MinInitStake:         100000,
+		VrfValue:             "",
+		VrfProof:             "",
+		Peers: []*config.VBFTPeerStakeInfo{
+			{Index: 1},
+			{Index: 2},
+			{Index: 3},
+			{Index: 4},
+			{Index: 5},
+			{Index: 6},
+			{Index: 7},
+		},
+	},
+	DBFT: &config.DBFTConfig{},
+	SOLO: &config.SOLOConfig{},
+}
+
 func TestGenesisBlockInit(t *testing.T) {
-	_, pub, _ := keypair.GenerateKeyPair(keypair.PK_ECDSA, keypair.P256)
-	conf := &config.GenesisConfig{}
-	block, err := BuildGenesisBlock([]keypair.PublicKey{pub}, conf)
+	var bookkeepers []keypair.PublicKey
+	testBookkeeperAccounts := make([]*account.Account, 0)
+	for i := 0; i < 7; i++ {
+		acc := account.NewAccount("")
+		testBookkeeperAccounts = append(testBookkeeperAccounts, acc)
+		bookkeepers = append(bookkeepers, acc.PublicKey)
+	}
+
+	config.DefConfig.Genesis = testGenesisConfig
+	genesisConfig := config.DefConfig.Genesis
+
+	// update peers in genesis
+	for i, p := range genesisConfig.VBFT.Peers {
+		if i < len(testBookkeeperAccounts) {
+			p.PeerPubkey = vconfig.PubkeyID(testBookkeeperAccounts[i].PublicKey)
+			p.Address = testBookkeeperAccounts[i].Address.ToBase58()
+		}
+	}
+
+	block, err := BuildGenesisBlock(bookkeepers, genesisConfig)
 	assert.Nil(t, err)
 	assert.NotNil(t, block)
 	assert.NotEqual(t, block.Header.TransactionsRoot, common.UINT256_EMPTY)
