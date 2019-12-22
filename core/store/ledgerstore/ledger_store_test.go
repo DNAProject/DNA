@@ -141,30 +141,28 @@ func TestInitLedgerStoreWithGenesisBlock(t *testing.T) {
 	}
 
 	block, err := genesis.BuildGenesisBlock(bookkeepers, genesisConfig)
+	if err != nil {
+		t.Fatalf("failed to build genesis block: %s", err)
+	}
 
 	err = testLedgerStore.InitLedgerStoreWithGenesisBlock(block, bookkeepers)
 	if err != nil {
-		t.Errorf("TestInitLedgerStoreWithGenesisBlock error %s", err)
-		return
+		t.Fatalf("TestInitLedgerStoreWithGenesisBlock error %s", err)
 	}
 
 	curBlockHeight := testLedgerStore.GetCurrentBlockHeight()
 	curBlockHash := testLedgerStore.GetCurrentBlockHash()
 	if curBlockHeight != block.Header.Height {
-		t.Errorf("TestInitLedgerStoreWithGenesisBlock failed CurrentBlockHeight %d != %d", curBlockHeight, block.Header.Height)
-		return
+		t.Fatalf("TestInitLedgerStoreWithGenesisBlock failed CurrentBlockHeight %d != %d", curBlockHeight, block.Header.Height)
 	}
 	if curBlockHash != block.Hash() {
-		t.Errorf("TestInitLedgerStoreWithGenesisBlock failed CurrentBlockHash %x != %x", curBlockHash, block.Hash())
-		return
+		t.Fatalf("TestInitLedgerStoreWithGenesisBlock failed CurrentBlockHash %x != %x", curBlockHash, block.Hash())
 	}
 	block1, err := testLedgerStore.GetBlockByHeight(curBlockHeight)
 	if err != nil {
-		t.Errorf("TestInitLedgerStoreWithGenesisBlock failed GetBlockByHeight error %s", err)
-		return
+		t.Fatalf("TestInitLedgerStoreWithGenesisBlock failed GetBlockByHeight error %s", err)
 	}
 	if block1.Hash() != block.Hash() {
-		t.Errorf("TestInitLedgerStoreWithGenesisBlock failed blockhash %x != %x", block1.Hash(), block.Hash())
-		return
+		t.Fatalf("TestInitLedgerStoreWithGenesisBlock failed blockhash %x != %x", block1.Hash(), block.Hash())
 	}
 }

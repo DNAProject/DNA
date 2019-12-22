@@ -31,9 +31,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
 	"github.com/DNAProject/DNA/core/genesis"
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/payload"
@@ -67,6 +69,41 @@ func NewMockP2p() *MockP2P {
 	return &MockP2P{netserver.NewNetServer(), make([]types.Message, 0)}
 }
 
+var testGenesisConfig = &config.GenesisConfig{
+	SeedList: []string{
+		"localhost:20338",
+		"localhost:20438",
+		"localhost:20538",
+		"localhost:20638",
+		"localhost:20738"},
+	ConsensusType: config.CONSENSUS_TYPE_VBFT,
+	VBFT: &config.VBFTConfig{
+		N:                    7,
+		C:                    2,
+		K:                    7,
+		L:                    112,
+		BlockMsgDelay:        10000,
+		HashMsgDelay:         10000,
+		PeerHandshakeTimeout: 10,
+		MaxBlockChangeView:   120000,
+		AdminOntID:           "did:dna:AdjfcJgwru2FD8kotCPvLDXYzRjqFjc9Tb",
+		MinInitStake:         100000,
+		VrfValue:             "",
+		VrfProof:             "",
+		Peers: []*config.VBFTPeerStakeInfo{
+			{Index: 1},
+			{Index: 2},
+			{Index: 3},
+			{Index: 4},
+			{Index: 5},
+			{Index: 6},
+			{Index: 7},
+		},
+	},
+	DBFT: &config.DBFTConfig{},
+	SOLO: &config.SOLOConfig{},
+}
+
 func TestMain(m *testing.M) {
 	log.InitLog(log.InfoLog, log.Stdout)
 	// Start local network server and create message router
@@ -80,19 +117,30 @@ func TestMain(m *testing.M) {
 		log.Fatalf("NewLedger error %s", err)
 	}
 
-	bookKeepers, err := config.DefConfig.GetBookkeepers()
-	if err != nil {
-		log.Fatal("failed to get bookkeepers")
-		return
+	var bookkeepers []keypair.PublicKey
+	testBookkeeperAccounts := make([]*account.Account, 0)
+	for i := 0; i < 7; i++ {
+		acc := account.NewAccount("")
+		testBookkeeperAccounts = append(testBookkeeperAccounts, acc)
+		bookkeepers = append(bookkeepers, acc.PublicKey)
 	}
-	genesisConfig := config.DefConfig.Genesis
-	genesisBlock, err := genesis.BuildGenesisBlock(bookKeepers, genesisConfig)
-	if err != nil {
-		log.Fatal("failed to build genesis block", err)
-		return
 
+	config.DefConfig.Genesis = testGenesisConfig
+	genesisConfig := config.DefConfig.Genesis
+
+	// update peers in genesis
+	for i, p := range genesisConfig.VBFT.Peers {
+		if i < len(testBookkeeperAccounts) {
+			p.PeerPubkey = vconfig.PubkeyID(testBookkeeperAccounts[i].PublicKey)
+			p.Address = testBookkeeperAccounts[i].Address.ToBase58()
+		}
 	}
-	err = ledger.DefLedger.Init(bookKeepers, genesisBlock)
+
+	block, err := genesis.BuildGenesisBlock(bookkeepers, genesisConfig)
+	if err != nil {
+		log.Fatalf("failed to build genesis block: %s", err)
+	}
+	err = ledger.DefLedger.Init(bookkeepers, block)
 	if err != nil {
 		log.Fatalf("DefLedger.Init error %s", err)
 	}
