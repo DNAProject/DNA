@@ -36,7 +36,7 @@ import (
 	vm "github.com/DNAProject/DNA/vm/neovm"
 )
 
-const NATIVE_INVOKE_NAME = "System.Native.Invoke" // copy from smartcontract/service/neovm/config.go to avoid cycle dependences
+const NATIVE_INVOKE_NAME = "DNA.Native.Invoke" // copy from smartcontract/service/neovm/config.go to avoid cycle dependences
 
 // NewDeployTransaction returns a deploy Transaction
 func NewDeployTransaction(code []byte, name, version, author, email, desp string, vmType payload.VmType) (*types.MutableTransaction, error) {
