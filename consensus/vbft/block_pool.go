@@ -158,7 +158,7 @@ func (pool *BlockPool) newBlockProposal(msg *blockProposalMsg) error {
 		Signature:        msg.Block.Block.Header.SigData[0],
 		ForEmpty:         false,
 	}
-	pool.addBlockEndorsementLocked(msg.GetBlockNum(), proposer, eSig)
+	pool.addBlockEndorsementLocked(msg.GetBlockNum(), proposer, eSig, false)
 	return nil
 }
 
@@ -262,10 +262,10 @@ func (pool *BlockPool) setProposalEndorsed(proposal *blockProposalMsg, forEmpty 
 	return nil
 }
 
-func (pool *BlockPool) addBlockEndorsementLocked(blkNum uint32, endorser uint32, eSig *CandidateEndorseSigInfo) {
+func (pool *BlockPool) addBlockEndorsementLocked(blkNum uint32, endorser uint32, eSig *CandidateEndorseSigInfo, commitment bool) {
 	candidate := pool.getCandidateInfoLocked(blkNum)
 
-	if eSigs, present := candidate.EndorseSigs[endorser]; present {
+	if eSigs, present := candidate.EndorseSigs[endorser]; present && !commitment {
 		for _, eSig := range eSigs {
 			if eSig.ForEmpty {
 				// has endorsed for empty, ignore new endorsement
@@ -303,7 +303,7 @@ func (pool *BlockPool) newBlockEndorsement(msg *blockEndorseMsg) {
 		Signature:        msg.EndorserSig,
 		ForEmpty:         msg.EndorseForEmpty,
 	}
-	pool.addBlockEndorsementLocked(msg.GetBlockNum(), msg.Endorser, eSig)
+	pool.addBlockEndorsementLocked(msg.GetBlockNum(), msg.Endorser, eSig, false)
 }
 
 //
@@ -474,7 +474,7 @@ func (pool *BlockPool) newBlockCommitment(msg *blockCommitMsg) error {
 			Signature:        sig,
 			ForEmpty:         msg.CommitForEmpty,
 		}
-		pool.addBlockEndorsementLocked(blkNum, endorser, eSig)
+		pool.addBlockEndorsementLocked(blkNum, endorser, eSig, false)
 	}
 
 	// add committer sig
@@ -482,7 +482,7 @@ func (pool *BlockPool) newBlockCommitment(msg *blockCommitMsg) error {
 		EndorsedProposer: msg.BlockProposer,
 		Signature:        msg.CommitterSig,
 		ForEmpty:         msg.CommitForEmpty,
-	})
+	}, true)
 
 	// add msg to commit-msgs
 	candidate.CommitMsgs = append(candidate.CommitMsgs, msg)
