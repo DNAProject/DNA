@@ -300,18 +300,6 @@ $ - 输入你的钱包口令
 - 登录 https://groups.google.com/forum/#!forum/OnchainDNA 
 
 
-## 网站
-
-- https://www.DNAproject.org
-
-## 论坛
-
-- https://forum.DNAproject.org
-
-## Wiki
-
-- https://wiki.DNAproject.org
-
 # 许可证
 
 DNA遵守LGPL License, 版本3.0。 详细信息请查看项目根目录下的LICENSE文件。
