@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/DNAProject/DNA.svg?branch=master)](https://travis-ci.org/DNAProject/DNA)
 
+[English](README.md) | 中文
+
 # DNA (Distributed Networks Architecture)
 
 DNA是go语言实现的基于区块链技术的去中心化的分布式网络协议。可以用来数字化资产和金融相关业务包括资产注册，发行，转账等。
