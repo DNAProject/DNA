@@ -29,6 +29,7 @@ import (
 	"github.com/DNAProject/DNA/common/constants"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
@@ -38,7 +39,7 @@ const (
 )
 
 func InitGas() {
-	native.Contracts[utils.GasContractAddress] = RegisterGasContract
+	native.Contracts[common2.GasContractAddress] = RegisterGasContract
 }
 
 func RegisterGasContract(native *native.NativeService) {

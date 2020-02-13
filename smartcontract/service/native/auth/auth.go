@@ -31,6 +31,7 @@ import (
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
@@ -39,7 +40,7 @@ var (
 )
 
 func Init() {
-	native.Contracts[utils.AuthContractAddress] = RegisterAuthContract
+	native.Contracts[common2.AuthContractAddress] = RegisterAuthContract
 }
 
 /*
@@ -645,7 +646,7 @@ func verifySig(native *native.NativeService, ontID []byte, keyNo uint64) (bool, 
 	sink.WriteVarBytes(ontID)
 	utils.EncodeVarUint(sink, keyNo)
 	args := sink.Bytes()
-	ret, err := native.NativeCall(utils.DIDContractAddress, "verifySignature", args)
+	ret, err := native.NativeCall(common2.DIDContractAddress, "verifySignature", args)
 	if err != nil {
 		return false, err
 	}

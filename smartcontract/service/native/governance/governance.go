@@ -34,6 +34,7 @@ import (
 	"github.com/DNAProject/DNA/common/constants"
 	cstates "github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
@@ -119,7 +120,7 @@ var Xi = []uint32{
 
 //Init governance contract address
 func InitGovernance() {
-	native.Contracts[utils.GovernanceContractAddress] = RegisterGovernanceContract
+	native.Contracts[common2.GovernanceContractAddress] = RegisterGovernanceContract
 }
 
 //Register methods of governance contract
@@ -402,7 +403,7 @@ func ApproveCandidate(native *native.NativeService) ([]byte, error) {
 
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -532,7 +533,7 @@ func RejectCandidate(native *native.NativeService) ([]byte, error) {
 
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -596,7 +597,7 @@ func BlackNode(native *native.NativeService) ([]byte, error) {
 
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -667,7 +668,7 @@ func WhiteNode(native *native.NativeService) ([]byte, error) {
 
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -954,7 +955,7 @@ func Withdraw(native *native.NativeService) ([]byte, error) {
 	}
 
 	//ont transfer
-	err = appCallTransferOnt(native, utils.GovernanceContractAddress, address, total)
+	err = appCallTransferOnt(native, common2.GovernanceContractAddress, address, total)
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
 	}
@@ -986,7 +987,7 @@ func CommitDpos(native *native.NativeService) ([]byte, error) {
 
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -1012,7 +1013,7 @@ func CommitDpos(native *native.NativeService) ([]byte, error) {
 func UpdateConfig(native *native.NativeService) ([]byte, error) {
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -1100,7 +1101,7 @@ func UpdateConfig(native *native.NativeService) ([]byte, error) {
 func UpdateGlobalParam(native *native.NativeService) ([]byte, error) {
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -1160,7 +1161,7 @@ func UpdateGlobalParam2(native *native.NativeService) ([]byte, error) {
 	}
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -1198,7 +1199,7 @@ func UpdateGlobalParam2(native *native.NativeService) ([]byte, error) {
 func UpdateSplitCurve(native *native.NativeService) ([]byte, error) {
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -1227,7 +1228,7 @@ func UpdateSplitCurve(native *native.NativeService) ([]byte, error) {
 func TransferPenalty(native *native.NativeService) ([]byte, error) {
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -1391,7 +1392,7 @@ func WithdrawFee(native *native.NativeService) ([]byte, error) {
 	fee := splitFeeAddress.Amount
 
 	//ong transfer
-	err = appCallTransferOng(native, utils.GovernanceContractAddress, params.Address, fee)
+	err = appCallTransferOng(native, common2.GovernanceContractAddress, params.Address, fee)
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("appCallTransferOng, ong transfer error: %v", err)
 	}
@@ -1468,7 +1469,7 @@ func AddInitPos(native *native.NativeService) ([]byte, error) {
 	}
 
 	//ont transfer
-	err = appCallTransferOnt(native, params.Address, utils.GovernanceContractAddress, uint64(params.Pos))
+	err = appCallTransferOnt(native, params.Address, common2.GovernanceContractAddress, uint64(params.Pos))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
 	}
@@ -1580,7 +1581,7 @@ func SetPromisePos(native *native.NativeService) ([]byte, error) {
 	}
 	// get admin from database
 	adminAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("getAdmin, get admin error: %v", err)
 	}
@@ -1609,7 +1610,7 @@ func SetPromisePos(native *native.NativeService) ([]byte, error) {
 func SetGasAddress(native *native.NativeService) ([]byte, error) {
 	// get operator from database
 	operatorAddress, err := global_params.GetStorageRole(native,
-		global_params.GenerateOperatorKey(utils.ParamContractAddress))
+		global_params.GenerateOperatorKey(common2.ParamContractAddress))
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("SetGasAddress, get operator error: %v", err)
 	}

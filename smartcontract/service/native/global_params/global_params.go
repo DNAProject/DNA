@@ -27,6 +27,7 @@ import (
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
@@ -46,7 +47,7 @@ const (
 )
 
 func InitGlobalParams() {
-	native.Contracts[utils.ParamContractAddress] = RegisterParamContract
+	native.Contracts[common2.ParamContractAddress] = RegisterParamContract
 }
 
 func RegisterParamContract(native *native.NativeService) {

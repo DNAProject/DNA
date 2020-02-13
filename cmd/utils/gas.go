@@ -43,8 +43,8 @@ import (
 	cutils "github.com/DNAProject/DNA/core/utils"
 	httpcom "github.com/DNAProject/DNA/http/base/common"
 	rpccommon "github.com/DNAProject/DNA/http/base/common"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	cstates "github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/ontio/ontology-crypto/keypair"
 	sig "github.com/ontio/ontology-crypto/signature"
@@ -194,7 +194,7 @@ func ApproveTx(gasPrice, gasLimit uint64, asset string, from, to string, amount 
 	switch strings.ToLower(asset) {
 	case ASSET_GAS:
 		version = VERSION_CONTRACT_GAS
-		contractAddr = utils.GasContractAddress
+		contractAddr = common2.GasContractAddress
 	default:
 		return nil, fmt.Errorf("Unsupport asset:%s", asset)
 	}
@@ -226,7 +226,7 @@ func TransferTx(gasPrice, gasLimit uint64, asset, from, to string, amount uint64
 	switch strings.ToLower(asset) {
 	case ASSET_GAS:
 		version = VERSION_CONTRACT_GAS
-		contractAddr = utils.GasContractAddress
+		contractAddr = common2.GasContractAddress
 	default:
 		return nil, fmt.Errorf("unsupport asset:%s", asset)
 	}
@@ -262,7 +262,7 @@ func TransferFromTx(gasPrice, gasLimit uint64, asset, sender, from, to string, a
 	switch strings.ToLower(asset) {
 	case ASSET_GAS:
 		version = VERSION_CONTRACT_GAS
-		contractAddr = utils.GasContractAddress
+		contractAddr = common2.GasContractAddress
 	default:
 		return nil, fmt.Errorf("unsupport asset:%s", asset)
 	}

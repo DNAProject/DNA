@@ -22,11 +22,11 @@ package did
 
 import (
 	"github.com/DNAProject/DNA/smartcontract/service/native"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/smartcontract/service/native/common"
 )
 
 func Init() {
-	native.Contracts[utils.DIDContractAddress] = RegisterIDContract
+	native.Contracts[common.DIDContractAddress] = RegisterIDContract
 }
 
 func RegisterIDContract(srvc *native.NativeService) {

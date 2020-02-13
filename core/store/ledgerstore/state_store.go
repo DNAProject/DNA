@@ -37,8 +37,8 @@ import (
 	"github.com/DNAProject/DNA/core/store/leveldbstore"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
 	"github.com/DNAProject/DNA/merkle"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/did"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 var (
@@ -419,7 +419,7 @@ func (self *StateStore) Close() error {
 func (self *StateStore) CheckStorage() error {
 	db := self.store
 
-	prefix := append([]byte{byte(scom.ST_STORAGE)}, utils.DIDContractAddress[:]...) //prefix of new storage key
+	prefix := append([]byte{byte(scom.ST_STORAGE)}, common2.DIDContractAddress[:]...) //prefix of new storage key
 	flag := append(prefix, did.FIELD_VERSION)
 	val, err := db.Get(flag)
 	if err == nil {

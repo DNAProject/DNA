@@ -26,6 +26,10 @@ package proc
 import (
 	"encoding/hex"
 	"fmt"
+	"sort"
+	"strconv"
+	"sync"
+
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -33,14 +37,11 @@ import (
 	tx "github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/errors"
 	httpcom "github.com/DNAProject/DNA/http/base/common"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	params "github.com/DNAProject/DNA/smartcontract/service/native/global_params"
-	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	tc "github.com/DNAProject/DNA/txnpool/common"
 	"github.com/DNAProject/DNA/validator/types"
 	"github.com/ontio/ontology-eventbus/actor"
-	"sort"
-	"strconv"
-	"sync"
 )
 
 type txStats struct {
@@ -100,7 +101,7 @@ func NewTxPoolServer(num uint8, disablePreExec, disableBroadcastNetTx bool) *TXP
 
 // getGlobalGasPrice returns a global gas price
 func getGlobalGasPrice() (uint64, error) {
-	mutable, err := httpcom.NewNativeInvokeTransaction(0, 0, nutils.ParamContractAddress, 0, "getGlobalParam", []interface{}{[]interface{}{"gasPrice"}})
+	mutable, err := httpcom.NewNativeInvokeTransaction(0, 0, common2.ParamContractAddress, 0, "getGlobalParam", []interface{}{[]interface{}{"gasPrice"}})
 	if err != nil {
 		return 0, fmt.Errorf("NewNativeInvokeTransaction error:%s", err)
 	}

@@ -24,20 +24,20 @@ package actor
 
 import (
 	"github.com/DNAProject/DNA/common"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 )
 
 func updateNativeSCAddr(hash common.Address) common.Address {
-	if hash == utils.GasContractAddress {
-		hash = common.AddressFromVmCode(utils.GasContractAddress[:])
-	} else if hash == utils.DIDContractAddress {
-		hash = common.AddressFromVmCode(utils.DIDContractAddress[:])
-	} else if hash == utils.ParamContractAddress {
-		hash = common.AddressFromVmCode(utils.ParamContractAddress[:])
-	} else if hash == utils.AuthContractAddress {
-		hash = common.AddressFromVmCode(utils.AuthContractAddress[:])
-	} else if hash == utils.GovernanceContractAddress {
-		hash = common.AddressFromVmCode(utils.GovernanceContractAddress[:])
+	if hash == common2.GasContractAddress {
+		hash = common.AddressFromVmCode(common2.GasContractAddress[:])
+	} else if hash == common2.DIDContractAddress {
+		hash = common.AddressFromVmCode(common2.DIDContractAddress[:])
+	} else if hash == common2.ParamContractAddress {
+		hash = common.AddressFromVmCode(common2.ParamContractAddress[:])
+	} else if hash == common2.AuthContractAddress {
+		hash = common.AddressFromVmCode(common2.AuthContractAddress[:])
+	} else if hash == common2.GovernanceContractAddress {
+		hash = common.AddressFromVmCode(common2.GovernanceContractAddress[:])
 	}
 	return hash
 }

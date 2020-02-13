@@ -24,6 +24,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"io"
 	"reflect"
 
 	"github.com/DNAProject/DNA/common"
@@ -33,14 +34,13 @@ import (
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/smartcontract/event"
 	native2 "github.com/DNAProject/DNA/smartcontract/service/native"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/util"
 	"github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/DNAProject/DNA/vm/crossvm_codec"
 	neotypes "github.com/DNAProject/DNA/vm/neovm/types"
 	"github.com/go-interpreter/wagon/exec"
 	"github.com/go-interpreter/wagon/wasm"
-	"io"
 )
 
 type ContractType byte
@@ -691,7 +691,7 @@ func NewHostModule() *wasm.Module {
 }
 
 func (self *Runtime) getContractType(addr common.Address) (ContractType, error) {
-	if utils.IsNativeContract(addr) {
+	if common2.IsNativeContract(addr) {
 		return NATIVE_CONTRACT, nil
 	}
 

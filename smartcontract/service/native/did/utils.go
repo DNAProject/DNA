@@ -27,6 +27,7 @@ import (
 	"github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/ontio/ontology-crypto/keypair"
 )
@@ -68,13 +69,13 @@ func encodeID(id []byte) ([]byte, error) {
 		return nil, errors.New("encode ONT ID error: invalid ID length")
 	}
 	//enc := []byte{byte(length)}
-	enc := append(utils.DIDContractAddress[:], byte(length))
+	enc := append(common2.DIDContractAddress[:], byte(length))
 	enc = append(enc, id...)
 	return enc, nil
 }
 
 func decodeID(data []byte) ([]byte, error) {
-	prefix := len(utils.DIDContractAddress)
+	prefix := len(common2.DIDContractAddress)
 	size := len(data)
 	if size < prefix || size != int(data[prefix])+1+prefix {
 		return nil, errors.New("decode ONT ID error: invalid data length")

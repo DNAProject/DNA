@@ -36,6 +36,7 @@ import (
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/smartcontract"
 	"github.com/DNAProject/DNA/smartcontract/event"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/neovm"
@@ -154,7 +155,7 @@ func refreshGlobalParam(config *smartcontract.Config, cache *storage.CacheDB, st
 	}
 
 	service, _ := sc.NewNativeService()
-	result, err := service.NativeCall(utils.ParamContractAddress, "getGlobalParam", sink.Bytes())
+	result, err := service.NativeCall(common2.ParamContractAddress, "getGlobalParam", sink.Bytes())
 	if err != nil {
 		return err
 	}
