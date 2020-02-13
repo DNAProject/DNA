@@ -222,10 +222,10 @@ func ParseReturnValue(rawValue interface{}, rawReturnTypeStr string, vmtype payl
 	if !ok {
 		rawValues = append(rawValues, rawValue)
 	}
-	if vmtype == payload.NEOVM_TYPE {
-		return parseReturnNeoValueArray(rawValues, returnTypes)
-	} else {
+	if vmtype == payload.WASMVM_TYPE {
 		return parasReturnValueWasmArray(rawValues, returnTypes)
+	} else {
+		return parseReturnNeoValueArray(rawValues, returnTypes)
 	}
 
 }

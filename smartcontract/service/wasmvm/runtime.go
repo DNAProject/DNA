@@ -704,6 +704,8 @@ func (self *Runtime) getContractType(addr common.Address) (ContractType, error) 
 	}
 	if dep.VmType() == payload.WASMVM_TYPE {
 		return WASMVM_CONTRACT, nil
+	} else if dep.VmType() == payload.NATIVE_TYPE {
+		return NATIVE_CONTRACT, nil
 	}
 
 	return NEOVM_CONTRACT, nil

@@ -24,6 +24,7 @@ package native
 import (
 	"fmt"
 	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/smartcontract/context"
@@ -62,9 +63,37 @@ func (this *NativeService) Register(methodName string, handler Handler) {
 	this.ServiceMap[methodName] = handler
 }
 
+func (this *NativeService) getBaseContractAddress(addr common.Address) (common.Address, error) {
+	if common2.IsNativeContract(addr) {
+		return addr, nil
+	}
+
+	dep, err := this.CacheDB.GetContract(addr)
+	if err != nil {
+		return common.ADDRESS_EMPTY, fmt.Errorf("[getNativeContract] get contract context error: %s", err)
+	}
+	if dep == nil {
+		return common.ADDRESS_EMPTY, errors.NewErr("[NativeVmService] deploy code type error!")
+	}
+
+	ndc, err := payload.NewNativeDeployCode(dep.GetRawCode())
+	if err != nil {
+		return common.ADDRESS_EMPTY, fmt.Errorf("[NativeVmService] native deploy code type error: %s", err)
+	}
+
+	return ndc.BaseContractAddress, nil
+}
+
 func (this *NativeService) Invoke() ([]byte, error) {
 	contract := this.InvokeParam
-	services, ok := Contracts[contract.Address]
+
+	// update baseContractAddr from deploy code
+	baseContractAddr, err := this.getBaseContractAddress(contract.Address)
+	if err != nil {
+		return common2.BYTE_FALSE, fmt.Errorf("get native contract base address: %s", err)
+	}
+
+	services, ok := Contracts[baseContractAddr]
 	if !ok {
 		return common2.BYTE_FALSE, fmt.Errorf("Native contract address %x haven't been registered.", contract.Address)
 	}

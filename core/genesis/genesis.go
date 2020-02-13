@@ -149,7 +149,7 @@ func newParamContract() *types.Transaction {
 
 func newGovConfigTx() *types.Transaction {
 	mutable, err := utils.NewDeployTransaction(common2.GovernanceContractAddress[:], "CONFIG", "1.0",
-		"DNA Dev Team", "contact@ont.io", "Blockchain Network Consensus Config", payload.NEOVM_TYPE)
+		"DNA Dev Team", "contact@onchain.com", "Blockchain Network Consensus Config", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
 	}
@@ -162,7 +162,7 @@ func newGovConfigTx() *types.Transaction {
 
 func deployAuthContract() *types.Transaction {
 	mutable, err := utils.NewDeployTransaction(common2.AuthContractAddress[:], "AuthContract", "1.0",
-		"DNA Dev Team", "contact@ont.io", "Blockchain Network Authorization Contract", payload.NEOVM_TYPE)
+		"DNA Dev Team", "contact@onchain.com", "Blockchain Network Authorization Contract", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
 	}
@@ -174,14 +174,14 @@ func deployAuthContract() *types.Transaction {
 }
 
 func deployOntIDContract() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(common2.DIDContractAddress[:], "OID", "1.0",
-		"DNA Dev Team", "contact@ont.io", "Blockchain Network ONT ID", payload.NEOVM_TYPE)
+	mutable, err := utils.NewDeployTransaction(common2.DIDContractAddress[:], "DID", "1.0",
+		"DNA Dev Team", "contact@onchain.com", "Blockchain Network DID", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
 	}
 	tx, err := mutable.IntoImmutable()
 	if err != nil {
-		panic("construct genesis ontid transaction error ")
+		panic("construct genesis DID transaction error ")
 	}
 	return tx
 }
