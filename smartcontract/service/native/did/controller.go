@@ -32,6 +32,11 @@ import (
 )
 
 func regIdWithController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	didMethod, err := getDIDMethod(srvc)
+	if err != nil || didMethod == nil {
+		return utils.BYTE_FALSE, fmt.Errorf("regIDWithController, get did method: %s", err)
+	}
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: ID
 	arg0, err := utils.DecodeVarBytes(source)
@@ -39,11 +44,11 @@ func regIdWithController(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("argument 0 error")
 	}
 
-	if !account.VerifyID(string(arg0)) {
+	if !account.VerifyID(string(didMethod), string(arg0)) {
 		return utils.BYTE_FALSE, fmt.Errorf("invalid ID")
 	}
 
-	encId, err := encodeID(arg0)
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -58,13 +63,13 @@ func regIdWithController(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("argument 1 error")
 	}
 
-	if account.VerifyID(string(arg1)) {
+	if account.VerifyID(string(didMethod), string(arg1)) {
 		err = verifySingleController(srvc, arg1, source)
 		if err != nil {
 			return utils.BYTE_FALSE, err
 		}
 	} else {
-		controller, err := deserializeGroup(arg1)
+		controller, err := deserializeGroup(didMethod, arg1)
 		if err != nil {
 			return utils.BYTE_FALSE, errors.New("deserialize controller error")
 		}
@@ -83,6 +88,7 @@ func regIdWithController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func revokeIDByController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: id
 	arg0, err := utils.DecodeVarBytes(source)
@@ -90,7 +96,7 @@ func revokeIDByController(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("argument 0 error")
 	}
 
-	encID, err := encodeID(arg0)
+	encID, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -114,6 +120,7 @@ func revokeIDByController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func verifyController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: ID
 	arg0, err := utils.DecodeVarBytes(source)
@@ -121,7 +128,7 @@ func verifyController(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("argument 0 error, %s", err)
 	}
 
-	key, err := encodeID(arg0)
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -135,6 +142,7 @@ func verifyController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func removeController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: id
 	arg0, err := utils.DecodeVarBytes(source)
@@ -146,7 +154,7 @@ func removeController(srvc *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("argument 1 error")
 	}
-	encId, err := encodeID(arg0)
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -161,6 +169,7 @@ func removeController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func addKeyByController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: id
 	arg0, err := utils.DecodeVarBytes(source)
@@ -178,7 +187,7 @@ func addKeyByController(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("invalid key")
 	}
 
-	encId, err := encodeID(arg0)
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -198,6 +207,7 @@ func addKeyByController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func removeKeyByController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: id
 	arg0, err := utils.DecodeVarBytes(source)
@@ -211,7 +221,7 @@ func removeKeyByController(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("argument 1")
 	}
 
-	encId, err := encodeID(arg0)
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New(err.Error())
 	}
@@ -231,6 +241,7 @@ func removeKeyByController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func addAttributesByController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: id
 	arg0, err := utils.DecodeVarBytes(source)
@@ -253,7 +264,7 @@ func addAttributesByController(srvc *native.NativeService) ([]byte, error) {
 		arg1 = append(arg1, v)
 	}
 
-	encId, err := encodeID(arg0)
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -274,6 +285,7 @@ func addAttributesByController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func removeAttributeByController(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	source := common.NewZeroCopySource(srvc.Input)
 	// arg0: id
 	arg0, err := utils.DecodeVarBytes(source)
@@ -287,7 +299,7 @@ func removeAttributeByController(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("argument 1 error")
 	}
 
-	encId, err := encodeID(arg0)
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -307,6 +319,11 @@ func removeAttributeByController(srvc *native.NativeService) ([]byte, error) {
 }
 
 func getController(srvc *native.NativeService, encId []byte) (interface{}, error) {
+	didMethod, err := getDIDMethod(srvc)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("getController, get did method: %s", err)
+	}
+
 	key := append(encId, FIELD_CONTROLLER)
 	item, err := utils.GetStorageItem(srvc, key)
 	if err != nil {
@@ -315,20 +332,21 @@ func getController(srvc *native.NativeService, encId []byte) (interface{}, error
 		return nil, errors.New("empty controller storage")
 	}
 
-	if account.VerifyID(string(item.Value)) {
+	if account.VerifyID(string(didMethod), string(item.Value)) {
 		return item.Value, nil
 	} else {
-		return deserializeGroup(item.Value)
+		return deserializeGroup(didMethod, item.Value)
 	}
 }
 
 func verifySingleController(srvc *native.NativeService, id []byte, args *common.ZeroCopySource) error {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	// public key index
 	index, err := utils.DecodeVarUint(args)
 	if err != nil {
 		return fmt.Errorf("index error, %s", err)
 	}
-	encId, err := encodeID(id)
+	encId, err := encodeID(contract, id)
 	if err != nil {
 		return err
 	}

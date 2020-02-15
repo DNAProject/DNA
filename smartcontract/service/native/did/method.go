@@ -43,49 +43,55 @@ func regIdWithPublicKey(srvc *native.NativeService) ([]byte, error) {
 	// arg0: ID
 	arg0, err := utils.DecodeVarBytes(source)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: parsing argument 0 failed")
+		return utils.BYTE_FALSE, errors.New("register DID error: parsing argument 0 failed")
 	} else if len(arg0) == 0 {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid length of argument 0")
+		return utils.BYTE_FALSE, errors.New("register DID error: invalid length of argument 0")
 	}
 	log.Debug("arg 0:", hex.EncodeToString(arg0), string(arg0))
 	// arg1: public key
 	arg1, err := utils.DecodeVarBytes(source)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: parsing argument 1 failed")
+		return utils.BYTE_FALSE, errors.New("register DID error: parsing argument 1 failed")
 	}
 
 	log.Debug("arg 1:", hex.EncodeToString(arg1))
 
 	if len(arg0) == 0 || len(arg1) == 0 {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid argument")
+		return utils.BYTE_FALSE, errors.New("register DID error: invalid argument")
 	}
 
-	if !account.VerifyID(string(arg0)) {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid ID")
+	didMethod, err := getDIDMethod(srvc)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("regIdWithPublicKey, get did method: %s", err)
 	}
 
-	key, err := encodeID(arg0)
+	if !account.VerifyID(string(didMethod), string(arg0)) {
+		return utils.BYTE_FALSE, errors.New("register DID error: invalid ID")
+	}
+
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: " + err.Error())
+		return utils.BYTE_FALSE, errors.New("register DID error: " + err.Error())
 	}
 
 	if checkIDState(srvc, key) != flag_not_exist {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: already registered")
+		return utils.BYTE_FALSE, errors.New("register DID error: already registered")
 	}
 
 	public, err := keypair.DeserializePublicKey(arg1)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid public key")
+		return utils.BYTE_FALSE, errors.New("register DID error: invalid public key")
 	}
 	addr := types.AddressFromPubKey(public)
 	if !srvc.ContextRef.CheckWitness(addr) {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: checking witness failed")
+		return utils.BYTE_FALSE, errors.New("register DID error: checking witness failed")
 	}
 
 	// insert public key
 	_, err = insertPk(srvc, key, arg1)
 	if err != nil {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: store public key error, " + err.Error())
+		return utils.BYTE_FALSE, errors.New("register DID error: store public key error, " + err.Error())
 	}
 	// set flags
 	utils.PutBytes(srvc, key, []byte{flag_valid})
@@ -106,8 +112,14 @@ func regIdWithAttributes(srvc *native.NativeService) ([]byte, error) {
 	} else if len(arg0) == 0 {
 		return utils.BYTE_FALSE, errors.New("register ID with attributes error: argument 0 error, invalid length")
 	}
-	if !account.VerifyID(string(arg0)) {
-		return utils.BYTE_FALSE, errors.New("register ONT ID error: invalid ID")
+
+	didMethod, err := getDIDMethod(srvc)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("regIdWithAttributes, get did method: %s", err)
+	}
+
+	if !account.VerifyID(string(didMethod), string(arg0)) {
+		return utils.BYTE_FALSE, errors.New("register DID error: invalid ID")
 	}
 
 	// arg1: public key
@@ -133,7 +145,8 @@ func regIdWithAttributes(srvc *native.NativeService) ([]byte, error) {
 		arg2 = append(arg2, v)
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("register ID with attributes error: " + err.Error())
 	}
@@ -197,7 +210,8 @@ func addKey(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("add key failed: check witness failed, " + err.Error())
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("add key failed: " + err.Error())
 	}
@@ -248,7 +262,8 @@ func removeKey(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("remove key failed: check witness failed, %s", err)
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("remove key failed: %s", err)
 	}
@@ -305,7 +320,8 @@ func addAttributes(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("add attributes failed, argument 2, error: %s", err)
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("add attributes failed: %s", err)
 	}
@@ -352,7 +368,9 @@ func removeAttribute(srvc *native.NativeService) ([]byte, error) {
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("remove attribute failed: " + err.Error())
 	}
-	key, err := encodeID(arg0)
+
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("remove attribute failed: " + err.Error())
 	}
@@ -385,7 +403,8 @@ func verifySignature(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("verify signature error: argument 1 error, " + err.Error())
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("verify signature error: " + err.Error())
 	}
@@ -409,7 +428,8 @@ func revokeID(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, fmt.Errorf("argument 1 error")
 	}
 
-	encID, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	encID, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}

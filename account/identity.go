@@ -68,11 +68,11 @@ func CreateID(nonce []byte) (string, error) {
 	return SCHEME + ":" + METHOD + ":" + string(idstring), nil
 }
 
-func VerifyID(id string) bool {
-	if len(id) < 9 {
+func VerifyID(method, id string) bool {
+	if len(id) < 9 || len(method) != 3 {
 		return false
 	}
-	if id[0:8] != "did:dna:" {
+	if id[0:8] != "did:"+method+":" {
 		return false
 	}
 	buf, err := base58.BitcoinEncoding.Decode([]byte(id[8:]))

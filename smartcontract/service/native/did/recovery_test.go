@@ -36,6 +36,13 @@ func TestRecovery(t *testing.T) {
 }
 
 func CaseRecovery(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
 	id0, _ := account.GenerateID()
 	a0 := account.NewAccount("")
 	id1, _ := account.GenerateID()

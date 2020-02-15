@@ -23,12 +23,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"testing"
+
 	"github.com/DNAProject/DNA/cmd/abi"
 	clisvrcom "github.com/DNAProject/DNA/cmd/sigsvr/common"
-	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	"github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-crypto/signature"
-	"testing"
 )
 
 func TestSigNativeInvokeTx(t *testing.T) {
@@ -46,7 +47,7 @@ func TestSigNativeInvokeTx(t *testing.T) {
 	invokeReq := &SigNativeInvokeTxReq{
 		GasPrice: 0,
 		GasLimit: 40000,
-		Address:  nutils.GasContractAddress.ToHexString(),
+		Address:  common.GasContractAddress.ToHexString(),
 		Method:   "transfer",
 		Version:  0,
 		Params: []interface{}{

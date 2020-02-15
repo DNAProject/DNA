@@ -26,16 +26,18 @@ import (
 	"sort"
 
 	"github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/smartcontract/event"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 var (
-	PreAdmin          = []byte{0x01}
-	PreRoleFunc       = []byte{0x02}
-	PreRoleToken      = []byte{0x03}
-	PreDelegateStatus = []byte{0x04}
+	PreAdmin           = []byte{0x01}
+	PreRoleFunc        = []byte{0x02}
+	PreRoleToken       = []byte{0x03}
+	PreDelegateStatus  = []byte{0x04}
+	PreDIDContractAddr = []byte{0x05}
 )
 
 //type(this.contractAddr.Admin) = []byte
@@ -195,4 +197,36 @@ func pushEvent(native *native.NativeService, s interface{}) {
 
 func serializeAddress(sink *common.ZeroCopySink, addr common.Address) {
 	sink.WriteVarBytes(addr[:])
+}
+
+func getDIDContractAddr(native *native.NativeService) (common.Address, error) {
+	contract := native.ContextRef.CurrentContext().ContractAddress
+	didContractAddrBytes, err := native.CacheDB.Get(utils.ConcatKey(contract, PreDIDContractAddr))
+	if err != nil {
+		return common.ADDRESS_EMPTY, fmt.Errorf("get did contract: %s", err)
+	}
+	value, err := states.GetValueFromRawStorageItem(didContractAddrBytes)
+	if err != nil {
+		return common.ADDRESS_EMPTY, fmt.Errorf("parse did contract: %s", err)
+	}
+	didContractAddr, err := common.AddressParseFromBytes(value)
+	if err != nil {
+		return common.ADDRESS_EMPTY, fmt.Errorf("invalid did contract addr: %s", err)
+	}
+	return didContractAddr, nil
+}
+
+func getDIDMethod(native *native.NativeService) ([]byte, error) {
+	didContractAddr, err := getDIDContractAddr(native)
+	if err != nil {
+		return nil, fmt.Errorf("invalid did contract addr: %s", err)
+	}
+	didMethod, err := native.NativeCall(didContractAddr, "getDIDMethod", []byte{})
+	if err != nil {
+		return nil, fmt.Errorf("get did method from contract: %s", err)
+	}
+	if result, ok := didMethod.([]byte); ok {
+		return result, nil
+	}
+	return nil, fmt.Errorf("get did method from contract failed")
 }

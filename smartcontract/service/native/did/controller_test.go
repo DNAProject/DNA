@@ -27,6 +27,7 @@ import (
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/ontio/ontology-crypto/keypair"
 )
@@ -41,6 +42,13 @@ func TestGroupController(t *testing.T) {
 
 // Test case: register an ID controlled by another ID
 func CaseController(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
 	a0 := account.NewAccount("")
 	id0, _ := account.GenerateID()
 	id1, _ := account.GenerateID()
@@ -204,6 +212,13 @@ func CaseController(t *testing.T, n *native.NativeService) {
 }
 
 func CaseGroupController(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
 	id, _ := account.GenerateID()
 	id0, _ := account.GenerateID()
 	id1, _ := account.GenerateID()
@@ -301,7 +316,7 @@ func CaseGroupController(t *testing.T, n *native.NativeService) {
 	}
 
 	// 10. check id state
-	enc, _ := encodeID([]byte(id))
+	enc, _ := encodeID(common2.DIDContractAddress, []byte(id))
 	if checkIDState(n, enc) != flag_revoke {
 		t.Fatal("id state is not revoked")
 	}

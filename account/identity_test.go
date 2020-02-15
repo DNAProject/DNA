@@ -42,7 +42,7 @@ func TestCreate(t *testing.T) {
 
 func TestVerify(t *testing.T) {
 	t.Log("verify", id)
-	if !VerifyID(id) {
+	if !VerifyID("dna", id) {
 		t.Error("error: failed")
 	}
 
@@ -56,7 +56,7 @@ func TestVerify(t *testing.T) {
 
 	for _, v := range invalid {
 		t.Log("verify", v)
-		if VerifyID(v) {
+		if VerifyID("dna", v) {
 			t.Error("error: passed")
 		}
 	}

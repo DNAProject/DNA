@@ -26,7 +26,7 @@ import (
 	"testing"
 
 	"github.com/DNAProject/DNA/common"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,7 +39,7 @@ var (
 var (
 	funcs           = []string{"foo1", "foo2"}
 	role            = "role"
-	GasContractAddr = utils.GasContractAddress
+	GasContractAddr = common2.GasContractAddress
 )
 
 func init() {
