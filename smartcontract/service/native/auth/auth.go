@@ -81,7 +81,8 @@ func InitContractAdmin(native *native.NativeService) ([]byte, error) {
 		return nil, fmt.Errorf("[initContractAdmin] get did method: %s", err)
 	}
 	if !account.VerifyID(string(didMethod), string(param.AdminOntID)) {
-		return nil, fmt.Errorf("[initContractAdmin] invalid param: adminOntID is %x", param.AdminOntID)
+		return nil, fmt.Errorf("[initContractAdmin] invalid param: didMethod %s, adminOntID is %s",
+			string(didMethod), string(param.AdminOntID))
 	}
 	ret, err := initContractAdmin(native, invokeAddr, param.AdminOntID)
 	if err != nil {
