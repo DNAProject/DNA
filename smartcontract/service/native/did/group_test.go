@@ -29,11 +29,11 @@ import (
 	"github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/core/store/leveldbstore"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
-	"github.com/DNAProject/DNA/smartcontract/service/native"
-	"github.com/DNAProject/DNA/smartcontract/storage"
-	"github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract"
 	"github.com/DNAProject/DNA/smartcontract/context"
+	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/service/native/common"
+	"github.com/DNAProject/DNA/smartcontract/storage"
 )
 
 func TestDeserializeGroup(t *testing.T) {
