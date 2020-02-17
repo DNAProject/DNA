@@ -29,6 +29,7 @@ import (
 	"github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/smartcontract/event"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
@@ -201,6 +202,10 @@ func serializeAddress(sink *common.ZeroCopySink, addr common.Address) {
 
 func getDIDContractAddr(native *native.NativeService) (common.Address, error) {
 	contract := native.ContextRef.CurrentContext().ContractAddress
+	if contract == common2.AuthContractAddress {
+		// default auth contract
+		return common2.DIDContractAddress, nil
+	}
 	didContractAddrBytes, err := native.CacheDB.Get(utils.ConcatKey(contract, PreDIDContractAddr))
 	if err != nil {
 		return common.ADDRESS_EMPTY, fmt.Errorf("get did contract: %s", err)

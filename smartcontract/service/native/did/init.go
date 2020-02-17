@@ -76,18 +76,24 @@ func didInit(srvc *native.NativeService) ([]byte, error) {
 	}
 
 	// check if has initialized
-	if _, err := getDIDMethod(srvc); err == nil {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	didMethodBytes, err := srvc.CacheDB.Get(utils.ConcatKey(contract, []byte{FIELD_DID_METHOD}))
+	if didMethodBytes != nil || err != nil {
 		return utils.BYTE_FALSE, fmt.Errorf("init did, already inited")
 	}
 
 	// save did-method
-	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	srvc.CacheDB.Put(utils.ConcatKey(contract, []byte{FIELD_DID_METHOD}), states.GenRawStorageItem(didMethod))
 	return utils.BYTE_TRUE, nil
 }
 
 func getDIDMethod(srvc *native.NativeService) ([]byte, error) {
 	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	if contract == common.DIDContractAddress {
+		// default did contract
+		return []byte("dna"), nil
+	}
+
 	didMethodBytes, err := srvc.CacheDB.Get(utils.ConcatKey(contract, []byte{FIELD_DID_METHOD}))
 	if err != nil {
 		return nil, err

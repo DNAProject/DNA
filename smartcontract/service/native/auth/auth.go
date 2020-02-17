@@ -693,12 +693,13 @@ func authInit(srvc *native.NativeService) ([]byte, error) {
 	}
 
 	// check if has initialized
-	if _, err := getDIDContractAddr(srvc); err == nil {
-		return utils.BYTE_FALSE, fmt.Errorf("init auth, already inited")
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	didContractAddrBytes, err := srvc.CacheDB.Get(utils.ConcatKey(contract, PreDIDContractAddr))
+	if didContractAddrBytes != nil || err != nil {
+		return utils.BYTE_FALSE, fmt.Errorf("get did contract: %s", err)
 	}
 
 	// save did contract addr
-	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	srvc.CacheDB.Put(utils.ConcatKey(contract, PreDIDContractAddr), states.GenRawStorageItem(didContractAddr))
 	return utils.BYTE_TRUE, nil
 }

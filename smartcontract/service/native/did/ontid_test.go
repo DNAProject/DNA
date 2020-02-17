@@ -56,6 +56,10 @@ func TestOwnerSize(t *testing.T) {
 	testcase(t, CaseOwnerSize)
 }
 
+func TestDoubleInitFail(t *testing.T) {
+	testcase(t, CaseDoubleInit)
+}
+
 // Register id with account acc
 func regID(n *native.NativeService, id string, a *account.Account) error {
 	// make arguments
@@ -360,6 +364,22 @@ func CaseOwnerSize(t *testing.T, n *native.NativeService) {
 	_, err = insertPk(n, enc, buf)
 	if err == nil {
 		t.Fatal("total size of the owner's key should be limited")
+	}
+}
+
+func CaseDoubleInit(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
+	initSink = common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("abc"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err == nil {
+		t.Error("failed to double init did")
 	}
 }
 
