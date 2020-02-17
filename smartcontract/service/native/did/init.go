@@ -21,15 +21,22 @@
 package did
 
 import (
+	"fmt"
+
+	common2 "github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 func Init() {
-	native.Contracts[utils.DIDContractAddress] = RegisterIDContract
+	native.Contracts[common.DIDContractAddress] = RegisterIDContract
 }
 
 func RegisterIDContract(srvc *native.NativeService) {
+	srvc.Register("initDID", didInit)
+	srvc.Register("getDIDMethod", getDIDMethod)
 	srvc.Register("regIDWithPublicKey", regIdWithPublicKey)
 	srvc.Register("regIDWithController", regIdWithController)
 	srvc.Register("revokeID", revokeID)
@@ -57,4 +64,39 @@ func RegisterIDContract(srvc *native.NativeService) {
 	srvc.Register("getAttributes", GetAttributes)
 	srvc.Register("getDDO", GetDDO)
 	return
+}
+
+func didInit(srvc *native.NativeService) ([]byte, error) {
+	didMethod, err := utils.DecodeVarBytes(common2.NewZeroCopySource(srvc.Input))
+	if err != nil {
+		return utils.BYTE_FALSE, fmt.Errorf("init did, contract param deserialize err: %s", err)
+	}
+	if len(didMethod) != 3 {
+		return utils.BYTE_FALSE, fmt.Errorf("init did, invalid length of did-method: %s", string(didMethod))
+	}
+
+	// check if has initialized
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	didMethodBytes, err := srvc.CacheDB.Get(utils.ConcatKey(contract, []byte{FIELD_DID_METHOD}))
+	if didMethodBytes != nil || err != nil {
+		return utils.BYTE_FALSE, fmt.Errorf("init did, already inited")
+	}
+
+	// save did-method
+	srvc.CacheDB.Put(utils.ConcatKey(contract, []byte{FIELD_DID_METHOD}), states.GenRawStorageItem(didMethod))
+	return utils.BYTE_TRUE, nil
+}
+
+func getDIDMethod(srvc *native.NativeService) ([]byte, error) {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	if contract == common.DIDContractAddress {
+		// default did contract
+		return []byte("dna"), nil
+	}
+
+	didMethodBytes, err := srvc.CacheDB.Get(utils.ConcatKey(contract, []byte{FIELD_DID_METHOD}))
+	if err != nil {
+		return nil, err
+	}
+	return states.GetValueFromRawStorageItem(didMethodBytes)
 }

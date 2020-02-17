@@ -37,8 +37,8 @@ import (
 	"github.com/DNAProject/DNA/core/states"
 	scommon "github.com/DNAProject/DNA/core/store/common"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	gov "github.com/DNAProject/DNA/smartcontract/service/native/governance"
-	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-crypto/vrf"
 )
@@ -138,7 +138,7 @@ func GetVbftConfigInfo(memdb *overlaydb.MemDB) (*config.VBFTConfig, error) {
 
 	//get preConfig
 	preCfg := new(gov.PreConfig)
-	data, err := GetStorageValue(memdb, ledger.DefLedger, nutils.GovernanceContractAddress, []byte(gov.PRE_CONFIG))
+	data, err := GetStorageValue(memdb, ledger.DefLedger, common2.GovernanceContractAddress, []byte(gov.PRE_CONFIG))
 	if err != nil && err != scommon.ErrNotFound {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func GetVbftConfigInfo(memdb *overlaydb.MemDB) (*config.VBFTConfig, error) {
 			MaxBlockChangeView:   uint32(preCfg.Configuration.MaxBlockChangeView),
 		}
 	} else {
-		data, err := GetStorageValue(memdb, ledger.DefLedger, nutils.GovernanceContractAddress, []byte(gov.VBFT_CONFIG))
+		data, err := GetStorageValue(memdb, ledger.DefLedger, common2.GovernanceContractAddress, []byte(gov.VBFT_CONFIG))
 		if err != nil {
 			return nil, err
 		}
@@ -195,7 +195,7 @@ func GetPeersConfig(memdb *overlaydb.MemDB) ([]*config.VBFTPeerStakeInfo, error)
 		return nil, err
 	}
 	key := append([]byte(gov.PEER_POOL), viewBytes...)
-	data, err := GetStorageValue(memdb, ledger.DefLedger, nutils.GovernanceContractAddress, key)
+	data, err := GetStorageValue(memdb, ledger.DefLedger, common2.GovernanceContractAddress, key)
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +256,7 @@ func GetStorageValue(memdb *overlaydb.MemDB, backend *ledger.Ledger, addr common
 }
 
 func GetGovernanceView(memdb *overlaydb.MemDB) (*gov.GovernanceView, error) {
-	value, err := GetStorageValue(memdb, ledger.DefLedger, nutils.GovernanceContractAddress, []byte(gov.GOVERNANCE_VIEW))
+	value, err := GetStorageValue(memdb, ledger.DefLedger, common2.GovernanceContractAddress, []byte(gov.GOVERNANCE_VIEW))
 	if err != nil {
 		return nil, err
 	}

@@ -27,6 +27,7 @@ import (
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/errors"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 )
 
 type VmType byte
@@ -34,11 +35,12 @@ type VmType byte
 const (
 	NEOVM_TYPE  VmType = 1
 	WASMVM_TYPE VmType = 3
+	NATIVE_TYPE VmType = 4
 )
 
 func VmTypeFromByte(ty byte) (VmType, error) {
 	switch ty {
-	case 1, 3:
+	case 1, 3, 4:
 		return VmType(ty), nil
 	default:
 		return VmType(0), fmt.Errorf("can not convert byte:%d to vm type", ty)
@@ -48,7 +50,7 @@ func VmTypeFromByte(ty byte) (VmType, error) {
 // DeployCode is an implementation of transaction payload for deploy smartcontract
 type DeployCode struct {
 	code []byte
-	//0, 1 means NEOVM_TYPE, 3 means WASMVM_TYPE
+	//0, 1 means NEOVM_TYPE, 3 means WASMVM_TYPE, 4 means NATIVE_TYPE
 	vmFlags     byte
 	Name        string
 	Version     string
@@ -105,7 +107,7 @@ func (dc *DeployCode) GetNeoCode() ([]byte, error) {
 
 func checkVmFlags(vmFlags byte) error {
 	switch vmFlags {
-	case 0, 1, 3:
+	case 0, 1, 3, 4:
 		return nil
 	default:
 		return fmt.Errorf("invalid vm flags: %d", vmFlags)
@@ -118,6 +120,8 @@ func (dc *DeployCode) VmType() VmType {
 		return NEOVM_TYPE
 	case 3:
 		return WASMVM_TYPE
+	case 4:
+		return NATIVE_TYPE
 	default:
 		panic("unreachable")
 	}
@@ -197,6 +201,10 @@ func validateDeployCode(dep *DeployCode) error {
 		if len(dep.code) > maxWasmCodeSize {
 			return errors.NewErr("[contract] Code too long!")
 		}
+	} else if dep.VmType() == NATIVE_TYPE {
+		if _, err := NewNativeDeployCode(dep.code); err != nil {
+			return err
+		}
 	} else {
 		if len(dep.code) > 1024*1024 {
 			return errors.NewErr("[contract] Code too long!")
@@ -252,4 +260,44 @@ func CreateDeployCode(code []byte,
 		return nil, err
 	}
 	return contract, nil
+}
+
+type NativeDeployCode struct {
+	BaseContractAddress common.Address
+	InitParam           []byte // optional
+}
+
+func (ndc *NativeDeployCode) Serialization(sink *common.ZeroCopySink) {
+	sink.WriteAddress(ndc.BaseContractAddress)
+	sink.WriteVarBytes(ndc.InitParam)
+}
+
+func (ndc *NativeDeployCode) Deserialization(source *common.ZeroCopySource) error {
+	var eof, irregular bool
+
+	ndc.BaseContractAddress, eof = source.NextAddress()
+	if eof {
+		return io.ErrUnexpectedEOF
+	}
+
+	// skip eof check of initParam,
+	ndc.InitParam, _, irregular, _ = source.NextVarBytes()
+	if irregular {
+		return common.ErrIrregularData
+	}
+	return nil
+}
+
+func NewNativeDeployCode(code []byte) (*NativeDeployCode, error) {
+	ndc := &NativeDeployCode{}
+	// 1. validate data format
+	if err := ndc.Deserialization(common.NewZeroCopySource(code)); err != nil {
+		return nil, fmt.Errorf("[contract] invalid code format: %s", err)
+	}
+	// 2. validate base-contract is native deployable
+	if !common2.IsNativeDeployable(ndc.BaseContractAddress) {
+		return nil, errors.NewErr("[contract] invalid base contract address")
+	}
+
+	return ndc, nil
 }

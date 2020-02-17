@@ -29,11 +29,15 @@ import (
 	"github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/core/store/leveldbstore"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
+	"github.com/DNAProject/DNA/smartcontract"
+	"github.com/DNAProject/DNA/smartcontract/context"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	"github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/storage"
 )
 
 func TestDeserializeGroup(t *testing.T) {
+	didMethod := []byte("dna")
 	id0 := []byte("did:dna:ARY2ekof1eCSetcimGdjqyzUYaVDDPVWmw")
 	id1 := []byte("did:dna:ASbxtSqrpmydpjqCUGDiQp2mzsfd4zFArs")
 	id2 := []byte("did:dna:AGxc3cdeB6QFvmZXzWhGwzuvohNtqaaaDw")
@@ -51,7 +55,7 @@ func TestDeserializeGroup(t *testing.T) {
 		},
 	}
 
-	g, err := deserializeGroup(g_.Serialize())
+	g, err := deserializeGroup(didMethod, g_.Serialize())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,16 +69,24 @@ func TestDeserializeGroup(t *testing.T) {
 	overlay := overlaydb.NewOverlayDB(memback)
 	cache := storage.NewCacheDB(overlay)
 
+	ctx := &context.Context{
+		ContractAddress: common.DIDContractAddress,
+	}
+	sc := &smartcontract.SmartContract{
+		CacheDB: cache,
+	}
+	sc.PushContext(ctx)
 	srvc := new(native.NativeService)
 	srvc.CacheDB = cache
+	srvc.ContextRef = sc
 
-	key, _ := encodeID(id0)
+	key, _ := encodeID(common.DIDContractAddress, id0)
 	insertPk(srvc, key, []byte("test pk"))
 	cache.Put(key, states.GenRawStorageItem([]byte{flag_valid}))
-	key, _ = encodeID(id1)
+	key, _ = encodeID(common.DIDContractAddress, id1)
 	insertPk(srvc, key, []byte("test pk"))
 	cache.Put(key, states.GenRawStorageItem([]byte{flag_valid}))
-	key, _ = encodeID(id2)
+	key, _ = encodeID(common.DIDContractAddress, id2)
 	insertPk(srvc, key, []byte("test pk"))
 	cache.Put(key, states.GenRawStorageItem([]byte{flag_valid}))
 
@@ -118,16 +130,18 @@ func groupCmp(a, b *Group) error {
 }
 
 func TestDeserializeGroup1(t *testing.T) {
+	didMethod := []byte("ont")
 	data, _ := hex.DecodeString("01022a6469643a6f6e743a4153627874537172706d7964706a7143554744695170326d7a736664347a464172732a6469643a6f6e743a414778633363646542365146766d5a587a576847777a75766f684e747161616144770103")
-	_, err := deserializeGroup(data)
+	_, err := deserializeGroup(didMethod, data)
 	if err == nil {
 		t.Fatal("deserializeGroup should fail due to the invalid threshold")
 	}
 }
 
 func TestDeserializeGroup2(t *testing.T) {
+	didMethod := []byte("ont")
 	data, _ := hex.DecodeString("010203646964086469643a6f6e740101")
-	_, err := deserializeGroup(data)
+	_, err := deserializeGroup(didMethod, data)
 	if err == nil {
 		t.Fatal("deserializeGroup should fail due to invalid member data")
 	}

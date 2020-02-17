@@ -41,9 +41,9 @@ import (
 	"github.com/DNAProject/DNA/events"
 	"github.com/DNAProject/DNA/events/message"
 	p2pmsg "github.com/DNAProject/DNA/p2pserver/message/types"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	gover "github.com/DNAProject/DNA/smartcontract/service/native/governance"
 	ninit "github.com/DNAProject/DNA/smartcontract/service/native/init"
-	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/validator/increment"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology-crypto/vrf"
@@ -2132,7 +2132,7 @@ func (self *Server) msgSendLoop() {
 
 //creategovernaceTransaction invoke governance native contract commit_pos
 func (self *Server) creategovernaceTransaction(blkNum uint32) (*types.Transaction, error) {
-	mutable := utils.BuildNativeTransaction(nutils.GovernanceContractAddress, gover.COMMIT_DPOS, []byte{})
+	mutable := utils.BuildNativeTransaction(common2.GovernanceContractAddress, gover.COMMIT_DPOS, []byte{})
 	mutable.Nonce = blkNum
 	tx, err := mutable.IntoImmutable()
 	return tx, err

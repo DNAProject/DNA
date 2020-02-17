@@ -37,7 +37,7 @@ import (
 	ontErrors "github.com/DNAProject/DNA/errors"
 	bactor "github.com/DNAProject/DNA/http/base/actor"
 	"github.com/DNAProject/DNA/smartcontract/event"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	cstate "github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/DNAProject/DNA/vm/neovm"
 	"github.com/ontio/ontology-crypto/keypair"
@@ -279,7 +279,7 @@ func GetBlockInfo(block *types.Block) BlockInfo {
 }
 
 func GetBalance(address common.Address) (*BalanceOfRsp, error) {
-	balances, height, err := GetContractBalance(0, []common.Address{utils.GasContractAddress}, address, true)
+	balances, height, err := GetContractBalance(0, []common.Address{common2.GasContractAddress}, address, true)
 	if err != nil {
 		return nil, fmt.Errorf("get balance error:%s", err)
 	}
@@ -293,7 +293,7 @@ func GetAllowance(asset string, from, to common.Address) (string, error) {
 	var contractAddr common.Address
 	switch strings.ToLower(asset) {
 	case "gas":
-		contractAddr = utils.GasContractAddress
+		contractAddr = common2.GasContractAddress
 	default:
 		return "", fmt.Errorf("unsupport asset")
 	}

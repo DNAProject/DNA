@@ -27,17 +27,17 @@ import (
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/auth"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/did"
 	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	params "github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/governance"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/neovm"
 	vm "github.com/DNAProject/DNA/vm/neovm"
 )
 
 var (
-	COMMIT_DPOS_BYTES = InitBytes(utils.GovernanceContractAddress, governance.COMMIT_DPOS)
+	COMMIT_DPOS_BYTES = InitBytes(common2.GovernanceContractAddress, governance.COMMIT_DPOS)
 )
 
 func init() {

@@ -24,7 +24,6 @@ package ledgerstore
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 
@@ -37,8 +36,6 @@ import (
 	"github.com/DNAProject/DNA/core/store/leveldbstore"
 	"github.com/DNAProject/DNA/core/store/overlaydb"
 	"github.com/DNAProject/DNA/merkle"
-	"github.com/DNAProject/DNA/smartcontract/service/native/did"
-	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
 var (
@@ -417,45 +414,5 @@ func (self *StateStore) Close() error {
 }
 
 func (self *StateStore) CheckStorage() error {
-	db := self.store
-
-	prefix := append([]byte{byte(scom.ST_STORAGE)}, utils.DIDContractAddress[:]...) //prefix of new storage key
-	flag := append(prefix, did.FIELD_VERSION)
-	val, err := db.Get(flag)
-	if err == nil {
-		item := &states.StorageItem{}
-		source := common.NewZeroCopySource(val)
-		err := item.Deserialization(source)
-		if err == nil && item.Value[0] == did.FLAG_VERSION {
-			return nil
-		} else if err == nil {
-			return errors.New("check ontid storage: invalid version flag")
-		} else {
-			return err
-		}
-	}
-
-	prefix1 := []byte{byte(scom.ST_STORAGE), 0x2a, 0x64, 0x69, 0x64} //prefix of old storage key
-
-	iter := db.NewIterator(prefix1)
-	db.NewBatch()
-	for ok := iter.First(); ok; ok = iter.Next() {
-		key := append(prefix, iter.Key()[1:]...)
-		db.BatchPut(key, iter.Value())
-		db.BatchDelete(iter.Key())
-	}
-	iter.Release()
-	err = iter.Error()
-	if err != nil {
-		return err
-	}
-
-	tag := states.StorageItem{}
-	tag.Value = []byte{did.FLAG_VERSION}
-	buf := common.NewZeroCopySink(nil)
-	tag.Serialization(buf)
-	db.BatchPut(flag, buf.Bytes())
-	err = db.BatchCommit()
-
-	return err
+	return nil
 }

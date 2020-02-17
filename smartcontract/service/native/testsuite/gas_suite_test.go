@@ -25,6 +25,7 @@ import (
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	_ "github.com/DNAProject/DNA/smartcontract/service/native/init"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
@@ -33,7 +34,7 @@ import (
 )
 
 func setBalance(db *storage.CacheDB, addr common.Address, value uint64) {
-	balanceKey := gas.GenBalanceKey(utils.GasContractAddress, addr)
+	balanceKey := gas.GenBalanceKey(common2.GasContractAddress, addr)
 	item := utils.GenUInt64StorageItem(value)
 	db.Put(balanceKey, item.ToArray())
 }
@@ -58,7 +59,7 @@ func makeTransfer(native *native.NativeService, from, to common.Address, value u
 }
 
 func TestTransfer(t *testing.T) {
-	InvokeNativeContract(t, utils.GasContractAddress, func(native *native.NativeService) ([]byte, error) {
+	InvokeNativeContract(t, common2.GasContractAddress, func(native *native.NativeService) ([]byte, error) {
 		a := RandomAddress()
 		b := RandomAddress()
 		c := RandomAddress()

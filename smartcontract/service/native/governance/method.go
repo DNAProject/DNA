@@ -31,6 +31,7 @@ import (
 	"github.com/DNAProject/DNA/common/constants"
 	cstates "github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
@@ -115,25 +116,25 @@ func registerCandidate(native *native.NativeService, flag string) error {
 	switch flag {
 	case "transfer":
 		//ont transfer
-		err = appCallTransferOnt(native, params.Address, utils.GovernanceContractAddress, uint64(params.InitPos))
+		err = appCallTransferOnt(native, params.Address, common2.GovernanceContractAddress, uint64(params.InitPos))
 		if err != nil {
 			return fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
 		}
 
 		//ong transfer
-		err = appCallTransferOng(native, params.Address, utils.GovernanceContractAddress, globalParam.CandidateFee)
+		err = appCallTransferOng(native, params.Address, common2.GovernanceContractAddress, globalParam.CandidateFee)
 		if err != nil {
 			return fmt.Errorf("appCallTransferOng, ong transfer error: %v", err)
 		}
 	case "transferFrom":
 		//ont transfer from
-		err = appCallTransferFromOnt(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, uint64(params.InitPos))
+		err = appCallTransferFromOnt(native, common2.GovernanceContractAddress, params.Address, common2.GovernanceContractAddress, uint64(params.InitPos))
 		if err != nil {
 			return fmt.Errorf("appCallTransferFromOnt, ont transfer error: %v", err)
 		}
 
 		//ong transfer from
-		err = appCallTransferFromOng(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, globalParam.CandidateFee)
+		err = appCallTransferFromOng(native, common2.GovernanceContractAddress, params.Address, common2.GovernanceContractAddress, globalParam.CandidateFee)
 		if err != nil {
 			return fmt.Errorf("appCallTransferFromOng, ong transfer error: %v", err)
 		}
@@ -248,13 +249,13 @@ func authorizeForPeer(native *native.NativeService, flag string) error {
 	switch flag {
 	case "transfer":
 		//ont transfer
-		err = appCallTransferOnt(native, params.Address, utils.GovernanceContractAddress, total)
+		err = appCallTransferOnt(native, params.Address, common2.GovernanceContractAddress, total)
 		if err != nil {
 			return fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
 		}
 	case "transferFrom":
 		//ont transfer from
-		err = appCallTransferFromOnt(native, utils.GovernanceContractAddress, params.Address, utils.GovernanceContractAddress, total)
+		err = appCallTransferFromOnt(native, common2.GovernanceContractAddress, params.Address, common2.GovernanceContractAddress, total)
 		if err != nil {
 			return fmt.Errorf("appCallTransferFromOnt, ont transfer error: %v", err)
 		}
@@ -323,7 +324,7 @@ func normalQuit(native *native.NativeService, contract common.Address, peerPoolI
 
 func blackQuit(native *native.NativeService, contract common.Address, peerPoolItem *PeerPoolItem) error {
 	// ont transfer to trigger unboundong
-	err := appCallTransferOnt(native, utils.GovernanceContractAddress, utils.GovernanceContractAddress, peerPoolItem.InitPos)
+	err := appCallTransferOnt(native, common2.GovernanceContractAddress, common2.GovernanceContractAddress, peerPoolItem.InitPos)
 	if err != nil {
 		return fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
 	}
@@ -577,7 +578,7 @@ func depositTotalStake(native *native.NativeService, contract common.Address, ad
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
 	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.GasContractAddress, totalStake.Address, amount)
+	err = appCallTransferFromOng(native, common2.GovernanceContractAddress, common2.GasContractAddress, totalStake.Address, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOng, transfer from ong error: %v", err)
 	}
@@ -606,7 +607,7 @@ func withdrawTotalStake(native *native.NativeService, contract common.Address, a
 	timeOffset := native.Time - constants.GENESIS_BLOCK_TIMESTAMP
 
 	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.GasContractAddress, totalStake.Address, amount)
+	err = appCallTransferFromOng(native, common2.GovernanceContractAddress, common2.GasContractAddress, totalStake.Address, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOng, transfer from ong error: %v", err)
 	}
@@ -662,12 +663,12 @@ func withdrawPenaltyStake(native *native.NativeService, contract common.Address,
 	amount := utils.CalcUnbindOng(preStake, preTimeOffset, timeOffset)
 
 	//ont transfer
-	err = appCallTransferOnt(native, utils.GovernanceContractAddress, address, preStake)
+	err = appCallTransferOnt(native, common2.GovernanceContractAddress, address, preStake)
 	if err != nil {
 		return fmt.Errorf("appCallTransferOnt, ont transfer error: %v", err)
 	}
 	//ong approve
-	err = appCallTransferFromOng(native, utils.GovernanceContractAddress, utils.GasContractAddress, address, amount+preAmount)
+	err = appCallTransferFromOng(native, common2.GovernanceContractAddress, common2.GasContractAddress, address, amount+preAmount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOng, transfer from ong error: %v", err)
 	}
@@ -730,7 +731,7 @@ func executeSplit(native *native.NativeService, contract common.Address, view ui
 		return fmt.Errorf("executeSplit, get peerPoolMap error: %v", err)
 	}
 
-	balance, err := getOngBalance(native, utils.GovernanceContractAddress)
+	balance, err := getOngBalance(native, common2.GovernanceContractAddress)
 	if err != nil {
 		return fmt.Errorf("executeSplit, getOngBalance error: %v", err)
 	}
@@ -790,7 +791,7 @@ func executeSplit(native *native.NativeService, contract common.Address, view ui
 	for i := 0; i < int(config.K); i++ {
 		nodeAmount := balance * uint64(globalParam.A) / 100 * peersCandidate[i].S / sumS
 		address := peersCandidate[i].Address
-		err = appCallTransferOng(native, utils.GovernanceContractAddress, address, nodeAmount)
+		err = appCallTransferOng(native, common2.GovernanceContractAddress, address, nodeAmount)
 		if err != nil {
 			return fmt.Errorf("executeSplit, ong transfer error: %v", err)
 		}
@@ -808,7 +809,7 @@ func executeSplit(native *native.NativeService, contract common.Address, view ui
 	for i := int(config.K); i < len(peersCandidate); i++ {
 		nodeAmount := balance * uint64(globalParam.B) / 100 * peersCandidate[i].Stake / sum
 		address := peersCandidate[i].Address
-		err = appCallTransferOng(native, utils.GovernanceContractAddress, address, nodeAmount)
+		err = appCallTransferOng(native, common2.GovernanceContractAddress, address, nodeAmount)
 		if err != nil {
 			return fmt.Errorf("executeSplit, ong transfer error: %v", err)
 		}
@@ -843,7 +844,7 @@ func executeSplit2(native *native.NativeService, contract common.Address, view u
 		return splitSum, fmt.Errorf("executeSplit, get currentPeerPoolMap error: %v", err)
 	}
 
-	balance, err := getOngBalance(native, utils.GovernanceContractAddress)
+	balance, err := getOngBalance(native, common2.GovernanceContractAddress)
 	if err != nil {
 		return splitSum, fmt.Errorf("executeSplit, getOngBalance error: %v", err)
 	}
@@ -866,7 +867,7 @@ func executeSplit2(native *native.NativeService, contract common.Address, view u
 	if gasAddress.Address == common.ADDRESS_EMPTY {
 		dappIncome = new(big.Int).SetUint64(0)
 	} else {
-		err := appCallTransferOng(native, utils.GovernanceContractAddress, gasAddress.Address, dappIncome.Uint64())
+		err := appCallTransferOng(native, common2.GovernanceContractAddress, gasAddress.Address, dappIncome.Uint64())
 		if err != nil {
 			return splitSum, fmt.Errorf("appCallTransferOng, appCallTransferOng error: %v", err)
 		}

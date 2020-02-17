@@ -34,6 +34,7 @@ import (
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/core/utils"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	"github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/governance"
@@ -98,21 +99,25 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 	//block
 	gas := newUtilityToken()
 	param := newParamContract()
-	oid := deployOntIDContract()
-	auth := deployAuthContract()
-	govConfigTx := newGovConfigTx()
+	did := deployBaseDIDContract()
+	auth := deployBaseAuthContract()
+	gov := deploygGovContract()
+	didInit := newDidInit("dna")
+	authInit := newAuthInit(common2.DIDContractAddress[:])
 
 	genesisBlock := &types.Block{
 		Header: genesisHeader,
 		Transactions: []*types.Transaction{
 			gas,
 			param,
-			oid,
+			did,
 			auth,
-			govConfigTx,
+			gov,
 			newUtilityInit(),
 			newParamInit(),
 			govConfig,
+			didInit,
+			authInit,
 		},
 	}
 	genesisBlock.RebuildMerkleRoot()
@@ -120,7 +125,7 @@ func BuildGenesisBlock(defaultBookkeeper []keypair.PublicKey, genesisConfig *con
 }
 
 func newUtilityToken() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.GasContractAddress[:], "GAS", "1.0",
+	mutable, err := utils.NewDeployTransaction(common2.GasContractAddress[:], "GAS", "1.0",
 		"DNA Dev Team", "contact@onchain.com", "Blockchain Network Gas", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis utility token transaction error ")
@@ -133,7 +138,7 @@ func newUtilityToken() *types.Transaction {
 }
 
 func newParamContract() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.ParamContractAddress[:],
+	mutable, err := utils.NewDeployTransaction(common2.ParamContractAddress[:],
 		"ParamConfig", "1.0", "DNA Dev Team", "contact@onchain.com",
 		"Chain Global Environment Variables Manager ", payload.NEOVM_TYPE)
 	if err != nil {
@@ -146,9 +151,9 @@ func newParamContract() *types.Transaction {
 	return tx
 }
 
-func newGovConfigTx() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.GovernanceContractAddress[:], "CONFIG", "1.0",
-		"DNA Dev Team", "contact@ont.io", "Blockchain Network Consensus Config", payload.NEOVM_TYPE)
+func deploygGovContract() *types.Transaction {
+	mutable, err := utils.NewDeployTransaction(common2.GovernanceContractAddress[:], "CONFIG", "1.0",
+		"DNA Dev Team", "contact@onchain.com", "Blockchain Network Consensus Config", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
 	}
@@ -159,9 +164,9 @@ func newGovConfigTx() *types.Transaction {
 	return tx
 }
 
-func deployAuthContract() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.AuthContractAddress[:], "AuthContract", "1.0",
-		"DNA Dev Team", "contact@ont.io", "Blockchain Network Authorization Contract", payload.NEOVM_TYPE)
+func deployBaseAuthContract() *types.Transaction {
+	mutable, err := utils.NewDeployTransaction(common2.AuthContractAddress[:], "AuthContract", "1.0",
+		"DNA Dev Team", "contact@onchain.com", "Blockchain Network Authorization Contract", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
 	}
@@ -172,15 +177,15 @@ func deployAuthContract() *types.Transaction {
 	return tx
 }
 
-func deployOntIDContract() *types.Transaction {
-	mutable, err := utils.NewDeployTransaction(nutils.DIDContractAddress[:], "OID", "1.0",
-		"DNA Dev Team", "contact@ont.io", "Blockchain Network ONT ID", payload.NEOVM_TYPE)
+func deployBaseDIDContract() *types.Transaction {
+	mutable, err := utils.NewDeployTransaction(common2.DIDContractAddress[:], "DID", "1.0",
+		"DNA Dev Team", "contact@onchain.com", "Blockchain Network DID", payload.NEOVM_TYPE)
 	if err != nil {
 		panic("[NewDeployTransaction] construct genesis governing token transaction error ")
 	}
 	tx, err := mutable.IntoImmutable()
 	if err != nil {
-		panic("construct genesis ontid transaction error ")
+		panic("construct genesis DID transaction error ")
 	}
 	return tx
 }
@@ -212,7 +217,7 @@ func newUtilityInit() *types.Transaction {
 		nutils.EncodeVarUint(args, part.value)
 	}
 
-	mutable := utils.BuildNativeTransaction(nutils.GasContractAddress, gas.INIT_NAME, args.Bytes())
+	mutable := utils.BuildNativeTransaction(common2.GasContractAddress, gas.INIT_NAME, args.Bytes())
 	tx, err := mutable.IntoImmutable()
 	if err != nil {
 		panic("construct genesis governing token transaction error ")
@@ -253,7 +258,7 @@ func newParamInit() *types.Transaction {
 	}
 	nutils.EncodeAddress(sink, addr)
 
-	mutable := utils.BuildNativeTransaction(nutils.ParamContractAddress, global_params.INIT_NAME, sink.Bytes())
+	mutable := utils.BuildNativeTransaction(common2.ParamContractAddress, global_params.INIT_NAME, sink.Bytes())
 	tx, err := mutable.IntoImmutable()
 	if err != nil {
 		panic("construct genesis governing token transaction error ")
@@ -262,10 +267,28 @@ func newParamInit() *types.Transaction {
 }
 
 func newGoverConfigInit(config []byte) *types.Transaction {
-	mutable := utils.BuildNativeTransaction(nutils.GovernanceContractAddress, governance.INIT_CONFIG, config)
+	mutable := utils.BuildNativeTransaction(common2.GovernanceContractAddress, governance.INIT_CONFIG, config)
 	tx, err := mutable.IntoImmutable()
 	if err != nil {
 		panic("construct genesis governing token transaction error ")
+	}
+	return tx
+}
+
+func newDidInit(didMethod string) *types.Transaction {
+	mutable := utils.BuildNativeTransaction(common2.DIDContractAddress, "initDID", []byte(didMethod))
+	tx, err := mutable.IntoImmutable()
+	if err != nil {
+		panic(fmt.Sprintf("construct did init transaction error: %s", err))
+	}
+	return tx
+}
+
+func newAuthInit(didBaseContract []byte) *types.Transaction {
+	mutable := utils.BuildNativeTransaction(common2.AuthContractAddress, "initAuth", didBaseContract)
+	tx, err := mutable.IntoImmutable()
+	if err != nil {
+		panic(fmt.Sprintf("construct auth init transaction error: %s", err))
 	}
 	return tx
 }

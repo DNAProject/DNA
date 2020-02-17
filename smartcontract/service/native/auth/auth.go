@@ -29,8 +29,10 @@ import (
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/errors"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
@@ -39,7 +41,7 @@ var (
 )
 
 func Init() {
-	native.Contracts[utils.AuthContractAddress] = RegisterAuthContract
+	native.Contracts[common2.AuthContractAddress] = RegisterAuthContract
 }
 
 /*
@@ -74,8 +76,13 @@ func InitContractAdmin(native *native.NativeService) ([]byte, error) {
 	}
 	invokeAddr := cxt.ContractAddress
 
-	if !account.VerifyID(string(param.AdminOntID)) {
-		return nil, fmt.Errorf("[initContractAdmin] invalid param: adminOntID is %x", param.AdminOntID)
+	didMethod, err := getDIDMethod(native)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("[initContractAdmin] get did method: %s", err)
+	}
+	if !account.VerifyID(string(didMethod), string(param.AdminOntID)) {
+		return nil, fmt.Errorf("[initContractAdmin] invalid param: didMethod %s, adminOntID is %s",
+			string(didMethod), string(param.AdminOntID))
 	}
 	ret, err := initContractAdmin(native, invokeAddr, param.AdminOntID)
 	if err != nil {
@@ -122,7 +129,11 @@ func Transfer(native *native.NativeService) ([]byte, error) {
 		return nil, fmt.Errorf("[transfer] deserialize param failed: %v", err)
 	}
 
-	if !account.VerifyID(string(param.NewAdminOntID)) {
+	didMethod, err := getDIDMethod(native)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("[transfer] get did method: %s", err)
+	}
+	if !account.VerifyID(string(didMethod), string(param.NewAdminOntID)) {
 		return nil, fmt.Errorf("[transfer] invalid param: newAdminOntID is %x", param.NewAdminOntID)
 	}
 	//prepare event msg
@@ -268,7 +279,7 @@ func assignToRole(native *native.NativeService, param *DIDsToRoleParam) (bool, e
 	return true, nil
 }
 
-func AssignOntIDsToRole(native *native.NativeService) ([]byte, error) {
+func AssignDIDsToRole(native *native.NativeService) ([]byte, error) {
 	//deserialize param
 	param := new(DIDsToRoleParam)
 	source := common.NewZeroCopySource(native.Input)
@@ -279,8 +290,12 @@ func AssignOntIDsToRole(native *native.NativeService) ([]byte, error) {
 	if param.Role == nil {
 		return nil, fmt.Errorf("[assignOntIDsToRole] invalid param: role is nil")
 	}
+	didMethod, err := getDIDMethod(native)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("[assignOntIDsToRole] get did method: %s", err)
+	}
 	for i, ontID := range param.Persons {
-		if !account.VerifyID(string(ontID)) {
+		if !account.VerifyID(string(didMethod), string(ontID)) {
 			return nil, fmt.Errorf("[assignOntIDsToRole] invalid param: param.Persons[%d]=%s",
 				i, string(ontID))
 		}
@@ -383,7 +398,11 @@ func delegate(native *native.NativeService, contractAddr common.Address, from []
 		return false, nil
 	}
 
-	if !account.VerifyID(string(to)) {
+	didMethod, err := getDIDMethod(native)
+	if err != nil || didMethod == nil {
+		return false, fmt.Errorf("[get did method: %s", err)
+	}
+	if !account.VerifyID(string(didMethod), string(to)) {
 		return false, fmt.Errorf("can not pass OntID validity test: to=%s", string(to))
 	}
 
@@ -641,11 +660,16 @@ func VerifyToken(native *native.NativeService) ([]byte, error) {
 }
 
 func verifySig(native *native.NativeService, ontID []byte, keyNo uint64) (bool, error) {
+	didContractAddr, err := getDIDContractAddr(native)
+	if err != nil {
+		return false, fmt.Errorf("verify sig: %s", err)
+	}
+
 	sink := common.NewZeroCopySink(nil)
 	sink.WriteVarBytes(ontID)
 	utils.EncodeVarUint(sink, keyNo)
 	args := sink.Bytes()
-	ret, err := native.NativeCall(utils.DIDContractAddress, "verifySignature", args)
+	ret, err := native.NativeCall(didContractAddr, "verifySignature", args)
 	if err != nil {
 		return false, err
 	}
@@ -660,12 +684,34 @@ func verifySig(native *native.NativeService, ontID []byte, keyNo uint64) (bool, 
 	}
 }
 
+func authInit(srvc *native.NativeService) ([]byte, error) {
+	didContractAddr, err := utils.DecodeVarBytes(common.NewZeroCopySource(srvc.Input))
+	if err != nil {
+		return utils.BYTE_FALSE, fmt.Errorf("init auth, contract param deserialize err: %s", err)
+	}
+	if len(didContractAddr) != common.ADDR_LEN {
+		return utils.BYTE_FALSE, fmt.Errorf("init auth, invalid length of DID contract addr: %v", didContractAddr)
+	}
+
+	// check if has initialized
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	didContractAddrBytes, err := srvc.CacheDB.Get(utils.ConcatKey(contract, PreDIDContractAddr))
+	if didContractAddrBytes != nil || err != nil {
+		return utils.BYTE_FALSE, fmt.Errorf("get did contract: %s", err)
+	}
+
+	// save did contract addr
+	srvc.CacheDB.Put(utils.ConcatKey(contract, PreDIDContractAddr), states.GenRawStorageItem(didContractAddr))
+	return utils.BYTE_TRUE, nil
+}
+
 func RegisterAuthContract(native *native.NativeService) {
+	native.Register("initAuth", authInit)
 	native.Register("initContractAdmin", InitContractAdmin)
 	native.Register("assignFuncsToRole", AssignFuncsToRole)
 	native.Register("delegate", Delegate)
 	native.Register("withdraw", Withdraw)
-	native.Register("assignOntIDsToRole", AssignOntIDsToRole)
+	native.Register("assignDIDsToRole", AssignDIDsToRole)
 	native.Register("verifyToken", VerifyToken)
 	native.Register("transfer", Transfer)
 }

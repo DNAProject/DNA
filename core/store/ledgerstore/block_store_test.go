@@ -32,8 +32,8 @@ import (
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/core/utils"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
-	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/stretchr/testify/assert"
 )
@@ -376,7 +376,7 @@ func transferTx(from, to common.Address, amount uint64) (*types.Transaction, err
 		Value: amount,
 	})
 	var cversion byte
-	return invokeSmartContractTx(0, 30000, cversion, nutils.GasContractAddress, "transfer", []interface{}{sts})
+	return invokeSmartContractTx(0, 30000, cversion, common2.GasContractAddress, "transfer", []interface{}{sts})
 }
 
 func invokeSmartContractTx(gasPrice,

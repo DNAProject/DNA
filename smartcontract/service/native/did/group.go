@@ -53,14 +53,14 @@ func (g *Group) Serialize() []byte {
 		case *Group:
 			sink.WriteVarBytes(t.Serialize())
 		default:
-			panic("invlid member type")
+			panic("invalid member type")
 		}
 	}
 	utils.EncodeVarUint(sink, uint64(g.Threshold))
 	return sink.Bytes()
 }
 
-func rDeserialize(data []byte, depth uint) (*Group, error) {
+func rDeserialize(didPrefix, data []byte, depth uint) (*Group, error) {
 	if depth == MAX_DEPTH {
 		return nil, fmt.Errorf("recursion is too deep")
 	}
@@ -79,11 +79,11 @@ func rDeserialize(data []byte, depth uint) (*Group, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error parsing group members: %s", err)
 		}
-		if len(m) > 8 && bytes.Equal(m[:8], []byte("did:dna:")) {
+		if len(m) > 8 && bytes.Equal(m[:8], didPrefix) {
 			g.Members = append(g.Members, m)
 		} else {
 			// parse recursively
-			g1, err := rDeserialize(m, depth+1)
+			g1, err := rDeserialize(didPrefix, m, depth+1)
 			if err != nil {
 				return nil, fmt.Errorf("error parsing subgroup: %s", err)
 			}
@@ -105,15 +105,18 @@ func rDeserialize(data []byte, depth uint) (*Group, error) {
 	return &g, nil
 }
 
-func deserializeGroup(data []byte) (*Group, error) {
-	return rDeserialize(data, 0)
+func deserializeGroup(didMethod, data []byte) (*Group, error) {
+	didPrefix := []byte("did:" + string(didMethod) + ":")
+	return rDeserialize(didPrefix, data, 0)
 }
 
 func validateMembers(srvc *native.NativeService, g *Group) error {
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+
 	for _, m := range g.Members {
 		switch t := m.(type) {
 		case []byte:
-			key, err := encodeID(t)
+			key, err := encodeID(contract, t)
 			if err != nil {
 				return fmt.Errorf("invalid id: %s", string(t))
 			}
@@ -210,8 +213,9 @@ func verifyGroupSignature(srvc *native.NativeService, g *Group, signers []Signer
 		return false
 	}
 
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
 	for _, signer := range signers {
-		key, err := encodeID(signer.id)
+		key, err := encodeID(contract, signer.id)
 		if err != nil {
 			return false
 		}

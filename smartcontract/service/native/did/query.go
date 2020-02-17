@@ -31,36 +31,6 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 )
 
-func GetPublicKeyByID(srvc *native.NativeService) ([]byte, error) {
-	args := common.NewZeroCopySource(srvc.Input)
-	// arg0: ID
-	arg0, err := utils.DecodeVarBytes(args)
-	if err != nil {
-		return nil, errors.New("get public key failed: argument 0 error")
-	}
-	// arg1: key ID
-	arg1, err := utils.DecodeUint32(args)
-	if err != nil {
-		return nil, errors.New("get public key failed: argument 1 error")
-	}
-
-	key, err := encodeID(arg0)
-	if err != nil {
-		return nil, fmt.Errorf("get public key failed: %s", err)
-	}
-
-	pk, err := getPk(srvc, key, arg1)
-	if err != nil {
-		return nil, fmt.Errorf("get public key failed: %s", err)
-	} else if pk == nil {
-		return nil, errors.New("get public key failed: not found")
-	} else if pk.revoked {
-		return nil, errors.New("get public key failed: revoked")
-	}
-
-	return pk.key, nil
-}
-
 func GetDDO(srvc *native.NativeService) ([]byte, error) {
 	log.Debug("GetDDO")
 	source := common.NewZeroCopySource(srvc.Input)
@@ -69,7 +39,8 @@ func GetDDO(srvc *native.NativeService) ([]byte, error) {
 		return nil, fmt.Errorf("get id error, %s", err)
 	}
 
-	key, err := encodeID(did)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, did)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +108,9 @@ func GetPublicKeys(srvc *native.NativeService) ([]byte, error) {
 	if len(did) == 0 {
 		return nil, errors.New("get public keys error: invalid ID")
 	}
-	key, err := encodeID(did)
+
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, did)
 	if err != nil {
 		return nil, fmt.Errorf("get public keys error: %s", err)
 	}
@@ -171,7 +144,8 @@ func GetAttributes(srvc *native.NativeService) ([]byte, error) {
 	if len(did) == 0 {
 		return nil, errors.New("get attributes error: invalid ID")
 	}
-	key, err := encodeID(did)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, did)
 	if err != nil {
 		return nil, fmt.Errorf("get public keys error: %s", err)
 	}
@@ -197,7 +171,8 @@ func GetKeyState(srvc *native.NativeService) ([]byte, error) {
 		return nil, fmt.Errorf("get key state failed: argument 1 error, %s", err)
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return nil, fmt.Errorf("get key state failed: %s", err)
 	}

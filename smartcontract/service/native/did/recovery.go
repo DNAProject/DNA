@@ -54,7 +54,8 @@ func setRecovery(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("setRecovery: argument 2 error")
 	}
 
-	encId, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("setRecovery: " + err.Error())
 	}
@@ -94,7 +95,8 @@ func updateRecovery(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("updateRecovery: argument 2 error")
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("update recovery: " + err.Error())
 	}
@@ -137,7 +139,8 @@ func addKeyByRecovery(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("argument 2 error")
 	}
 
-	encId, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -183,7 +186,8 @@ func removeKeyByRecovery(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("argument 2 error")
 	}
 
-	encId, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	encId, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, err
 	}
@@ -212,7 +216,12 @@ func removeKeyByRecovery(srvc *native.NativeService) ([]byte, error) {
 }
 
 func putRecovery(srvc *native.NativeService, encID, data []byte) (*Group, error) {
-	rec, err := deserializeGroup(data)
+	didMethod, err := getDIDMethod(srvc)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("putRecovery, get did method: %s", err)
+	}
+
+	rec, err := deserializeGroup(didMethod, data)
 	if err != nil {
 		return nil, err
 	}
@@ -229,6 +238,11 @@ func putRecovery(srvc *native.NativeService, encID, data []byte) (*Group, error)
 }
 
 func getRecovery(srvc *native.NativeService, encID []byte) (*Group, error) {
+	didMethod, err := getDIDMethod(srvc)
+	if err != nil || didMethod == nil {
+		return nil, fmt.Errorf("getRecovery, get did method: %s", err)
+	}
+
 	key := append(encID, FIELD_RECOVERY)
 	item, err := utils.GetStorageItem(srvc, key)
 	if err != nil {
@@ -239,7 +253,7 @@ func getRecovery(srvc *native.NativeService, encID []byte) (*Group, error) {
 	if item.StateVersion != _VERSION_1 {
 		return nil, errors.New("unexpected storage version")
 	}
-	return deserializeGroup(item.Value)
+	return deserializeGroup(didMethod, item.Value)
 }
 
 // deprecated
@@ -267,7 +281,8 @@ func addRecovery(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("add recovery failed: " + err.Error())
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("add recovery failed: " + err.Error())
 	}
@@ -313,7 +328,8 @@ func changeRecovery(srvc *native.NativeService) ([]byte, error) {
 		return utils.BYTE_FALSE, errors.New("change recovery failed: argument 2 error")
 	}
 
-	key, err := encodeID(arg0)
+	contract := srvc.ContextRef.CurrentContext().ContractAddress
+	key, err := encodeID(contract, arg0)
 	if err != nil {
 		return utils.BYTE_FALSE, errors.New("change recovery failed: " + err.Error())
 	}

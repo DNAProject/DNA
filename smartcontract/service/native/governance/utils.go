@@ -33,6 +33,7 @@ import (
 	cstates "github.com/DNAProject/DNA/core/states"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
 	"github.com/DNAProject/DNA/smartcontract/service/native/auth"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/gas"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/ontio/ontology-crypto/vrf"
@@ -116,7 +117,7 @@ func GetView(native *native.NativeService, contract common.Address) (uint32, err
 }
 
 func appCallTransferOnt(native *native.NativeService, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransfer(native, utils.GasContractAddress, from, to, amount)
+	err := appCallTransfer(native, common2.GasContractAddress, from, to, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferOnt, appCallTransfer error: %v", err)
 	}
@@ -124,7 +125,7 @@ func appCallTransferOnt(native *native.NativeService, from common.Address, to co
 }
 
 func appCallTransferOng(native *native.NativeService, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransfer(native, utils.GasContractAddress, from, to, amount)
+	err := appCallTransfer(native, common2.GasContractAddress, from, to, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferOng, appCallTransfer error: %v", err)
 	}
@@ -149,7 +150,7 @@ func appCallTransfer(native *native.NativeService, contract common.Address, from
 }
 
 func appCallTransferFromOnt(native *native.NativeService, sender common.Address, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransferFrom(native, utils.GasContractAddress, sender, from, to, amount)
+	err := appCallTransferFrom(native, common2.GasContractAddress, sender, from, to, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOnt, appCallTransferFrom error: %v", err)
 	}
@@ -157,7 +158,7 @@ func appCallTransferFromOnt(native *native.NativeService, sender common.Address,
 }
 
 func appCallTransferFromOng(native *native.NativeService, sender common.Address, from common.Address, to common.Address, amount uint64) error {
-	err := appCallTransferFrom(native, utils.GasContractAddress, sender, from, to, amount)
+	err := appCallTransferFrom(native, common2.GasContractAddress, sender, from, to, amount)
 	if err != nil {
 		return fmt.Errorf("appCallTransferFromOng, appCallTransferFrom error: %v", err)
 	}
@@ -182,7 +183,7 @@ func getOngBalance(native *native.NativeService, address common.Address) (uint64
 	sink := common.ZeroCopySink{}
 	utils.EncodeAddress(&sink, address)
 
-	value, err := native.NativeCall(utils.GasContractAddress, "balanceOf", sink.Bytes())
+	value, err := native.NativeCall(common2.GasContractAddress, "balanceOf", sink.Bytes())
 	if err != nil {
 		return 0, fmt.Errorf("getOngBalance, appCall error: %v", err)
 	}
@@ -636,7 +637,7 @@ func appCallInitContractAdmin(native *native.NativeService, adminOntID []byte) e
 	params := &auth.InitContractAdminParam{
 		AdminOntID: adminOntID,
 	}
-	if _, err := native.NativeCall(utils.AuthContractAddress, "initContractAdmin", common.SerializeToBytes(params)); err != nil {
+	if _, err := native.NativeCall(common2.AuthContractAddress, "initContractAdmin", common.SerializeToBytes(params)); err != nil {
 		return fmt.Errorf("appCallInitContractAdmin, appCall error: %v", err)
 	}
 	return nil
@@ -649,7 +650,7 @@ func appCallVerifyToken(native *native.NativeService, contract common.Address, c
 		Fn:           fn,
 		KeyNo:        keyNo,
 	}
-	ok, err := native.NativeCall(utils.AuthContractAddress, "verifyToken", common.SerializeToBytes(params))
+	ok, err := native.NativeCall(common2.AuthContractAddress, "verifyToken", common.SerializeToBytes(params))
 	if err != nil {
 		return fmt.Errorf("appCallVerifyToken, appCall error: %v", err)
 	}

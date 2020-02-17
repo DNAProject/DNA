@@ -36,6 +36,7 @@ import (
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/smartcontract"
 	"github.com/DNAProject/DNA/smartcontract/event"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/global_params"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/DNAProject/DNA/smartcontract/service/neovm"
@@ -47,14 +48,9 @@ import (
 func (self *StateStore) HandleDeployTransaction(store store.LedgerStore, overlay *overlaydb.OverlayDB, gasTable map[string]uint64, cache *storage.CacheDB,
 	tx *types.Transaction, block *types.Block, notify *event.ExecuteNotify) error {
 	deploy := tx.Payload.(*payload.DeployCode)
-	var (
-		notifies    []*event.NotifyEventInfo
-		gasConsumed uint64
-		err         error
-	)
 
 	if deploy.VmType() == payload.WASMVM_TYPE {
-		_, err = wasmvm.ReadWasmModule(deploy.GetRawCode(), true)
+		_, err := wasmvm.ReadWasmModule(deploy.GetRawCode(), true)
 		if err != nil {
 			return err
 		}
@@ -72,8 +68,9 @@ func (self *StateStore) HandleDeployTransaction(store store.LedgerStore, overlay
 	}
 	cache.Commit()
 
-	notify.Notify = append(notify.Notify, notifies...)
-	notify.GasConsumed = gasConsumed
+	notify.Notify = append(notify.Notify, &event.NotifyEventInfo{
+		ContractAddress: address,
+	})
 	notify.State = event.CONTRACT_STATE_SUCCESS
 	return nil
 }
@@ -91,21 +88,13 @@ func (self *StateStore) HandleInvokeTransaction(store store.LedgerStore, overlay
 		BlockHash: block.Hash(),
 	}
 
-	var (
-		costGasLimit      uint64
-		availableGasLimit uint64
-		err               error
-	)
-
-	availableGasLimit = tx.GasLimit
-
 	//init smart contract info
 	sc := smartcontract.SmartContract{
 		Config:       config,
 		CacheDB:      cache,
 		Store:        store,
 		GasTable:     gasTable,
-		Gas:          availableGasLimit,
+		Gas:          tx.GasLimit,
 		WasmExecStep: sysconfig.DEFAULT_WASM_MAX_STEPCOUNT,
 		PreExec:      false,
 	}
@@ -113,16 +102,13 @@ func (self *StateStore) HandleInvokeTransaction(store store.LedgerStore, overlay
 	//start the smart contract executive function
 	engine, _ := sc.NewExecuteEngine(invoke.Code, tx.TxType)
 
-	_, err = engine.Invoke()
+	_, err := engine.Invoke()
 	if err != nil {
 		return err
 	}
-	costGasLimit = availableGasLimit - sc.Gas
 
-	var notifies []*event.NotifyEventInfo
 	notify.Notify = append(notify.Notify, sc.Notifications...)
-	notify.Notify = append(notify.Notify, notifies...)
-	notify.GasConsumed = costGasLimit
+	notify.GasConsumed = tx.GasLimit - sc.Gas
 	notify.State = event.CONTRACT_STATE_SUCCESS
 	sc.CacheDB.Commit()
 	return nil
@@ -154,7 +140,7 @@ func refreshGlobalParam(config *smartcontract.Config, cache *storage.CacheDB, st
 	}
 
 	service, _ := sc.NewNativeService()
-	result, err := service.NativeCall(utils.ParamContractAddress, "getGlobalParam", sink.Bytes())
+	result, err := service.NativeCall(common2.ParamContractAddress, "getGlobalParam", sink.Bytes())
 	if err != nil {
 		return err
 	}

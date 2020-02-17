@@ -37,6 +37,13 @@ func TestAttribute(t *testing.T) {
 }
 
 func CaseAttribute(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
 	// 1. register id
 	a := account.NewAccount("")
 	id, err := account.GenerateID()

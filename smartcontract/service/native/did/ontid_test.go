@@ -22,18 +22,21 @@ package did
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/DNAProject/DNA/account"
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
+	common2 "github.com/DNAProject/DNA/smartcontract/service/native/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native/testsuite"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	"github.com/ontio/ontology-crypto/keypair"
 )
 
 func testcase(t *testing.T, f func(t *testing.T, n *native.NativeService)) {
-	testsuite.InvokeNativeContract(t, utils.DIDContractAddress,
+	testsuite.InvokeNativeContract(t, common2.DIDContractAddress,
 		func(n *native.NativeService) ([]byte, error) {
 			f(t, n)
 			return nil, nil
@@ -53,6 +56,10 @@ func TestOwnerSize(t *testing.T) {
 	testcase(t, CaseOwnerSize)
 }
 
+func TestDoubleInitFail(t *testing.T) {
+	testcase(t, CaseDoubleInit)
+}
+
 // Register id with account acc
 func regID(n *native.NativeService, id string, a *account.Account) error {
 	// make arguments
@@ -69,6 +76,13 @@ func regID(n *native.NativeService, id string, a *account.Account) error {
 }
 
 func CaseRegID(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
 	id, err := account.GenerateID()
 	if err != nil {
 		t.Fatal(err)
@@ -165,6 +179,13 @@ func CaseRegID(t *testing.T, n *native.NativeService) {
 }
 
 func CaseOwner(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
 	// 1. register ID
 	id, err := account.GenerateID()
 	if err != nil {
@@ -320,6 +341,13 @@ func CaseOwner(t *testing.T, n *native.NativeService) {
 }
 
 func CaseOwnerSize(t *testing.T, n *native.NativeService) {
+	sink := common.NewZeroCopySink(nil)
+	sink.WriteVarBytes([]byte("dna"))
+	n.Input = sink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
 	id, _ := account.GenerateID()
 	a := account.NewAccount("")
 	err := regID(n, id, a)
@@ -327,7 +355,7 @@ func CaseOwnerSize(t *testing.T, n *native.NativeService) {
 		t.Fatal(err)
 	}
 
-	enc, err := encodeID([]byte(id))
+	enc, err := encodeID(common2.DIDContractAddress, []byte(id))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -337,4 +365,50 @@ func CaseOwnerSize(t *testing.T, n *native.NativeService) {
 	if err == nil {
 		t.Fatal("total size of the owner's key should be limited")
 	}
+}
+
+func CaseDoubleInit(t *testing.T, n *native.NativeService) {
+	initSink := common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("dna"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err != nil {
+		t.Errorf("failed to init did: %s", err)
+	}
+
+	initSink = common.NewZeroCopySink(nil)
+	initSink.WriteVarBytes([]byte("abc"))
+	n.Input = initSink.Bytes()
+	if _, err := didInit(n); err == nil {
+		t.Error("failed to double init did")
+	}
+}
+
+func GetPublicKeyByID(srvc *native.NativeService) ([]byte, error) {
+	args := common.NewZeroCopySource(srvc.Input)
+	// arg0: ID
+	arg0, err := utils.DecodeVarBytes(args)
+	if err != nil {
+		return nil, errors.New("get public key failed: argument 0 error")
+	}
+	// arg1: key ID
+	arg1, err := utils.DecodeUint32(args)
+	if err != nil {
+		return nil, errors.New("get public key failed: argument 1 error")
+	}
+
+	key, err := encodeID(common2.DIDContractAddress, arg0)
+	if err != nil {
+		return nil, fmt.Errorf("get public key failed: %s", err)
+	}
+
+	pk, err := getPk(srvc, key, arg1)
+	if err != nil {
+		return nil, fmt.Errorf("get public key failed: %s", err)
+	} else if pk == nil {
+		return nil, errors.New("get public key failed: not found")
+	} else if pk.revoked {
+		return nil, errors.New("get public key failed: revoked")
+	}
+
+	return pk.key, nil
 }

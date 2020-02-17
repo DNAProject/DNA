@@ -60,21 +60,22 @@ const (
 	FIELD_ATTR       byte = 2
 	FIELD_RECOVERY   byte = 3
 	FIELD_CONTROLLER byte = 4
+	FIELD_DID_METHOD byte = 5
 )
 
-func encodeID(id []byte) ([]byte, error) {
+func encodeID(contract common.Address, id []byte) ([]byte, error) {
 	length := len(id)
 	if length == 0 || length > 255 {
 		return nil, errors.New("encode ONT ID error: invalid ID length")
 	}
 	//enc := []byte{byte(length)}
-	enc := append(utils.DIDContractAddress[:], byte(length))
+	enc := append(contract[:], byte(length))
 	enc = append(enc, id...)
 	return enc, nil
 }
 
-func decodeID(data []byte) ([]byte, error) {
-	prefix := len(utils.DIDContractAddress)
+func decodeID(contract common.Address, data []byte) ([]byte, error) {
+	prefix := len(contract)
 	size := len(data)
 	if size < prefix || size != int(data[prefix])+1+prefix {
 		return nil, errors.New("decode ONT ID error: invalid data length")
