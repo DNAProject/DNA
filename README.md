@@ -4,7 +4,9 @@ English | [中文](README_CN.md)
 
 # DNA (Distributed Networks Architecture)
 
- DNA is a decentralized distributed network protocol based on blockchain technology and is implemented in Golang. Through peer-to-peer network, DNA can be used to digitize assets and provide financial service, including asset registration, issuance, transfer, etc.
+ DNA is a decentralized distributed network protocol based on blockchain technology and is implemented in Golang.
+ Through peer-to-peer network, DNA can be used to digitize assets and provide financial service, including asset
+ registration, issuance, transfer, etc.
 
 ## Highlight Features
 
@@ -13,10 +15,9 @@ English | [中文](README_CN.md)
  *	Quantum-Resistant Cryptography (optional module)
  *	China National Crypto Standard (optional module)
  *	High Optimization of TPS
- *	Distributed Storage and File Sharding Solutions Based on IPFS
  *	P2P Link Layer Encryption
  *	Node Access Control
- *	Multiple Consensus Algorithm Support (DBFT/RBFT/SBFT)
+ *	Multiple Consensus Algorithm Support (DBFT/VBFT)
  *	Configurable Block Generation Time
  *	Configurable Digital Currency Incentive
  *	Configable Sharding Consensus (in progress)
@@ -24,11 +25,10 @@ English | [中文](README_CN.md)
 
 # Building
 The requirements to build DNA are:
- *	Go version 1.8 or later
- *	Glide (a third-party package management tool)
+ *	Go version 1.12.5 or later
  *	Properly configured Go environment
  
-Clone the DNA repository into the appropriate $GOPATH/src directory.
+Clone the DNA repository into the appropriate `$GOPATH/src/DNAProject` directory.
 
 
 ```shell
@@ -36,13 +36,6 @@ $ git clone https://github.com/DNAProject/DNA.git
 
 ```
 
-Fetch the dependent third-party packages with glide.
-
-
-````shell
-$ cd DNA
-$ glide install
-````
 Build the source code with make.
 
 ```shell
@@ -51,8 +44,7 @@ $ make
 
 After building the source code, you should see two executable programs:
 
-* `node`: the node program
-* `nodectl`: command line tool for node control
+* `dnaNode`: the node program
 
 Follow the procedures in Deployment section to give them a shot!
 
@@ -62,185 +54,98 @@ Follow the procedures in Deployment section to give them a shot!
 To run DNA successfully, at least 4 nodes are required. The four nodes can be deployed in the following two way:
 
 * multi-hosts deployment
-* single-host deployment
+* testmode deployment
 
 ## Configurations for multi-hosts deployment
 
- We can do a quick multi-host deployment by modifying the default configuration file `config.json`. Change the IP address in `SeedList` section to the seed node's IP address, and then copy the changed file to the hosts that you will run on.
- On each host, put the executable program `dnaNode` and the configuration file `config.json` into the same directory. Like :
+ We can do a quick multi-host deployment by modifying the default configuration file `config.json`. Change the IP
+ address in `SeedList` section to the seed node's IP address, and then copy the changed file to the hosts that you
+ will run on.
+ On each host, put the executable program `dnaNode` and the configuration file `config.json` into the same directory.
+ Like :
  
 ```shell
 $ ls
 config.json dnaNode
 
 ```
- Each node also needs a `wallet.dat` to run. The quickest way to generate wallets is to run `./dnaNode account add -d` on each host.
- Then, change the `BookKeepers` field to the 4 nodes' wallet public keys, which you can get from the last command's echo. The public key sequence does not matter.
+ Each node also needs a `wallet.dat` to run. The quickest way to generate wallets is to run `./dnaNode account add -d`
+ on each host.Then, change the `peerPubkey` and `address` field to the 4 nodes' wallet public keys, which you can get
+ from the last command's echo. The public key sequence does not matter.
  Now all configurations are completed.
  
  Here's an snippet for configuration, note that `10.0.1.100` and `10.0.1.101` are public seed node's addresses:
- 
- 
+
 ```shell
 $ cat config.json
-    "SeedList": [
-      "10.0.1.100:10338",
-      "10.0.1.101:10338",
-      "10.0.1.102:10338"
-    ],
-    "BookKeepers": [
-      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
-      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
-      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
-      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
-    ],
-    "HttpInfoPort": 10333,
-    "HttpInfoStart": true,    
-    "HttpRestPort": 10334,
-    "HttpWsPort": 10335,
-    "HttpJsonPort": 10336,
-    "HttpLocalPort": 10337,
-    "NoticeServerUrl":"",
-    "OauthServerUrl":"",
-    "NodePort": 10338,
- 	...
+{
+  "SeedList": [
+    "10.0.1.100:20338",
+    "10.0.1.101:20338",
+    "10.0.1.102:20338",
+    "10.0.1.103:20338"
+  ],
+  "ConsensusType":"vbft",
+  "VBFT":{
+    "n":40,
+    "c":1,
+    "k":4,
+    "l":64,
+    "block_msg_delay":10000,
+    "hash_msg_delay":10000,
+    "peer_handshake_timeout":10,
+    "max_block_change_view":3000,
+    "admin_ont_id":"did:dna:AMAx993nE6NEqZjwBssUfopxnnvTdob9ij",
+    "min_init_stake":10000,
+    "vrf_value":"1c9810aa9822e511d5804a9c4db9dd08497c31087b0daafa34d768a3253441fa20515e2f30f81741102af0ca3cefc4818fef16adb825fbaa8cad78647f3afb590e",
+    "vrf_proof":"c57741f934042cb8d8b087b44b161db56fc3ffd4ffb675d36cd09f83935be853d8729f3f5298d12d6fd28d45dde515a4b9d7f67682d182ba5118abf451ff1988",
+    "peers":[
+      {
+        "index":1,
+        "peerPubkey":"0289ebcf708798cd4c2570385e1371ba10bdc91e4800fa5b98a9b276eab9300f10",
+        "address":"ANT97HNwurK2LE2LEiU72MsSD684nPyJMX",
+        "initPos":10000
+      },
+      {
+        "index":2,
+        "peerPubkey":"039dc5f67a4e1b3e4fc907ed430fd3958d8b6690f4f298b5e041697bd5be77f3e8",
+        "address":"AMLU5evr9EeW8G1WaZT1n1HDBxaq5GczeC",
+        "initPos":10000
+      },
+      {
+        "index":3,
+        "peerPubkey":"0369f4005b006166e988af436860b8a06c15f3eb272ccbabff175e067e6bba88d7",
+        "address":"AbSAwqHQmNMoUT8ps8N16HciYtgprbNozF",
+        "initPos":10000
+      },
+      {
+        "index":4,
+        "peerPubkey":"035998e70d829eea58998ec743113cf778f66932a063efc1a0a0496717c4a0d93d",
+        "address":"AemhQtcPTGegSk1UAsiLnePVcut1MLXSPg",
+        "initPos":10000
+      }
+    ]
+  }
+}
 ```
 
-## Configurations for single-host deployment
+## Configurations for testmode deployment
 
- Copy the executable file `dnaNode` and configuration file `config.json` to 4 different directories on the single host. Then change each `config.json` file as following.
- *	The SeedList section should be same in all `config.json`.
- *	For the seed node, the `NodePort` is the same with the port in `SeedList` part.
- *	For each non-seed node, the `NodePort` should have different ports.
- *	Also make sure that the `HttpJsonPort` and `HttpLocalPort` of each node do not conflict with those of the current host.
- After changing the configuration file, we also need to generate a wallet for each node and field the `BookKeepers` with the 4 nodes' wallet public keys. Please follow the steps in the multi-hosts deployment section above.
- Here's an example:
-
+If you like to run in test mode, there's no configuration needed.
+With the following command, you can start DNA in test mode.
 
 ```shell
-# directory structure #
-$ tree
-├── node1
-│   ├── config.json
-│   ├── dnaNode
-│   └── wallet.dat
-├── node2
-│   ├── config.json
-│   ├── dnaNode
-│   └── wallet.dat
-├── node3
-│   ├── config.json
-│   ├── dnaNode
-│   └── wallet.dat
-└── node4
-    ├── config.json
-    ├── dnaNode
-    └── wallet.dat
+$ ./dnaNode --testmode
+$ - input your wallet password
 ```
 
-```shell
-# configuration snippets #
-$ cat node[1234]/config.json
-    ...
-    "SeedList": [
-      "10.0.1.100:10338",
-      "10.0.1.100:20338",
-      "10.0.1.100:30338",
-      "10.0.1.100:40338"
-    ],
-    "BookKeepers": [
-      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
-      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
-      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
-      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
-    ],
-    "HttpInfoPort": 10333,
-    "HttpInfoStart": true,    
-    "HttpRestPort": 10334,
-    "HttpWsPort": 10335,
-    "HttpJsonPort": 10336,
-    "HttpLocalPort": 10337,
-    "NoticeServerUrl":"",
-    "OauthServerUrl":"",
-    "NodePort": 10338,
-    ...
-
-    "SeedList": [
-      "10.0.1.100:10338",
-      "10.0.1.100:20338",
-      "10.0.1.100:30338",
-      "10.0.1.100:40338"
-    ],
-    "BookKeepers": [
-      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
-      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
-      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
-      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
-    ],
-    "HttpInfoPort": 20333,
-    "HttpInfoStart": true,    
-    "HttpRestPort": 20334,
-    "HttpWsPort": 20335,
-    "HttpJsonPort": 20336,
-    "HttpLocalPort": 20337,
-    "NoticeServerUrl":"",
-    "OauthServerUrl":"",
-    "NodePort": 20338,
-    ...
-
-    "SeedList": [
-      "10.0.1.100:10338",
-      "10.0.1.100:20338",
-      "10.0.1.100:30338",
-      "10.0.1.100:40338"
-    ],
-    "BookKeepers": [
-      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
-      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
-      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
-      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
-    ],
-    "HttpInfoPort": 30333,
-    "HttpInfoStart": true,    
-    "HttpRestPort": 30334,
-    "HttpWsPort": 30335,
-    "HttpJsonPort": 30336,
-    "HttpLocalPort": 30337,
-    "NoticeServerUrl":"",
-    "OauthServerUrl":"",
-    "NodePort": 30338,
-    ...
-
-    "SeedList": [
-      "10.0.1.100:10338",
-      "10.0.1.100:20338",
-      "10.0.1.100:30338",
-      "10.0.1.100:40338"
-    ],
-    "BookKeepers": [
-      "0322cfdb6a20401c2e44ede40b5282b2925fcff21cdc3814d782fd26026f1d023d",
-      "02b639c019537839ba30b7c8c0396095da8838993492c07fe6ca11a5cf7b8fd2ca",
-      "032c842494feba4e3dec3b9b7d9ad080ce63c81a41f7d79d2bbb5d499d16322907",
-      "03d36828a99547184452276116f1b5171861931ff439a6da2316fddf1f3f428850"
-    ],
-    "HttpInfoPort": 40333,
-    "HttpInfoStart": true,    
-    "HttpRestPort": 40334,
-    "HttpWsPort": 40335,
-    "HttpJsonPort": 40336,
-    "HttpLocalPort": 40337,
-    "NoticeServerUrl":"",
-    "OauthServerUrl":"",
-    "NodePort": 40338,
-    ...
-```    
 ## Getting Started
 
 Start the seed node program first and then other nodes. Just run:
 
 ```shell
-$ ./node
-$ - input you wallet password
+$ ./dnaNode
+$ - input your wallet password
 ```
 
 Run `./dnaNode --help` for more details.
