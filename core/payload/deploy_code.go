@@ -269,9 +269,7 @@ type NativeDeployCode struct {
 
 func (ndc *NativeDeployCode) Serialization(sink *common.ZeroCopySink) {
 	sink.WriteAddress(ndc.BaseContractAddress)
-	if len(ndc.InitParam) > 0 {
-		sink.WriteVarBytes(ndc.InitParam)
-	}
+	sink.WriteVarBytes(ndc.InitParam)
 }
 
 func (ndc *NativeDeployCode) Deserialization(source *common.ZeroCopySource) error {
