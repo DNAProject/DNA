@@ -26,7 +26,7 @@ DNA是go语言实现的基于区块链技术的去中心化的分布式网络协
 * Go版本在1.12.5及以上
 * 正确的Go语言开发环境
 
-克隆DNA仓库到$GOPATH/src/DNAProject目录
+克隆DNA代码仓库到`$GOPATH/src/DNAProject`目录
 
 
 ```shell
@@ -140,7 +140,7 @@ $ cat config.json
 
 ```shell
 $ ./dnaNode --testmode
-$ - input your wallet password
+$ - 输入你的钱包口令
 ```
 
 ## 运行

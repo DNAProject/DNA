@@ -28,7 +28,7 @@ The requirements to build DNA are:
  *	Go version 1.12.5 or later
  *	Properly configured Go environment
  
-Clone the DNA repository into the appropriate $GOPATH/src/DNAProject directory.
+Clone the DNA repository into the appropriate `$GOPATH/src/DNAProject` directory.
 
 
 ```shell
