@@ -30,7 +30,6 @@ import (
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/core/payload"
 	httpcom "github.com/DNAProject/DNA/http/base/common"
-	"github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/urfave/cli"
 	"io/ioutil"
 	"strings"
@@ -312,7 +311,7 @@ func invokeContract(ctx *cli.Context) error {
 	PrintInfoMsg("Invoke:%x Params:%s", contractAddr[:], paramData)
 	if ctx.IsSet(utils.GetFlagName(utils.ContractPrepareInvokeFlag)) {
 
-		var preResult *states.PreExecResult
+		var preResult *httpcom.PreExecuteResult
 		if vmtype == payload.NEOVM_TYPE {
 			preResult, err = utils.PrepareInvokeNeoVMContract(contractAddr, params)
 
@@ -322,7 +321,7 @@ func invokeContract(ctx *cli.Context) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("PrepareInvokeNeoVMSmartContact error:%s", err)
+			return fmt.Errorf("PrepareInvokeNeoVMSmartContract error:%s", err)
 		}
 		if preResult.State == 0 {
 			return fmt.Errorf("contract invoke failed")
