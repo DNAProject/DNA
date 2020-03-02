@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	DEFAULT_EXPORT_FILE   = "./DNABlocks.dat"
+	DEFAULT_EXPORT_FILE   = "./Blocks.dat"
 	DEFAULT_ABI_PATH      = "./abi"
 	DEFAULT_EXPORT_HEIGHT = 0
 	DEFAULT_WALLET_PATH   = "./wallet_data"
