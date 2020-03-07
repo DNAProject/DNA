@@ -22,15 +22,15 @@
 package msgpack
 
 import (
-	"time"
-
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	ct "github.com/DNAProject/DNA/core/types"
 	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
 	mt "github.com/DNAProject/DNA/p2pserver/message/types"
 	p2pnet "github.com/DNAProject/DNA/p2pserver/net/protocol"
+	"time"
 )
 
 //Peer address package
@@ -142,6 +142,14 @@ func NewTxn(txn *ct.Transaction) mt.Message {
 	return &trn
 }
 
+func NewUpdateKadKeyId(n p2pnet.P2P) mt.Message {
+	log.Trace()
+	upk := &mt.UpdateKadId{
+		KadKeyId: n.GetKadKeyId(),
+	}
+	return upk
+}
+
 //version ack package
 func NewVerAck() mt.Message {
 	log.Trace()
@@ -207,4 +215,12 @@ func NewConsensusDataReq(hash common.Uint256) mt.Message {
 	dataReq.Hash = hash
 
 	return &dataReq
+}
+
+func NewFindNodeReq(id kbucket.KadId) mt.Message {
+	req := mt.FindNodeReq{
+		TargetID: id,
+	}
+
+	return &req
 }

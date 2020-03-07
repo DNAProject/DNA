@@ -23,22 +23,22 @@ package peer
 
 import (
 	"errors"
+	comm "github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
+	conn "github.com/DNAProject/DNA/p2pserver/link"
+	"github.com/DNAProject/DNA/p2pserver/message/types"
 	"net"
 	"runtime"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	comm "github.com/DNAProject/DNA/common"
-	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/p2pserver/common"
-	conn "github.com/DNAProject/DNA/p2pserver/link"
-	"github.com/DNAProject/DNA/p2pserver/message/types"
 )
 
 // PeerCom provides the basic information of a peer
 type PeerCom struct {
-	id           uint64
+	id           kbucket.KadId
 	version      uint32
 	services     uint64
 	relay        bool
@@ -48,13 +48,38 @@ type PeerCom struct {
 	softVersion  string
 }
 
+func NewPeerCom(id kbucket.KadId,
+	version uint32,
+	services uint64,
+	relay bool,
+	httpInfoPort uint16,
+	port uint16,
+	height uint64,
+	softVersion string) PeerCom {
+	return PeerCom{
+		id:           id,
+		version:      version,
+		services:     services,
+		relay:        relay,
+		httpInfoPort: httpInfoPort,
+		port:         port,
+		height:       height,
+		softVersion:  softVersion,
+	}
+}
+
 // SetID sets a peer's id
-func (this *PeerCom) SetID(id uint64) {
+func (this *PeerCom) SetID(id kbucket.KadId) {
 	this.id = id
 }
 
 // GetID returns a peer's id
 func (this *PeerCom) GetID() uint64 {
+	return this.id.ToUint64()
+}
+
+// GetID returns a peer's id
+func (this *PeerCom) GetKId() kbucket.KadId {
 	return this.id
 }
 
@@ -223,6 +248,14 @@ func (this *Peer) GetID() uint64 {
 	return this.base.GetID()
 }
 
+func (this *Peer) GetKId() kbucket.KadId {
+	return this.base.GetKId()
+}
+
+func (this *Peer) SetKId(id kbucket.KadId) {
+	this.base.SetID(id)
+}
+
 //GetRelay return peer`s relay state
 func (this *Peer) GetRelay() bool {
 	return this.base.GetRelay()
@@ -309,9 +342,9 @@ func (this *Peer) SetHttpInfoPort(port uint16) {
 //UpdateInfo update peer`s information
 func (this *Peer) UpdateInfo(t time.Time, version uint32, services uint64,
 	syncPort uint16, nonce uint64, relay uint8, height uint64, softVer string) {
-
 	this.Link.UpdateRXTime(t)
-	this.base.SetID(nonce)
+	id := kbucket.PseudoKadIdFromUint64(nonce)
+	this.base.SetID(id)
 	this.base.SetVersion(version)
 	this.base.SetServices(services)
 	this.base.SetPort(syncPort)
@@ -324,3 +357,12 @@ func (this *Peer) UpdateInfo(t time.Time, version uint32, services uint64,
 	}
 	this.SetHeight(uint64(height))
 }
+
+//func NewPeer(t time.Time, version uint32, services uint64,
+//	syncPort uint16, nonce uint64, relay uint8, height uint64, softVer string) *Peer {
+//		id := kbucket.PseudoKadIdFromUint64(nonce)
+//		peerCom := NewPeerCom(id, version,services, relay,true,syncPort,height,softVer)
+//		return &Peer{
+//
+//		}
+//}
