@@ -23,6 +23,7 @@ package peer
 
 import (
 	"errors"
+	"fmt"
 	comm "github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/p2pserver/common"
@@ -48,14 +49,8 @@ type PeerInfo struct {
 	SoftVersion  string
 }
 
-func NewPeerInfo(id kbucket.KadId,
-	version uint32,
-	services uint64,
-	relay bool,
-	httpInfoPort uint16,
-	port uint16,
-	height uint64,
-	softVersion string) *PeerInfo {
+func NewPeerInfo(id kbucket.KadId, version uint32, services uint64, relay bool, httpInfoPort uint16,
+	port uint16, height uint64, softVersion string) *PeerInfo {
 	return &PeerInfo{
 		Id:           id,
 		Version:      version,
@@ -97,6 +92,10 @@ func rmPeer(p *Peer) {
 
 func (self *Peer) SetInfo(info *PeerInfo) {
 	self.info = info
+}
+
+func (self *PeerInfo) String() string {
+	return fmt.Sprintf("id=%s, version=%s", self.Id.ToHexString(), self.SoftVersion)
 }
 
 //DumpInfo print all information of peer

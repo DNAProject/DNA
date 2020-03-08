@@ -24,7 +24,6 @@ package netserver
 import (
 	"errors"
 	"fmt"
-	"github.com/DNAProject/DNA/p2pserver/connect_controller"
 	"net"
 	"strings"
 	"sync"
@@ -33,6 +32,7 @@ import (
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/connect_controller"
 	"github.com/DNAProject/DNA/p2pserver/dht"
 	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
 	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
@@ -91,9 +91,8 @@ func (this *NetServer) init(conf *config.BlockchainConfig) error {
 		return errors.New("[p2p]invalid link port")
 	}
 
-	info := peer.NewPeerInfo(dtable.GetKadKeyId().Id, common.PROTOCOL_VERSION, uint64(service), true, httpInfo,
+	this.base = peer.NewPeerInfo(dtable.GetKadKeyId().Id, common.PROTOCOL_VERSION, uint64(service), true, httpInfo,
 		nodePort, 0, config.Version)
-	this.base = info
 
 	option, err := connect_controller.ConnCtrlOptionFromConfig(conf.P2PNode)
 	if err != nil {
@@ -247,7 +246,7 @@ func (this *NetServer) removeOldPeer(kid kbucket.KadId, remoteAddr string) {
 	if p != nil {
 		n, delOK := this.DelNbrNode(kid.ToUint64())
 		if delOK {
-			log.Infof("[createPeer]peer reconnect %d", kid.ToHexString(), remoteAddr)
+			log.Infof("[p2p] peer reconnect %s, addr: %s", kid.ToHexString(), remoteAddr)
 			// Close the connection and release the node source
 			n.Close()
 			if this.pid != nil {
@@ -286,7 +285,6 @@ func (this *NetServer) Connect(addr string) error {
 	remotePeer.AttachChan(netServer.NetChan)
 	netServer.AddPeerAddress(remoteAddr, remotePeer)
 	netServer.AddNbrNode(remotePeer)
-	log.Infof("remotePeer.GetId():%d,addr: %s, link id: %d", remotePeer.GetID(), remoteAddr, remotePeer.Link.GetID())
 	go remotePeer.Link.Rx()
 
 	if netServer.pid != nil {
@@ -409,8 +407,7 @@ func (this *NetServer) IsNbrPeerAddr(addr string) bool {
 	this.Np.RLock()
 	defer this.Np.RUnlock()
 	for _, p := range this.Np.List {
-		if p.GetState() == common.HAND || p.GetState() == common.HAND_SHAKE ||
-			p.GetState() == common.ESTABLISH {
+		if p.GetState() == common.ESTABLISH {
 			addrNew = p.Link.GetAddr()
 			if strings.Compare(addrNew, addr) == 0 {
 				return true
