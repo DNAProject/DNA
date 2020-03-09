@@ -22,12 +22,11 @@
 package kbucket
 
 import (
+	"github.com/scylladb/go-set/strset"
+	"github.com/stretchr/testify/require"
 	"math/rand"
 	"testing"
 	"time"
-
-	"github.com/DNAProject/DNA/p2pserver/common/set"
-	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -381,9 +380,9 @@ func TestTableFindMultipleBuckets(t *testing.T) {
 		// technically closer.
 
 		// Make sure all remaining peers are _somewhere_ in the "closer" set.
-		pset := set.NewStringSet()
+		pset := strset.New()
 		for _, p := range same {
-			pset.Insert(p.ToHexString())
+			pset.Add(p.ToHexString())
 		}
 		for _, p := range found {
 			if !pset.Has(p.ToHexString()) {
