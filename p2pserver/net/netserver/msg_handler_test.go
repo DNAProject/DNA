@@ -19,36 +19,34 @@
  * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package utils
+package netserver
 
 import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
 	"github.com/DNAProject/DNA/account"
+	"github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/ontio/ontology-crypto/keypair"
+	"net"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/consensus/vbft/config"
 	"github.com/DNAProject/DNA/core/genesis"
 	"github.com/DNAProject/DNA/core/ledger"
-	"github.com/DNAProject/DNA/core/payload"
-	ct "github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/events"
 	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
 	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
-	"github.com/DNAProject/DNA/p2pserver/net/netserver"
 	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/p2pserver/peer"
 	"github.com/DNAProject/DNA/p2pserver/protocols"
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/stretchr/testify/assert"
-	"net"
-	"os"
-	"testing"
-	"time"
 )
 
 var (
@@ -66,7 +64,7 @@ func (mock *MockP2P) Send(p *peer.Peer, msg types.Message) error {
 }
 
 func NewMockP2p() *MockP2P {
-	return &MockP2P{netserver.NewNetServer(), make([]types.Message, 0)}
+	return &MockP2P{NewNetServer(), make([]types.Message, 0)}
 }
 
 var testGenesisConfig = &config.GenesisConfig{
@@ -209,7 +207,7 @@ func TestAddrReqHandle_maskok(t *testing.T) {
 
 	// Simulate a remote peer to be added to the neighbor peers
 	testID := kbucket.PseudoKadIdFromUint64(123456)
-	info := peer.NewPeerInfo(testID, 1, 12345678, true, 0, 20336, 12345, "1.5.2")
+	info := peer.NewPeerInfo(testID, 1, 12345678, true, 0, 20336, 12345, "1.5.2", "1.2.3.4:5001")
 	remotePeer := peer.NewPeer()
 	remotePeer.SetInfo(info)
 	remotePeer.Link.SetAddr("1.2.3.4:5001")
@@ -218,7 +216,8 @@ func TestAddrReqHandle_maskok(t *testing.T) {
 	remotePeer.SetState(msgCommon.ESTABLISH)
 
 	testID2 := kbucket.PseudoKadIdFromUint64(1234567)
-	info2 := peer.NewPeerInfo(testID2, 1, 12345678, true, 0, 20336, 12345, "1.5.2")
+	info2 := peer.NewPeerInfo(testID2, 1, 12345678, true, 0,
+		20336, 12345, "1.5.2", "1.2.3.5:5002")
 	remotePeer2 := peer.NewPeer()
 	remotePeer2.SetInfo(info2)
 	remotePeer2.Link.SetAddr("1.2.3.5:5002")
@@ -479,44 +478,6 @@ func TestBlockHandle(t *testing.T) {
 	BlockHandle(ctx, buf.(*types.Block))
 
 	network.DelNbrNode(testID.ToUint64())
-}
-
-// TestTransactionHandle tests Function TransactionHandle handling a transaction message
-func TestTransactionHandle(t *testing.T) {
-	code := []byte("ont")
-	invokeCodePayload := &payload.InvokeCode{
-		Code: code,
-	}
-	tx := &ct.Transaction{
-		Version: 0,
-		TxType:  ct.InvokeNeo,
-		Payload: invokeCodePayload,
-	}
-
-	buf := msgpack.NewTxn(tx)
-
-	msg := &types.MsgPayload{
-		Id:      0,
-		Addr:    "127.0.0.1:50010",
-		Payload: buf,
-	}
-
-	ctx := newContext(t, msg, network)
-	TransactionHandle(ctx, buf.(*types.Trn))
-}
-
-// TestAddrHandle tests Function AddrHandle handling a neighbor address response message
-func TestAddrHandle(t *testing.T) {
-	nodeAddrs := []msgCommon.PeerAddr{}
-	buf := msgpack.NewAddrs(nodeAddrs)
-	msg := &types.MsgPayload{
-		Id:      0,
-		Addr:    "127.0.0.1:50010",
-		Payload: buf,
-	}
-
-	ctx := newContext(t, msg, network)
-	AddrHandle(ctx, buf.(*types.Addr))
 }
 
 // TestDataReqHandle tests Function DataReqHandle handling a data req(block/Transaction)

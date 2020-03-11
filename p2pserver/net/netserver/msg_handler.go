@@ -19,14 +19,11 @@
  * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package utils
+package netserver
 
 import (
 	"errors"
 	"fmt"
-	"net"
-	"strconv"
-
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -37,9 +34,10 @@ import (
 	"github.com/DNAProject/DNA/p2pserver/dht"
 	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	msgTypes "github.com/DNAProject/DNA/p2pserver/message/types"
-	"github.com/DNAProject/DNA/p2pserver/peer"
 	"github.com/DNAProject/DNA/p2pserver/protocols"
 	"github.com/hashicorp/golang-lru"
+	"net"
+	"strconv"
 )
 
 //respCache cache for some response data
@@ -51,10 +49,10 @@ var txCache, _ = lru.NewARC(msgCommon.MAX_TX_CACHE_SIZE)
 
 type MsgHandler struct{}
 
-func (self *MsgHandler) PeerConnected(p *peer.PeerInfo)    {}
-func (self *MsgHandler) PeerDisConnected(p *peer.PeerInfo) {}
+func (self *MsgHandler) HandleSystemMessage(ctx *protocols.Context, msg protocols.SystemMessage) {
+}
 
-func (self *MsgHandler) HandleMessage(ctx *protocols.Context, msg msgTypes.Message) {
+func (self *MsgHandler) HandlePeerMessage(ctx *protocols.Context, msg msgTypes.Message) {
 	log.Trace("[p2p]receive message", ctx.Sender().GetAddr(), ctx.Sender().GetID())
 	switch m := msg.(type) {
 	case *msgTypes.AddrReq:
