@@ -24,6 +24,7 @@ package rpc
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/DNAProject/DNA/common/log"
 	bactor "github.com/DNAProject/DNA/http/base/actor"
@@ -50,7 +51,7 @@ func GetNeighbor(params []interface{}) map[string]interface{} {
 
 func GetNodeState(params []interface{}) map[string]interface{} {
 	state := bactor.GetConnectionState()
-	t := bactor.GetNodeTime()
+	t := time.Now().UnixNano()
 	port := bactor.GetNodePort()
 	id := bactor.GetID()
 	ver := bactor.GetVersion()

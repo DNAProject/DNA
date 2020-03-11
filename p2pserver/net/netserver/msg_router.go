@@ -35,7 +35,7 @@ type MessageHandler func(data *types.MsgPayload, p2p p2p.P2P, pid *actor.PID)
 // MessageRouter mostly route different message type-based to the
 // related message handler
 type MessageRouter struct {
-	msgHander  protocols.Protocol
+	protocol   protocols.Protocol
 	RecvChan   chan *types.MsgPayload // The channel to handle sync msg
 	stopRecvCh chan bool              // To stop sync channel
 	p2p        p2p.P2P                // Refer to the p2p network
@@ -43,12 +43,12 @@ type MessageRouter struct {
 }
 
 // NewMsgRouter returns a message router object
-func NewMsgRouter(p2p p2p.P2P) *MessageRouter {
+func NewMsgRouter(p2p *NetServer) *MessageRouter {
 	router := &MessageRouter{}
-	router.RecvChan = p2p.GetMsgChan()
+	router.RecvChan = p2p.NetChan
 	router.stopRecvCh = make(chan bool)
 	router.p2p = p2p
-	router.msgHander = &MsgHandler{}
+	router.protocol = &MsgHandler{}
 	return router
 }
 
@@ -60,6 +60,10 @@ func (this *MessageRouter) SetPID(pid *actor.PID) {
 // Start starts the loop to handle the message from the network
 func (this *MessageRouter) Start() {
 	go this.hookChan(this.RecvChan, this.stopRecvCh)
+
+	ctx := protocols.NewContext(nil, this.p2p, this.pid, 0)
+	this.protocol.HandleSystemMessage(ctx, protocols.NetworkStart{})
+
 	log.Debug("[p2p]MessageRouter start to parse p2p message...")
 }
 
@@ -77,7 +81,7 @@ func (this *MessageRouter) hookChan(channel chan *types.MsgPayload,
 				}
 
 				ctx := protocols.NewContext(sender, this.p2p, this.pid, data.PayloadSize)
-				go this.msgHander.HandlePeerMessage(ctx, data.Payload)
+				go this.protocol.HandlePeerMessage(ctx, data.Payload)
 			}
 		case <-stopCh:
 			return
@@ -90,4 +94,6 @@ func (this *MessageRouter) Stop() {
 	if this.stopRecvCh != nil {
 		this.stopRecvCh <- true
 	}
+	ctx := protocols.NewContext(nil, this.p2p, this.pid, 0)
+	this.protocol.HandleSystemMessage(ctx, protocols.NetworkStop{})
 }

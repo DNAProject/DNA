@@ -23,9 +23,10 @@ package peer
 
 import (
 	"fmt"
-	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
 	"testing"
 	"time"
+
+	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
 )
 
 func createPeers(cnt uint16) []*Peer {

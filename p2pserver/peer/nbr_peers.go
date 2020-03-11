@@ -22,14 +22,13 @@
 package peer
 
 import (
-	"fmt"
+	comm "github.com/DNAProject/DNA/common"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/message/types"
 	"net"
 	"strconv"
 	"sync"
-
-	comm "github.com/DNAProject/DNA/common"
-	"github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/message/types"
 )
 
 //NbrPeers: The neigbor list
@@ -81,7 +80,7 @@ func (this *NbrPeers) AddNbrNode(p *Peer) {
 	defer this.Unlock()
 
 	if this.NodeExisted(p.GetID()) {
-		fmt.Printf("[p2p]insert an existed node\n")
+		log.Errorf("[p2p]insert an existed node\n")
 	} else {
 		this.List[p.GetID()] = p
 	}
