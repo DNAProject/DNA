@@ -22,12 +22,10 @@
 package server
 
 import (
-	"reflect"
-
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/p2pserver"
-	"github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/ontio/ontology-eventbus/actor"
+	"reflect"
 )
 
 type P2PActor struct {
@@ -65,14 +63,6 @@ func (this *P2PActor) Receive(ctx actor.Context) {
 		log.Warn("[p2p]actor restart")
 	case *TransmitConsensusMsgReq:
 		this.handleTransmitConsensusMsgReq(ctx, msg)
-	case *common.AppendPeerID:
-		this.server.OnAddNode(msg.ID)
-	case *common.RemovePeerID:
-		this.server.OnDelNode(msg.ID)
-	case *common.AppendHeaders:
-		this.server.OnHeaderReceive(msg.FromID, msg.Headers)
-	case *common.AppendBlock:
-		this.server.OnBlockReceive(msg.FromID, msg.BlockSize, msg.Block, msg.MerkleRoot)
 	default:
 		err := this.server.Xmit(ctx.Message())
 		if nil != err {

@@ -27,7 +27,6 @@ import (
 	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/p2pserver/peer"
-	"github.com/ontio/ontology-eventbus/actor"
 )
 
 //P2P represent the net interface of p2p package
@@ -35,13 +34,9 @@ type P2P interface {
 	Start()
 	Halt()
 	Connect(addr string) error
+	GetHostInfo() *peer.PeerInfo
 	GetID() uint64
 	GetKId() kbucket.KadId
-	GetVersion() uint32
-	GetPort() uint16
-	GetRelay() bool
-	GetHeight() uint64
-	GetServices() uint64
 	GetNeighbors() []*peer.Peer
 	GetNeighborAddrs() []common.PeerAddr
 	GetConnectionCnt() uint32
@@ -67,5 +62,4 @@ type P2P interface {
 	GetKadKeyId() *kbucket.KadKeyId
 
 	GetPeerStringAddr() map[uint64]string
-	SetPID(pid *actor.PID)
 }

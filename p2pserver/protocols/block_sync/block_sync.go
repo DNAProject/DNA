@@ -19,7 +19,7 @@
  * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package p2pserver
+package block_sync
 
 import (
 	"math"
@@ -32,7 +32,8 @@ import (
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/types"
 	p2pComm "github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	msgpack "github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	"github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/p2pserver/peer"
 )
 
@@ -228,7 +229,7 @@ type BlockSyncMgr struct {
 	flightBlocks   map[common.Uint256][]*SyncFlightInfo //Map BlockHash => []SyncFlightInfo, using for manager all of those block flights
 	flightHeaders  map[uint32]*SyncFlightInfo           //Map HeaderHeight => SyncFlightInfo, using for manager all of those header flights
 	blocksCache    *BlockCache                          //Map BlockHash => BlockInfo, using for cache the blocks receive from net, and waiting for commit to ledger
-	server         *P2PServer                           //Pointer to the local node
+	server         p2p.P2P                              //Pointer to the local node
 	syncBlockLock  bool                                 //Help to avoid send block sync request duplicate
 	syncHeaderLock bool                                 //Help to avoid send header sync request duplicate
 	saveBlockLock  bool                                 //Help to avoid saving block concurrently
@@ -239,13 +240,13 @@ type BlockSyncMgr struct {
 }
 
 //NewBlockSyncMgr return a BlockSyncMgr instance
-func NewBlockSyncMgr(server *P2PServer) *BlockSyncMgr {
+func NewBlockSyncMgr(server p2p.P2P, ld *ledger.Ledger) *BlockSyncMgr {
 	return &BlockSyncMgr{
 		flightBlocks:  make(map[common.Uint256][]*SyncFlightInfo, 0),
 		flightHeaders: make(map[uint32]*SyncFlightInfo, 0),
 		blocksCache:   NewBlockCache(),
 		server:        server,
-		ledger:        server.ledger,
+		ledger:        ld,
 		exitCh:        make(chan interface{}, 1),
 		nodeWeights:   make(map[uint64]*NodeWeight, 0),
 	}
@@ -422,9 +423,9 @@ func (this *BlockSyncMgr) sync() {
 }
 
 func (this *BlockSyncMgr) syncHeader() {
-	if !this.server.reachMinConnection() {
-		return
-	}
+	//if !this.server.reachMinConnection() {
+	//	return
+	//}
 	if this.tryGetSyncHeaderLock() {
 		return
 	}
@@ -615,7 +616,7 @@ func (this *BlockSyncMgr) OnBlockReceive(fromID uint64, blockSize uint32, block 
 	this.syncBlock()
 }
 
-//OnAddNode to node list when a new node added
+//OnAddPeer to node list when a new node added
 func (this *BlockSyncMgr) OnAddNode(nodeId uint64) {
 	log.Debugf("[p2p]OnAddNode:%d", nodeId)
 	this.lock.Lock()
@@ -873,7 +874,7 @@ func (this *BlockSyncMgr) getNextNode(nextBlockHeight uint32) *peer.Peer {
 			return nil
 		}
 		triedNode[nextNodeId] = true
-		n := this.server.getNode(nextNodeId)
+		n := this.server.GetPeer(nextNodeId)
 		if n == nil {
 			continue
 		}
@@ -973,7 +974,7 @@ func (this *BlockSyncMgr) pingOutsyncNodes(curHeight uint32) {
 	this.lock.RLock()
 	maxHeight := curHeight
 	for id := range this.nodeWeights {
-		peer := this.server.getNode(id)
+		peer := this.server.GetPeer(id)
 		if peer == nil {
 			continue
 		}
@@ -987,7 +988,7 @@ func (this *BlockSyncMgr) pingOutsyncNodes(curHeight uint32) {
 	}
 	this.lock.RUnlock()
 	if curHeight > maxHeight-SYNC_MAX_HEIGHT_OFFSET && len(peers) > 0 {
-		this.server.pingTo(peers)
+		pingTo(this.server, curHeight, peers)
 	}
 }
 
@@ -1003,4 +1004,11 @@ func getNextNodeId(nextNodeIndex int, nodeList []uint64) (int, uint64) {
 	index := nextNodeIndex
 	nextNodeIndex++
 	return nextNodeIndex, nodeList[index]
+}
+
+func pingTo(net p2p.P2P, height uint32, peers []*peer.Peer) {
+	ping := msgpack.NewPingMsg(uint64(height))
+	for _, p := range peers {
+		go net.Send(p, ping)
+	}
 }
