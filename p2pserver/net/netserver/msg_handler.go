@@ -24,6 +24,9 @@ package netserver
 import (
 	"errors"
 	"fmt"
+	"net"
+	"strconv"
+
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
@@ -32,12 +35,10 @@ import (
 	actor "github.com/DNAProject/DNA/p2pserver/actor/req"
 	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/p2pserver/dht"
-	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	msgpack "github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	msgTypes "github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/p2pserver/protocols"
-	"github.com/hashicorp/golang-lru"
-	"net"
-	"strconv"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 //respCache cache for some response data
@@ -50,6 +51,7 @@ var txCache, _ = lru.NewARC(msgCommon.MAX_TX_CACHE_SIZE)
 type MsgHandler struct{}
 
 func (self *MsgHandler) HandleSystemMessage(ctx *protocols.Context, msg protocols.SystemMessage) {
+
 }
 
 func (self *MsgHandler) HandlePeerMessage(ctx *protocols.Context, msg msgTypes.Message) {
@@ -165,10 +167,6 @@ func FindNodeResponseHandle(ctx *protocols.Context, fresp *msgTypes.FindNodeResp
 func FindNodeHandle(ctx *protocols.Context, freq *msgTypes.FindNodeReq) {
 	// we recv message must from establised peer
 	remotePeer := ctx.Sender()
-	if remotePeer == nil {
-		log.Debug("[p2p dht]remotePeer invalid in FindNodeHandle")
-		return
-	}
 
 	var fresp msgTypes.FindNodeResp
 	// check the target is my self

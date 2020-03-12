@@ -381,7 +381,7 @@ func (this *BlockSyncMgr) checkTimeout() {
 
 		headerHash := this.ledger.GetCurrentHeaderHash()
 		msg := msgpack.NewHeadersReq(headerHash)
-		err := this.server.Send(reqNode, msg, false)
+		err := this.server.Send(reqNode, msg)
 		if err != nil {
 			log.Warn("[p2p]checkTimeout failed to send a new headersReq:s", err)
 		} else {
@@ -405,7 +405,7 @@ func (this *BlockSyncMgr) checkTimeout() {
 			flightInfo.SetNodeId(reqNode.GetID())
 
 			msg := msgpack.NewBlkDataReq(blockHash)
-			err := this.server.Send(reqNode, msg, false)
+			err := this.server.Send(reqNode, msg)
 			if err != nil {
 				log.Warnf("[p2p]checkTimeout reqNode ID:%d Send error:%s", reqNode.GetID(), err)
 				continue
@@ -449,7 +449,7 @@ func (this *BlockSyncMgr) syncHeader() {
 
 	headerHash := this.ledger.GetCurrentHeaderHash()
 	msg := msgpack.NewHeadersReq(headerHash)
-	err := this.server.Send(reqNode, msg, false)
+	err := this.server.Send(reqNode, msg)
 	if err != nil {
 		log.Warn("[p2p]syncHeader failed to send a new headersReq")
 	} else {
@@ -517,7 +517,7 @@ func (this *BlockSyncMgr) syncBlock() {
 			}
 			this.addFlightBlock(reqNode.GetID(), nextBlockHeight, nextBlockHash)
 			msg := msgpack.NewBlkDataReq(nextBlockHash)
-			err := this.server.Send(reqNode, msg, false)
+			err := this.server.Send(reqNode, msg)
 			if err != nil {
 				log.Warnf("[p2p]syncBlock Height:%d ReqBlkData error:%s", nextBlockHeight, err)
 				return
@@ -738,7 +738,7 @@ func (this *BlockSyncMgr) saveBlock() {
 			}
 			this.addFlightBlock(reqNode.GetID(), nextBlockHeight, nextBlock.Hash())
 			msg := msgpack.NewBlkDataReq(nextBlock.Hash())
-			err := this.server.Send(reqNode, msg, false)
+			err := this.server.Send(reqNode, msg)
 			if err != nil {
 				log.Warn("[p2p]require new block error:", err)
 				return

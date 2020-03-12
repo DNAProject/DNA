@@ -41,7 +41,7 @@ import (
 	"github.com/DNAProject/DNA/events"
 	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
-	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	msgpack "github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
 	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/p2pserver/peer"

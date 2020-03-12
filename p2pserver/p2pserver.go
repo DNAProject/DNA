@@ -133,8 +133,7 @@ func (this *P2PServer) Xmit(message interface{}) error {
 }
 
 //Send tranfer buffer to peer
-func (this *P2PServer) Send(p *peer.Peer, msg msgtypes.Message,
-	isConsensus bool) error {
+func (this *P2PServer) Send(p *peer.Peer, msg msgtypes.Message) error {
 	if this.network.IsPeerEstablished(p) {
 		return this.network.Send(p, msg)
 	}
@@ -279,8 +278,8 @@ func (this *P2PServer) connectSeeds() {
 	if len(seedConnList) > 0 {
 		rand.Seed(time.Now().UnixNano())
 		// close NewAddrReq
-		// index := rand.Intn(len(seedConnList))
-		// this.reqNbrList(seedConnList[index])
+		index := rand.Intn(len(seedConnList))
+		this.reqNbrList(seedConnList[index])
 		if isSeed && len(seedDisconn) > 0 {
 			index := rand.Intn(len(seedDisconn))
 			go this.network.Connect(seedDisconn[index])
@@ -384,7 +383,6 @@ func (this *P2PServer) retryInactivePeer() {
 			log.Debug("[p2p]Back off time`s up, start connect node")
 			this.network.Connect(addr)
 		}
-
 	}
 }
 
@@ -426,8 +424,15 @@ func (this *P2PServer) keepOnlineService() {
 
 //reqNbrList ask the peer for its neighbor list
 func (this *P2PServer) reqNbrList(p *peer.Peer) {
-	msg := msgpack.NewAddrReq()
-	go this.Send(p, msg, false)
+	id := p.GetKId()
+	var msg msgtypes.Message
+	if id.IsPseudoKadId() {
+		msg = msgpack.NewAddrReq()
+	} else {
+		msg = msgpack.NewFindNodeReq(this.GetNetWork().GetKId())
+	}
+
+	go this.Send(p, msg)
 }
 
 //heartBeat send ping to nbr peers and check the timeout
@@ -460,7 +465,7 @@ func (this *P2PServer) pingTo(peers []*peer.Peer) {
 		if p.GetState() == common.ESTABLISH {
 			height := this.ledger.GetCurrentBlockHeight()
 			ping := msgpack.NewPingMsg(uint64(height))
-			go this.Send(p, ping, false)
+			go this.Send(p, ping)
 		}
 	}
 }
