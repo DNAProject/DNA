@@ -36,6 +36,7 @@ import (
 	cutils "github.com/DNAProject/DNA/core/utils"
 	ontErrors "github.com/DNAProject/DNA/errors"
 	bactor "github.com/DNAProject/DNA/http/base/actor"
+	common2 "github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/smartcontract/event"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
 	cstate "github.com/DNAProject/DNA/smartcontract/states"
@@ -144,9 +145,9 @@ type BlockInfo struct {
 }
 
 type NodeInfo struct {
-	NodeState   uint   // node status
-	NodePort    uint16 // The nodes's port
-	ID          uint64 // The nodes's id
+	NodeState   uint           // node status
+	NodePort    uint16         // The nodes's port
+	ID          common2.PeerId // The nodes's id
 	NodeTime    int64
 	NodeVersion uint32   // The network protocol the node used
 	NodeType    uint64   // The services the node supplied

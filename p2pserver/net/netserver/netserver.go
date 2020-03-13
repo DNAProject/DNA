@@ -34,10 +34,9 @@ import (
 	"github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/p2pserver/connect_controller"
 	"github.com/DNAProject/DNA/p2pserver/dht"
-	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
-	msgpack "github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
-	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
+	"github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/p2pserver/peer"
 	"github.com/DNAProject/DNA/p2pserver/protocols"
 )
@@ -115,14 +114,14 @@ func (this *NetServer) init(conf *config.P2PNodeConfig) error {
 		return errors.New("[p2p]invalid link port")
 	}
 
-	this.base = peer.NewPeerInfo(dtable.GetKadKeyId().Id, common.PROTOCOL_VERSION, common.SERVICE_NODE, true, httpInfo,
+	this.base = peer.NewPeerInfo(dtable.GetPeerKeyId().Id, common.PROTOCOL_VERSION, common.SERVICE_NODE, true, httpInfo,
 		nodePort, 0, config.Version, "")
 
 	option, err := connect_controller.ConnCtrlOptionFromConfig(conf)
 	if err != nil {
 		return err
 	}
-	this.connCtrl = connect_controller.NewConnectController(this.base, dtable.GetKadKeyId(), option)
+	this.connCtrl = connect_controller.NewConnectController(this.base, dtable.GetPeerKeyId(), option)
 
 	log.Infof("[p2p]init peer ID to %s", this.base.Id.ToHexString())
 
@@ -146,16 +145,12 @@ func (this *NetServer) GetHostInfo() *peer.PeerInfo {
 }
 
 //GetId return peer`s id
-func (this *NetServer) GetID() uint64 {
-	return this.base.Id.ToUint64()
-}
-
-func (this *NetServer) GetKId() kbucket.KadId {
+func (this *NetServer) GetID() common.PeerId {
 	return this.base.Id
 }
 
-func (this *NetServer) GetKadKeyId() *kbucket.KadKeyId {
-	return this.dht.GetKadKeyId()
+func (this *NetServer) GetPeerKeyId() *common.PeerKeyId {
+	return this.dht.GetPeerKeyId()
 }
 
 // SetHeight sets the local's height
@@ -169,7 +164,7 @@ func (this *NetServer) GetHeight() uint64 {
 }
 
 // GetPeer returns a peer with the peer id
-func (this *NetServer) GetPeer(id uint64) *peer.Peer {
+func (this *NetServer) GetPeer(id common.PeerId) *peer.Peer {
 	return this.Np.GetPeer(id)
 }
 
@@ -199,7 +194,7 @@ func (this *NetServer) AddNbrNode(remotePeer *peer.Peer) {
 }
 
 //DelNbrNode delete nbr peer by id
-func (this *NetServer) DelNbrNode(id uint64) (*peer.Peer, bool) {
+func (this *NetServer) DelNbrNode(id common.PeerId) (*peer.Peer, bool) {
 	return this.Np.DelNbrNode(id)
 }
 
@@ -209,7 +204,7 @@ func (this *NetServer) GetNeighbors() []*peer.Peer {
 }
 
 //NodeEstablished return whether a peer is establish with self according to id
-func (this *NetServer) NodeEstablished(id uint64) bool {
+func (this *NetServer) NodeEstablished(id common.PeerId) bool {
 	return this.Np.NodeEstablished(id)
 }
 
@@ -235,10 +230,10 @@ func (this *NetServer) IsPeerEstablished(p *peer.Peer) bool {
 	return this.Np.NodeEstablished(p.GetID())
 }
 
-func (this *NetServer) removeOldPeer(kid kbucket.KadId, remoteAddr string) {
-	p := this.GetPeer(kid.ToUint64())
+func (this *NetServer) removeOldPeer(kid common.PeerId, remoteAddr string) {
+	p := this.GetPeer(kid)
 	if p != nil {
-		n, delOK := this.DelNbrNode(kid.ToUint64())
+		n, delOK := this.DelNbrNode(kid)
 		if delOK {
 			log.Infof("[p2p] peer reconnect %s, addr: %s", kid.ToHexString(), remoteAddr)
 			// Close the connection and release the node source
@@ -262,7 +257,7 @@ func (this *NetServer) Connect(addr string) error {
 	}
 	remotePeer := createPeer(peerInfo, conn)
 
-	kid := remotePeer.GetKId()
+	kid := remotePeer.GetID()
 	remoteAddr := remotePeer.GetAddr()
 	// Obsolete node
 	this.removeOldPeer(kid, remoteAddr)
@@ -337,7 +332,7 @@ func (this *NetServer) handleClientConnection(conn net.Conn) error {
 	remotePeer := createPeer(peerInfo, conn)
 
 	// Obsolete node
-	kid := remotePeer.GetKId()
+	kid := remotePeer.GetID()
 	this.removeOldPeer(kid, conn.RemoteAddr().String())
 
 	this.dht.Update(kid)
@@ -440,21 +435,21 @@ func (this *NetServer) IsOwnAddress(addr string) bool {
 	return addr == this.connCtrl.OwnAddress()
 }
 
-func (ns *NetServer) UpdateDHT(id kbucket.KadId) bool {
+func (ns *NetServer) UpdateDHT(id common.PeerId) bool {
 	ns.dht.Update(id)
 	return true
 }
 
-func (ns *NetServer) RemoveDHT(id kbucket.KadId) bool {
+func (ns *NetServer) RemoveDHT(id common.PeerId) bool {
 	ns.dht.Remove(id)
 	return true
 }
 
-func (ns *NetServer) BetterPeers(id kbucket.KadId, count int) []kbucket.KadId {
+func (ns *NetServer) BetterPeers(id common.PeerId, count int) []common.PeerId {
 	return ns.dht.BetterPeers(id, count)
 }
 
-func (ns *NetServer) GetPeerStringAddr() map[uint64]string {
+func (ns *NetServer) GetPeerStringAddr() map[common.PeerId]string {
 	return ns.Np.GetPeerStringAddr()
 }
 
@@ -466,14 +461,14 @@ func (ns *NetServer) findSelf() {
 		select {
 		case <-tick.C:
 			log.Debug("[dht] start to find myself")
-			closer := ns.dht.BetterPeers(ns.dht.GetKadKeyId().Id, dht.AlphaValue)
+			closer := ns.dht.BetterPeers(ns.dht.GetPeerKeyId().Id, dht.AlphaValue)
 			for _, id := range closer {
 				log.Debugf("[dht] find closr peer %x", id)
 
-				if id.IsPseudoKadId() {
-					ns.Send(ns.GetPeer(id.ToUint64()), msgpack.NewAddrReq())
+				if id.IsPseudoPeerId() {
+					ns.Send(ns.GetPeer(id), msgpack.NewAddrReq())
 				} else {
-					ns.Send(ns.GetPeer(id.ToUint64()), msgpack.NewFindNodeReq(id))
+					ns.Send(ns.GetPeer(id), msgpack.NewFindNodeReq(id))
 				}
 			}
 		}
@@ -492,10 +487,10 @@ func (ns *NetServer) refreshCPL() {
 				closer := ns.dht.BetterPeers(randPeer, dht.AlphaValue)
 				for _, pid := range closer {
 					log.Debugf("[dht] find closr peer %d", pid)
-					if pid.IsPseudoKadId() {
-						ns.Send(ns.GetPeer(pid.ToUint64()), msgpack.NewAddrReq())
+					if pid.IsPseudoPeerId() {
+						ns.Send(ns.GetPeer(pid), msgpack.NewAddrReq())
 					} else {
-						ns.Send(ns.GetPeer(pid.ToUint64()), msgpack.NewFindNodeReq(randPeer))
+						ns.Send(ns.GetPeer(pid), msgpack.NewFindNodeReq(randPeer))
 					}
 				}
 			}
@@ -515,7 +510,7 @@ func createPeer(info *peer.PeerInfo, conn net.Conn) *peer.Peer {
 	remotePeer.Link.UpdateRXTime(time.Now())
 	remotePeer.Link.SetAddr(conn.RemoteAddr().String())
 	remotePeer.Link.SetConn(conn)
-	remotePeer.Link.SetID(info.Id.ToUint64())
+	remotePeer.Link.SetID(info.Id)
 
 	return remotePeer
 }

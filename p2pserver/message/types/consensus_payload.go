@@ -28,6 +28,7 @@ import (
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/signature"
 	"github.com/DNAProject/DNA/errors"
+	common2 "github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/ontio/ontology-crypto/keypair"
 )
 
@@ -40,7 +41,7 @@ type ConsensusPayload struct {
 	Data            []byte
 	Owner           keypair.PublicKey
 	Signature       []byte
-	PeerId          uint64
+	PeerId          common2.PeerId
 	hash            common.Uint256
 }
 

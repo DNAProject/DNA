@@ -22,18 +22,16 @@ package connect_controller
 
 import (
 	"fmt"
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/handshake"
+	"github.com/DNAProject/DNA/p2pserver/peer"
+	"github.com/scylladb/go-set/strset"
 	"net"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
-
-	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
-	"github.com/DNAProject/DNA/p2pserver/handshake"
-	"github.com/DNAProject/DNA/p2pserver/peer"
-	"github.com/scylladb/go-set/strset"
 )
 
 const INBOUND_INDEX = 0
@@ -48,19 +46,19 @@ type connectedPeer struct {
 type ConnectController struct {
 	ConnCtrlOption
 
-	selfId   *kbucket.KadKeyId
+	selfId   *common.PeerKeyId
 	peerInfo *peer.PeerInfo
 
 	mutex       sync.Mutex
 	inoutbounds [2]*strset.Set // in/outbounds address list
 	connecting  *strset.Set
-	peers       map[kbucket.KadId]*connectedPeer // all connected peers
+	peers       map[common.PeerId]*connectedPeer // all connected peers
 
 	ownAddr       string
 	nextConnectId uint64
 }
 
-func NewConnectController(peerInfo *peer.PeerInfo, keyid *kbucket.KadKeyId,
+func NewConnectController(peerInfo *peer.PeerInfo, keyid *common.PeerKeyId,
 	option ConnCtrlOption) *ConnectController {
 	control := &ConnectController{
 		ConnCtrlOption: option,
@@ -68,7 +66,7 @@ func NewConnectController(peerInfo *peer.PeerInfo, keyid *kbucket.KadKeyId,
 		peerInfo:       peerInfo,
 		inoutbounds:    [2]*strset.Set{strset.New(), strset.New()},
 		connecting:     strset.New(),
-		peers:          make(map[kbucket.KadId]*connectedPeer),
+		peers:          make(map[common.PeerId]*connectedPeer),
 	}
 
 	return control
@@ -295,7 +293,7 @@ func (self *ConnectController) isHandWithSelf(remotePeer *peer.PeerInfo, remoteA
 	return nil
 }
 
-func (self *ConnectController) getPeer(kid kbucket.KadId) *connectedPeer {
+func (self *ConnectController) getPeer(kid common.PeerId) *connectedPeer {
 	self.mutex.Lock()
 	defer self.mutex.Unlock()
 	p := self.peers[kid]

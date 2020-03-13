@@ -22,10 +22,11 @@
 package server
 
 import (
+	"github.com/DNAProject/DNA/p2pserver/common"
 	ptypes "github.com/DNAProject/DNA/p2pserver/message/types"
 )
 
 type TransmitConsensusMsgReq struct {
-	Target uint64
+	Target common.PeerId
 	Msg    ptypes.Message
 }

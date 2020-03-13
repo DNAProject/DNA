@@ -21,17 +21,16 @@
 package connect_controller
 
 import (
-	"net"
-
 	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"net"
 )
 
 // Conn is a net.Conn wrapper to do some clean up when Close.
 type Conn struct {
 	net.Conn
 	addr       string
-	kid        kbucket.KadId
+	kid        common.PeerId
 	boundIndex int
 	connectId  uint64
 	controller *ConnectController

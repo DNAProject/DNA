@@ -26,7 +26,6 @@ import (
 	"github.com/DNAProject/DNA/common/log"
 	ct "github.com/DNAProject/DNA/core/types"
 	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/dht/kbucket"
 	mt "github.com/DNAProject/DNA/p2pserver/message/types"
 )
 
@@ -169,7 +168,7 @@ func NewConsensusDataReq(hash common.Uint256) mt.Message {
 	return &dataReq
 }
 
-func NewFindNodeReq(id kbucket.KadId) mt.Message {
+func NewFindNodeReq(id msgCommon.PeerId) mt.Message {
 	req := mt.FindNodeReq{
 		TargetID: id,
 	}
