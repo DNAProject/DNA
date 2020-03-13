@@ -76,6 +76,10 @@ const (
 	SYNC_BLK_WAIT         = 2     //timespan for blk sync check
 )
 
+const (
+	RecentPeerElapseLimit = 60
+)
+
 // The peer state
 const (
 	INIT       = 0 //initial
