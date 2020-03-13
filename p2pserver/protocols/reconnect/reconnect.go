@@ -139,3 +139,9 @@ func (this *ReconnectService) retryInactivePeer() {
 		}
 	}
 }
+
+func (self *ReconnectService) ReconnectCount() int {
+	self.RLock()
+	defer self.RUnlock()
+	return len(self.RetryAddrs)
+}
