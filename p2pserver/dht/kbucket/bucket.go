@@ -23,8 +23,9 @@ package kbucket
 
 import (
 	"container/list"
-	"github.com/DNAProject/DNA/p2pserver/common"
 	"sync"
+
+	"github.com/DNAProject/DNA/p2pserver/common"
 )
 
 // Bucket holds a list of peers.

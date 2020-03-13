@@ -39,7 +39,7 @@ import (
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/types"
 	"github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/message/msg_pack"
+	msgpack "github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	msgtypes "github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/p2pserver/net/netserver"
 	p2pnet "github.com/DNAProject/DNA/p2pserver/net/protocol"

@@ -25,9 +25,10 @@ package kbucket
 import (
 	"errors"
 	"fmt"
-	"github.com/DNAProject/DNA/p2pserver/common"
 	"sync"
 	"time"
+
+	"github.com/DNAProject/DNA/p2pserver/common"
 )
 
 var ErrPeerRejectedHighLatency = errors.New("peer rejected; latency too high")

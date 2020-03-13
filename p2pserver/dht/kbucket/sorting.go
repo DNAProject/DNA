@@ -24,8 +24,9 @@ package kbucket
 import (
 	"bytes"
 	"container/list"
-	"github.com/DNAProject/DNA/p2pserver/common"
 	"sort"
+
+	"github.com/DNAProject/DNA/p2pserver/common"
 )
 
 // A helper struct to sort peers by their distance to the local node
