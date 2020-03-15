@@ -25,6 +25,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -62,6 +64,21 @@ func NewPeerInfo(id common.PeerId, version uint32, services uint64, relay bool, 
 		SoftVersion:  softVersion,
 		Addr:         addr,
 	}
+}
+
+// RemoteListen get remote service port
+func (pi *PeerInfo) RemoteListenAddress() string {
+	host, _, err := net.SplitHostPort(pi.Addr)
+	if err != nil {
+		return ""
+	}
+
+	sb := strings.Builder{}
+	sb.WriteString(host)
+	sb.WriteString(":")
+	sb.WriteString(strconv.Itoa(int(pi.Port)))
+
+	return sb.String()
 }
 
 //Peer represent the node in p2p
