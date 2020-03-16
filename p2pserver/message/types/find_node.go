@@ -22,14 +22,10 @@
 package types
 
 import (
-	"errors"
+	"io"
 
 	"github.com/DNAProject/DNA/common"
 	ncomm "github.com/DNAProject/DNA/p2pserver/common"
-)
-
-var (
-	errRead = errors.New("not enough bytes for uint64")
 )
 
 type FindNodeReq struct {
@@ -84,19 +80,19 @@ func (resp *FindNodeResp) Deserialization(source *common.ZeroCopySource) error {
 
 	succ, _, eof := source.NextBool()
 	if eof {
-		return errRead
+		return io.ErrUnexpectedEOF
 	}
 	resp.Success = succ
 
 	addr, _, _, eof := source.NextString()
 	if eof {
-		return errRead
+		return io.ErrUnexpectedEOF
 	}
 	resp.Address = addr
 
 	numCloser, eof := source.NextUint32()
 	if eof {
-		return errRead
+		return io.ErrUnexpectedEOF
 	}
 
 	for i := 0; i < int(numCloser); i++ {
@@ -109,7 +105,7 @@ func (resp *FindNodeResp) Deserialization(source *common.ZeroCopySource) error {
 		curpa.ID = id
 		addr, _, _, eof := source.NextString()
 		if eof {
-			return errRead
+			return io.ErrUnexpectedEOF
 		}
 		curpa.Address = addr
 
