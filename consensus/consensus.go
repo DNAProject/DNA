@@ -27,6 +27,7 @@ import (
 	"github.com/DNAProject/DNA/consensus/dbft"
 	"github.com/DNAProject/DNA/consensus/solo"
 	"github.com/DNAProject/DNA/consensus/vbft"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/ontio/ontology-eventbus/actor"
 )
 
@@ -42,7 +43,7 @@ const (
 	CONSENSUS_VBFT = "vbft"
 )
 
-func NewConsensusService(consensusType string, account *account.Account, txpool *actor.PID, ledger *actor.PID, p2p *actor.PID) (ConsensusService, error) {
+func NewConsensusService(consensusType string, account *account.Account, txpool *actor.PID, ledger *actor.PID, p2p p2p.P2P) (ConsensusService, error) {
 	if consensusType == "" {
 		consensusType = CONSENSUS_DBFT
 	}

@@ -57,7 +57,7 @@ func (self *ReconnectService) Start() {
 	go self.keepOnlineService()
 }
 
-func (self *ReconnectService) Close() {
+func (self *ReconnectService) Stop() {
 	close(self.quit)
 }
 

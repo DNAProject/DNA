@@ -914,7 +914,7 @@ func (this *BlockSyncMgr) getNodeWithMinFailedTimes(flightInfo *SyncFlightInfo, 
 }
 
 //Stop to sync
-func (this *BlockSyncMgr) Close() {
+func (this *BlockSyncMgr) Stop() {
 	close(this.exitCh)
 }
 

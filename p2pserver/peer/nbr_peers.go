@@ -26,8 +26,6 @@ import (
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
-	"net"
-	"strconv"
 	"sync"
 )
 
@@ -97,19 +95,6 @@ func (this *NbrPeers) DelNbrNode(id common.PeerId) (*Peer, bool) {
 	}
 	delete(this.List, id)
 	return n, true
-}
-
-//NodeEstablished whether peer established according to id
-func (this *NbrPeers) NodeEstablished(id common.PeerId) bool {
-	this.RLock()
-	defer this.RUnlock()
-
-	n, exist := this.List[id]
-	if !exist {
-		return false
-	}
-
-	return n.linkState == common.ESTABLISH
 }
 
 //GetNeighborAddrs return all establish peer address
@@ -189,23 +174,4 @@ func (this *NbrPeers) GetNbrNodeCnt() uint32 {
 		}
 	}
 	return count
-}
-
-// GetPeerStringAddr key: peerID value: "192.168.1.1:20338"
-func (nbp *NbrPeers) GetPeerStringAddr() map[common.PeerId]string {
-	nbp.RLock()
-	defer nbp.RUnlock()
-
-	ret := make(map[common.PeerId]string)
-	for _, tn := range nbp.List {
-		if tn.GetState() != common.ESTABLISH {
-			continue
-		}
-		ipAddr, _ := tn.GetAddr16()
-		ip := net.IP(ipAddr[:])
-		addrString := ip.To16().String() + ":" + strconv.Itoa(int(tn.GetPort()))
-		ret[tn.GetID()] = addrString
-	}
-
-	return ret
 }
