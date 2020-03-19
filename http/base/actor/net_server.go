@@ -23,7 +23,7 @@ package actor
 
 import (
 	"github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/net/protocol"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 )
 
 var netServer p2p.P2P
@@ -55,11 +55,6 @@ func GetNeighborAddrs() []common.PeerAddr {
 		return []common.PeerAddr{}
 	}
 	return netServer.GetNeighborAddrs()
-}
-
-//GetConnectionState from netSever actor
-func GetConnectionState() uint32 {
-	return common.INIT
 }
 
 //GetNodePort from netSever actor

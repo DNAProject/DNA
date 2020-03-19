@@ -23,11 +23,12 @@ package dht
 
 import (
 	"fmt"
-	"github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"testing"
 	"time"
+
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewDHT(t *testing.T) {

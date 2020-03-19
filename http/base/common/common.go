@@ -145,7 +145,6 @@ type BlockInfo struct {
 }
 
 type NodeInfo struct {
-	NodeState   uint           // node status
 	NodePort    uint16         // The nodes's port
 	ID          common2.PeerId // The nodes's id
 	NodeTime    int64

@@ -31,7 +31,7 @@ import (
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	"github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/net/protocol"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 )
 
 type PersistRecentPeerService struct {

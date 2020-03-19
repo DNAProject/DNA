@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright 2019 DNA Dev team
+//
 /*
  * Copyright (C) 2018 The ontology Authors
  * This file is part of The ontology library.
@@ -22,11 +25,11 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/ontio/ontology/p2pserver/common"
-	"github.com/ontio/ontology/p2pserver/connect_controller"
-	"github.com/ontio/ontology/p2pserver/net/netserver"
-	p2p "github.com/ontio/ontology/p2pserver/net/protocol"
-	"github.com/ontio/ontology/p2pserver/peer"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/connect_controller"
+	"github.com/DNAProject/DNA/p2pserver/net/netserver"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
+	"github.com/DNAProject/DNA/p2pserver/peer"
 )
 
 type Network interface {
@@ -48,5 +51,7 @@ func NewNode(keyId *common.PeerKeyId, localInfo *peer.PeerInfo, proto p2p.Protoc
 	localInfo.Addr = addr
 	iport, _ := strconv.Atoi(port)
 	localInfo.Port = uint16(iport)
-	return netserver.NewCustomNetServer(keyId, localInfo, proto, listener, dialer)
+	opt := connect_controller.NewConnCtrlOption().MaxInBoundPerIp(10).
+		MaxInBound(20).MaxOutBound(20).WithDialer(dialer)
+	return netserver.NewCustomNetServer(keyId, localInfo, proto, listener, opt)
 }

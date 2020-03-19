@@ -42,7 +42,7 @@ import (
 	"github.com/DNAProject/DNA/p2pserver/protocols/heatbeat"
 	"github.com/DNAProject/DNA/p2pserver/protocols/recent_peers"
 	"github.com/DNAProject/DNA/p2pserver/protocols/reconnect"
-	"github.com/hashicorp/golang-lru"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 //respCache cache for some response data
@@ -69,7 +69,7 @@ func NewMsgHandler(ld *ledger.Ledger) *MsgHandler {
 func (self *MsgHandler) start(net p2p.P2P) {
 	self.blockSync = block_sync.NewBlockSyncMgr(net, self.ledger)
 	self.reconnect = reconnect.NewReconectService(net)
-	self.discovery = discovery.NewDiscovery(net, config.DefConfig.P2PNode.ReservedCfg.MaskPeers)
+	self.discovery = discovery.NewDiscovery(net, config.DefConfig.P2PNode.ReservedCfg.MaskPeers, 0)
 	seeds := config.DefConfig.Genesis.SeedList
 	self.bootstrap = bootstrap.NewBootstrapService(net, seeds)
 	self.heatBeat = heatbeat.NewHeartBeat(net, self.ledger)
@@ -141,8 +141,6 @@ func (self *MsgHandler) HandlePeerMessage(ctx *p2p.Context, msg msgTypes.Message
 		DataReqHandle(ctx, m)
 	case *msgTypes.Inv:
 		InvHandle(ctx, m)
-	case *msgTypes.Disconnected:
-		DisconnectHandle(ctx)
 	case *msgTypes.NotFound:
 		log.Debug("[p2p]receive notFound message, hash is ", m.Hash)
 	default:
@@ -342,19 +340,6 @@ func InvHandle(ctx *p2p.Context, inv *msgTypes.Inv) {
 		log.Warn("[p2p]receive unknown inventory message")
 	}
 
-}
-
-// DisconnectHandle handles the disconnect events
-func DisconnectHandle(ctx *p2p.Context) {
-	remotePeer := ctx.Sender()
-	if remotePeer == nil {
-		log.Debug("[p2p]disconnect peer is nil")
-		return
-	}
-
-	if remotePeer.Link.GetAddr() == remotePeer.GetAddr() {
-		remotePeer.Close()
-	}
 }
 
 //get blk hdrs from starthash to stophash
