@@ -24,15 +24,15 @@ package vbft
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ontio/ontology-crypto/keypair"
 	"time"
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/consensus/vbft/config"
+	vconfig "github.com/DNAProject/DNA/consensus/vbft/config"
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/signature"
 	"github.com/DNAProject/DNA/core/types"
-	"github.com/ontio/ontology-crypto/keypair"
 )
 
 type ConsensusMsgPayload struct {

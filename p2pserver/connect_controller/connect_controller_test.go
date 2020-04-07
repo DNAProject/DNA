@@ -89,7 +89,7 @@ func NewNode(option ConnCtrlOption) *Node {
 	info := &peer.PeerInfo{
 		Id:          key.Id,
 		Port:        20338,
-		SoftVersion: "v1.9.0-beta",
+		SoftVersion: common.MIN_VERSION_FOR_DHT,
 	}
 
 	return &Node{

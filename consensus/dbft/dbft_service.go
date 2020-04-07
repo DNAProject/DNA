@@ -23,8 +23,6 @@ package dbft
 
 import (
 	"fmt"
-	msgpack "github.com/DNAProject/DNA/p2pserver/message/msg_pack"
-	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"reflect"
 	"time"
 
@@ -40,7 +38,9 @@ import (
 	"github.com/DNAProject/DNA/core/vote"
 	"github.com/DNAProject/DNA/events"
 	"github.com/DNAProject/DNA/events/message"
+	msgpack "github.com/DNAProject/DNA/p2pserver/message/msg_pack"
 	p2pmsg "github.com/DNAProject/DNA/p2pserver/message/types"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/validator/increment"
 	"github.com/ontio/ontology-eventbus/actor"
 )

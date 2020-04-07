@@ -24,7 +24,6 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"os"
 	"os/signal"
 	"runtime"
@@ -52,6 +51,7 @@ import (
 	"github.com/DNAProject/DNA/http/websocket"
 	"github.com/DNAProject/DNA/p2pserver"
 	netreqactor "github.com/DNAProject/DNA/p2pserver/actor/req"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/txnpool"
 	tc "github.com/DNAProject/DNA/txnpool/common"
 	"github.com/DNAProject/DNA/txnpool/proc"
