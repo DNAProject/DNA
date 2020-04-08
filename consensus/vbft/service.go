@@ -2520,10 +2520,8 @@ func (self *Server) restartSyncing() {
 	// send sync request to self.sync, go syncing-state immediately
 	// stop all bft timers
 
-	self.stateMgr.checkStartSyncing(self.GetCommittedBlockNo(), true)
-
-}
-
-func (self *Server) checkSyncing() {
-	self.stateMgr.checkStartSyncing(self.GetCommittedBlockNo(), false)
+	self.stateMgr.StateEventC <- &StateEvent{
+		Type:     ForceCheckSync,
+		blockNum: self.GetCommittedBlockNo(),
+	}
 }
