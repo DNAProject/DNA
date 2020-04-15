@@ -13,7 +13,7 @@ else
 	exit 1
 fi
 
-env GO111MODULE=on make dnaNode-${PLATFORM}
+env GO111MODULE=on make DNA-${PLATFORM}
 
 set +x
 echo "dnaNode-${PLATFORM}-amd64 |" $(md5sum dnaNode-${PLATFORM}-amd64|cut -d ' ' -f1)
