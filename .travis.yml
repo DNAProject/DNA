@@ -6,12 +6,13 @@ go_import_path: github.com/DNAProject/DNA
 
 os:
   - linux
+  - osx
 
 go:
   - 1.12.x
 
 script:
-  - env GO111MODULE=on make all-cross
+  - env GO111MODULE=on make DNA
   - env GO111MODULE=on go mod vendor
   - bash ./.travis.check-license.sh
   - bash ./.travis.gofmt.sh
