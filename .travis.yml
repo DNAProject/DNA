@@ -17,7 +17,7 @@ script:
   - bash ./.travis.check-license.sh
   - bash ./.travis.gofmt.sh
   - bash ./.travis.gotest.sh
-  - base ./.travis.deploy.sh
+  - bash ./.travis.deploy.sh
 
 deploy:
   provider: releases
