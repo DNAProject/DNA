@@ -16,3 +16,17 @@ script:
   - bash ./.travis.check-license.sh
   - bash ./.travis.gofmt.sh
   - bash ./.travis.gotest.sh
+  - base ./.travis.deploy.sh
+
+deploy:
+  provider: releases
+  token: "${GITHUB_TOKEN}"
+  file_glob: true
+  file:
+    - dnaNode*
+  skip_cleanup: true
+  overwrite: true
+  draft: true
+  on:
+    repo: DNAProject/DNA
+    tags: true
