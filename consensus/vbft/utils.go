@@ -270,6 +270,9 @@ func GetGovernanceView(memdb *overlaydb.MemDB) (*gov.GovernanceView, error) {
 
 func getChainConfig(memdb *overlaydb.MemDB, blkNum uint32) (*vconfig.ChainConfig, error) {
 	config, err := GetVbftConfigInfo(memdb)
+	if err == scommon.ErrNotFound {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get chainconfig from leveldb: %s", err)
 	}
