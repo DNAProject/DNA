@@ -2156,7 +2156,7 @@ func (self *Server) checkNeedUpdateChainConfig(blockNum uint32) bool {
 func (self *Server) checkUpdateChainConfig(blkNum uint32) bool {
 	force, err := isUpdate(self.blockPool.getExecWriteSet(blkNum-1), self.config.View)
 	if err != nil {
-		log.Errorf("checkUpdateChainConfig err:%s", err)
+		log.Infof("checkUpdateChainConfig err:%s", err)
 		return false
 	}
 	log.Debugf("checkUpdateChainConfig force: %v", force)
@@ -2206,6 +2206,11 @@ func (self *Server) makeProposal(blkNum uint32, forEmpty bool) error {
 		chainconfig, err := getChainConfig(self.blockPool.getExecWriteSet(blkNum-1), blkNum)
 		if err != nil {
 			return fmt.Errorf("getChainConfig failed:%s", err)
+		}
+		if chainconfig == nil {
+			log.Errorf("chain config not found in DB, reusing last config")
+			cfg2 := *self.config // copy current config
+			chainconfig = &cfg2
 		}
 		//add transaction invoke governance native commit_pos contract
 		if self.checkNeedUpdateChainConfig(blkNum) {
