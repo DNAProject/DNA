@@ -22,9 +22,7 @@
 package reconnect
 
 import (
-	"fmt"
 	"math/rand"
-	"strconv"
 	"sync"
 	"time"
 
@@ -35,11 +33,16 @@ import (
 	"github.com/DNAProject/DNA/p2pserver/peer"
 )
 
+type ReconnectPeerInfo struct {
+	count int // current retry count
+	id    common.PeerId
+}
+
 //ReconnectService contain addr need to reconnect
 type ReconnectService struct {
 	sync.RWMutex
 	MaxRetryCount uint
-	RetryAddrs    map[string]int
+	RetryAddrs    map[string]*ReconnectPeerInfo
 	net           p2p.P2P
 	quit          chan bool
 }
@@ -49,7 +52,7 @@ func NewReconectService(net p2p.P2P) *ReconnectService {
 		net:           net,
 		MaxRetryCount: common.MAX_RETRY_COUNT,
 		quit:          make(chan bool),
-		RetryAddrs:    make(map[string]int),
+		RetryAddrs:    make(map[string]*ReconnectPeerInfo),
 	}
 }
 
@@ -74,34 +77,17 @@ func (this *ReconnectService) keepOnlineService() {
 	}
 }
 
-func getPeerListenAddr(p *peer.PeerInfo) (string, error) {
-	addrIp, err := common.ParseIPAddr(p.Addr)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse addr: %s", p.Addr)
-	}
-	nodeAddr := addrIp + ":" + strconv.Itoa(int(p.Port))
-	return nodeAddr, nil
-}
-
 func (self *ReconnectService) OnAddPeer(p *peer.PeerInfo) {
-	nodeAddr, err := getPeerListenAddr(p)
-	if err != nil {
-		log.Errorf("failed to parse addr: %s", p.Addr)
-		return
-	}
+	listenAddr := p.RemoteListenAddress()
 	self.Lock()
-	delete(self.RetryAddrs, nodeAddr)
+	delete(self.RetryAddrs, listenAddr)
 	self.Unlock()
 }
 
 func (self *ReconnectService) OnDelPeer(p *peer.PeerInfo) {
-	nodeAddr, err := getPeerListenAddr(p)
-	if err != nil {
-		log.Errorf("failed to parse addr: %s", p.Addr)
-		return
-	}
+	nodeAddr := p.RemoteListenAddress()
 	self.Lock()
-	self.RetryAddrs[nodeAddr] = 0
+	self.RetryAddrs[nodeAddr] = &ReconnectPeerInfo{count: 0, id: p.Id}
 	self.Unlock()
 }
 
@@ -118,12 +104,12 @@ func (this *ReconnectService) retryInactivePeer() {
 	if len(this.RetryAddrs) > 0 {
 		this.Lock()
 
-		list := make(map[string]int)
+		list := make(map[string]*ReconnectPeerInfo)
 		addrs := make([]string, 0, len(this.RetryAddrs))
 		for addr, v := range this.RetryAddrs {
-			v += 1
-			addrs = append(addrs, addr)
-			if v < common.MAX_RETRY_COUNT {
+			v.count += 1
+			if v.count <= common.MAX_RETRY_COUNT && net.GetPeer(v.id) == nil {
+				addrs = append(addrs, addr)
 				list[addr] = v
 			}
 		}
