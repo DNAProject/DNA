@@ -30,6 +30,7 @@ import (
 type Conn struct {
 	net.Conn
 	addr       string
+	listenAddr string
 	kid        common.PeerId
 	boundIndex int
 	connectId  uint64
