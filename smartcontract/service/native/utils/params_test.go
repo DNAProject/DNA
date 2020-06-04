@@ -24,14 +24,13 @@ package utils
 import (
 	"testing"
 
-	"github.com/ontio/ontology/common"
+	"github.com/DNAProject/DNA/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestIsNativeContract(t *testing.T) {
-	address := []common.Address{OntContractAddress, OngContractAddress, OntIDContractAddress,
-		ParamContractAddress, AuthContractAddress, GovernanceContractAddress,
-		HeaderSyncContractAddress, CrossChainContractAddress, LockProxyContractAddress}
+	address := []common.Address{GasContractAddress, DIDContractAddress,
+		ParamContractAddress, AuthContractAddress, GovernanceContractAddress}
 	for _, addr := range address {
 		assert.True(t, IsNativeContract(addr))
 	}
