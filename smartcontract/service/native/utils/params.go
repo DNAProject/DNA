@@ -21,8 +21,6 @@
 package utils
 
 import (
-	"bytes"
-
 	"github.com/DNAProject/DNA/common"
 )
 
@@ -35,12 +33,15 @@ var (
 	ParamContractAddress, _      = common.AddressParseFromBytes([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04})
 	AuthContractAddress, _       = common.AddressParseFromBytes([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06})
 	GovernanceContractAddress, _ = common.AddressParseFromBytes([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07})
+	//WARN: when add Contract Here, please update IsNativeContract function bellow.
 )
 
 func IsNativeContract(addr common.Address) bool {
-	return bytes.Compare(addr[:], GasContractAddress[:]) == 0 ||
-		bytes.Compare(addr[:], DIDContractAddress[:]) == 0 ||
-		bytes.Compare(addr[:], ParamContractAddress[:]) == 0 ||
-		bytes.Compare(addr[:], AuthContractAddress[:]) == 0 ||
-		bytes.Compare(addr[:], GovernanceContractAddress[:]) == 0
+	switch addr {
+	case GasContractAddress, DIDContractAddress,
+		ParamContractAddress, AuthContractAddress, GovernanceContractAddress:
+		return true
+	default:
+		return false
+	}
 }
