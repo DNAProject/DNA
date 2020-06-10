@@ -32,6 +32,7 @@ import (
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/core/ledger"
 	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Info struct {
@@ -57,9 +58,9 @@ var node p2p.P2P
 
 var templates = template.Must(template.New("info").Parse(TEMPLATE_PAGE))
 
-func newNgbNodeInfo(ngbId string, ngbType string, ngbAddr string, httpInfoAddr string, httpInfoPort uint16, httpInfoStart bool, ngbVersion string) *NgbNodeInfo {
+func newNgbNodeInfo(ngbId string, ngbType string, ngbAddr string, httpInfoAddr string, httpInfoPort uint16, ngbVersion string) *NgbNodeInfo {
 	return &NgbNodeInfo{NgbId: ngbId, NgbType: ngbType, NgbAddr: ngbAddr, HttpInfoAddr: httpInfoAddr,
-		HttpInfoPort: httpInfoPort, HttpInfoStart: httpInfoStart, NgbVersion: ngbVersion}
+		HttpInfoPort: httpInfoPort, NgbVersion: ngbVersion}
 }
 
 func initPageInfo(blockHeight uint32, curNodeType string, ngbrCnt int, ngbrsInfo []NgbNodeInfo) (*Info, error) {
@@ -80,7 +81,6 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	var ngbAddr string
 	var ngbType string
 	var ngbInfoPort uint16
-	var ngbInfoState bool
 	var ngbHttpInfoAddr string
 	var ngbVersion string
 
@@ -92,12 +92,11 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		ngbType = SERVICENODE
 		ngbAddr = ngbrNoders[i].GetAddr()
 		ngbInfoPort = ngbrNoders[i].GetHttpInfoPort()
-		ngbInfoState = ngbrNoders[i].GetHttpInfoState()
 		ngbHttpInfoAddr = ngbAddr + ":" + strconv.Itoa(int(ngbInfoPort))
 		ngbId = fmt.Sprintf("0x%x", ngbrNoders[i].GetID())
 		ngbVersion = ngbrNoders[i].GetSoftVersion()
 
-		ngbrInfo := newNgbNodeInfo(ngbId, ngbType, ngbAddr, ngbHttpInfoAddr, ngbInfoPort, ngbInfoState, ngbVersion)
+		ngbrInfo := newNgbNodeInfo(ngbId, ngbType, ngbAddr, ngbHttpInfoAddr, ngbInfoPort, ngbVersion)
 		ngbrNodersInfo = append(ngbrNodersInfo, *ngbrInfo)
 	}
 	sort.Sort(NgbNodeInfoSlice(ngbrNodersInfo))
@@ -118,6 +117,15 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 func StartServer(n p2p.P2P) {
 	node = n
 	port := int(config.DefConfig.P2PNode.HttpInfoPort)
+
 	http.HandleFunc("/info", viewHandler)
+	// prom related
+	if err := initMetric(); err != nil {
+		panic("init prometheus metrics fail")
+	}
+
+	http.Handle("/metrics", promhttp.Handler())
+	go updateMetric(n)
+
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }

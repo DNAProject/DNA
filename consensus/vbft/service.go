@@ -33,7 +33,7 @@ import (
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"
 	actorTypes "github.com/DNAProject/DNA/consensus/actor"
-	"github.com/DNAProject/DNA/consensus/vbft/config"
+	vconfig "github.com/DNAProject/DNA/consensus/vbft/config"
 	"github.com/DNAProject/DNA/core/ledger"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/types"
@@ -41,6 +41,7 @@ import (
 	"github.com/DNAProject/DNA/events"
 	"github.com/DNAProject/DNA/events/message"
 	p2pmsg "github.com/DNAProject/DNA/p2pserver/message/types"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	gover "github.com/DNAProject/DNA/smartcontract/service/native/governance"
 	ninit "github.com/DNAProject/DNA/smartcontract/service/native/init"
 	nutils "github.com/DNAProject/DNA/smartcontract/service/native/utils"
@@ -93,7 +94,7 @@ type Server struct {
 	Index         uint32
 	account       *account.Account
 	poolActor     *actorTypes.TxPoolActor
-	p2p           *actorTypes.P2PActor
+	p2p           p2p.P2P
 	ledger        *ledger.Ledger
 	incrValidator *increment.IncrementValidator
 	pid           *actor.PID
@@ -132,12 +133,12 @@ type Server struct {
 	quitWg     sync.WaitGroup
 }
 
-func NewVbftServer(account *account.Account, txpool, p2p *actor.PID) (*Server, error) {
+func NewVbftServer(account *account.Account, txpool *actor.PID, p2p p2p.P2P) (*Server, error) {
 	server := &Server{
 		msgHistoryDuration: 64,
 		account:            account,
 		poolActor:          &actorTypes.TxPoolActor{Pool: txpool},
-		p2p:                &actorTypes.P2PActor{P2P: p2p},
+		p2p:                p2p,
 		ledger:             ledger.DefLedger,
 		incrValidator:      increment.NewIncrementValidator(20),
 	}
@@ -2113,10 +2114,7 @@ func (self *Server) msgSendLoop() {
 			}
 			if evt.ToPeer == math.MaxUint32 {
 				// broadcast
-				if err := self.broadcastToAll(payload); err != nil {
-					log.Errorf("server %d xmit msg (type %d): %s",
-						self.Index, evt.Msg.Type(), err)
-				}
+				self.broadcastToAll(payload)
 			} else {
 				if err := self.sendToPeer(evt.ToPeer, payload); err != nil {
 					log.Errorf("server %d xmit to peer %d failed: %s", self.Index, evt.ToPeer, err)
@@ -2156,7 +2154,7 @@ func (self *Server) checkNeedUpdateChainConfig(blockNum uint32) bool {
 func (self *Server) checkUpdateChainConfig(blkNum uint32) bool {
 	force, err := isUpdate(self.blockPool.getExecWriteSet(blkNum-1), self.config.View)
 	if err != nil {
-		log.Infof("checkUpdateChainConfig err:%s", err)
+		log.Errorf("checkUpdateChainConfig err:%s", err)
 		return false
 	}
 	log.Debugf("checkUpdateChainConfig force: %v", force)

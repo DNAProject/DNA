@@ -22,21 +22,25 @@
 package types
 
 import (
-	comm "github.com/DNAProject/DNA/common"
+	common2 "github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/p2pserver/common"
 )
 
-type Disconnected struct{}
+type UpdatePeerKeyId struct {
+	//TODO remove this legecy field when upgrade network layer protocal
+	KadKeyId *common.PeerKeyId
+}
 
 //Serialize message payload
-func (this Disconnected) Serialization(sink *comm.ZeroCopySink) {
+func (this *UpdatePeerKeyId) Serialization(sink *common2.ZeroCopySink) {
+	this.KadKeyId.Serialization(sink)
 }
 
-func (this Disconnected) CmdType() string {
-	return common.DISCONNECT_TYPE
+func (this *UpdatePeerKeyId) Deserialization(source *common2.ZeroCopySource) error {
+	this.KadKeyId = &common.PeerKeyId{}
+	return this.KadKeyId.Deserialization(source)
 }
 
-//Deserialize message payload
-func (this *Disconnected) Deserialization(source *comm.ZeroCopySource) error {
-	return nil
+func (this *UpdatePeerKeyId) CmdType() string {
+	return common.UPDATE_KADID_TYPE
 }

@@ -25,7 +25,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
-	types2 "github.com/DNAProject/DNA/vm/neovm/types"
 	"hash"
 	"math"
 	"os"
@@ -37,7 +36,7 @@ import (
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/consensus/vbft/config"
+	vconfig "github.com/DNAProject/DNA/consensus/vbft/config"
 	"github.com/DNAProject/DNA/core/payload"
 	"github.com/DNAProject/DNA/core/signature"
 	"github.com/DNAProject/DNA/core/states"
@@ -54,6 +53,7 @@ import (
 	"github.com/DNAProject/DNA/smartcontract/service/wasmvm"
 	sstate "github.com/DNAProject/DNA/smartcontract/states"
 	"github.com/DNAProject/DNA/smartcontract/storage"
+	types2 "github.com/DNAProject/DNA/vm/neovm/types"
 	"github.com/ontio/ontology-crypto/keypair"
 )
 

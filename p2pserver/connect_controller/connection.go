@@ -18,32 +18,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-package utils
+package connect_controller
 
 import (
-	"testing"
-
 	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/p2pserver/message/types"
-	"github.com/DNAProject/DNA/p2pserver/net/netserver"
-	"github.com/DNAProject/DNA/p2pserver/net/protocol"
-	"github.com/ontio/ontology-eventbus/actor"
-	"github.com/stretchr/testify/assert"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"net"
 )
 
-func testHandler(data *types.MsgPayload, p2p p2p.P2P, pid *actor.PID, args ...interface{}) {
-	log.Info("Test handler")
+// Conn is a net.Conn wrapper to do some clean up when Close.
+type Conn struct {
+	net.Conn
+	addr       string
+	listenAddr string
+	kid        common.PeerId
+	boundIndex int
+	connectId  uint64
+	controller *ConnectController
 }
 
-// TestMsgRouter tests a basic function of a message router
-func TestMsgRouter(t *testing.T) {
-	network := netserver.NewNetServer()
-	msgRouter := NewMsgRouter(network)
-	assert.NotNil(t, msgRouter)
+// Close overwrite net.Conn
+// warning: this method will try to lock the controller, be carefull to avoid deadlock
+func (self *Conn) Close() error {
+	log.Infof("closing connection: peer %s, address: %s", self.kid.ToHexString(), self.addr)
 
-	msgRouter.RegisterMsgHandler("test", testHandler)
-	msgRouter.UnRegisterMsgHandler("test")
-	msgRouter.Start()
-	msgRouter.Stop()
+	self.controller.removePeer(self)
+
+	return self.Conn.Close()
 }

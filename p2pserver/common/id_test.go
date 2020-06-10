@@ -19,35 +19,39 @@
  * along with The ontology.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package p2pserver
+package common
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 
-	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/stretchr/testify/assert"
 )
 
-func init() {
-	log.InitLog(log.InfoLog, log.Stdout)
-	fmt.Println("Start test the netserver...")
+func TestConvertPeerID(t *testing.T) {
+	start := time.Now().Unix()
+	fmt.Println("start:", start)
+	RandPeerKeyId()
 
+	end := time.Now().Unix()
+	fmt.Println("end:", end)
+	fmt.Println(end - start)
 }
-func TestNewP2PServer(t *testing.T) {
-	fmt.Println("Start test new p2pserver...")
 
-	p2p := NewServer()
+func TestKIdToUint64(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		data := rand.Uint64()
+		id := PseudoPeerIdFromUint64(data)
+		data2 := id.ToUint64()
+		assert.Equal(t, data, data2)
+	}
+}
 
-	if p2p.GetVersion() != common.PROTOCOL_VERSION {
-		t.Error("TestNewP2PServer p2p version error", p2p.GetVersion())
-	}
-
-	if p2p.GetVersion() != common.PROTOCOL_VERSION {
-		t.Error("TestNewP2PServer p2p version error")
-	}
-	sync := p2p.GetPort()
-	if sync != 20338 {
-		t.Error("TestNewP2PServer sync port error")
-	}
+func TestKadId_IsEmpty(t *testing.T) {
+	id := PeerId{}
+	assert.True(t, id.IsEmpty())
+	kid := RandPeerKeyId()
+	assert.False(t, kid.Id.IsEmpty())
 }

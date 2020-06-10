@@ -51,7 +51,7 @@ import (
 	"github.com/DNAProject/DNA/http/websocket"
 	"github.com/DNAProject/DNA/p2pserver"
 	netreqactor "github.com/DNAProject/DNA/p2pserver/actor/req"
-	p2pactor "github.com/DNAProject/DNA/p2pserver/actor/server"
+	p2p "github.com/DNAProject/DNA/p2pserver/net/protocol"
 	"github.com/DNAProject/DNA/txnpool"
 	tc "github.com/DNAProject/DNA/txnpool/common"
 	"github.com/DNAProject/DNA/txnpool/proc"
@@ -59,7 +59,6 @@ import (
 	"github.com/DNAProject/DNA/validator/stateless"
 	"github.com/ethereum/go-ethereum/common/fdlimit"
 	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology-eventbus/actor"
 	alog "github.com/ontio/ontology-eventbus/log"
 	"github.com/urfave/cli"
 )
@@ -171,12 +170,12 @@ func startDNA(ctx *cli.Context) {
 		log.Errorf("initTxPool error: %s", err)
 		return
 	}
-	p2pSvr, p2pPid, err := initP2PNode(ctx, txpool)
+	p2pSvr, p2p, err := initP2PNode(ctx, txpool)
 	if err != nil {
 		log.Errorf("initP2PNode error: %s", err)
 		return
 	}
-	_, err = initConsensus(ctx, p2pPid, txpool, acc)
+	_, err = initConsensus(ctx, p2p, txpool, acc)
 	if err != nil {
 		log.Errorf("initConsensus error: %s", err)
 		return
@@ -298,38 +297,35 @@ func initTxPool(ctx *cli.Context) (*proc.TXPoolServer, error) {
 	return txPoolServer, nil
 }
 
-func initP2PNode(ctx *cli.Context, txpoolSvr *proc.TXPoolServer) (*p2pserver.P2PServer, *actor.PID, error) {
+func initP2PNode(ctx *cli.Context, txpoolSvr *proc.TXPoolServer) (*p2pserver.P2PServer, p2p.P2P, error) {
 	if config.DefConfig.Genesis.ConsensusType == config.CONSENSUS_TYPE_SOLO {
 		return nil, nil, nil
 	}
-	p2p := p2pserver.NewServer()
-
-	p2pActor := p2pactor.NewP2PActor(p2p)
-	p2pPID, err := p2pActor.Start()
+	p2p, err := p2pserver.NewServer()
 	if err != nil {
-		return nil, nil, fmt.Errorf("p2pActor init error %s", err)
+		return nil, nil, err
 	}
-	p2p.SetPID(p2pPID)
+
 	err = p2p.Start()
 	if err != nil {
 		return nil, nil, fmt.Errorf("p2p service start error %s", err)
 	}
 	netreqactor.SetTxnPoolPid(txpoolSvr.GetPID(tc.TxActor))
-	txpoolSvr.RegisterActor(tc.NetActor, p2pPID)
-	hserver.SetNetServerPID(p2pPID)
+	txpoolSvr.Net = p2p.GetNetwork()
+	hserver.SetNetServer(p2p.GetNetwork())
 	p2p.WaitForPeersStart()
 	log.Infof("P2P init success")
-	return p2p, p2pPID, nil
+	return p2p, p2p.GetNetwork(), nil
 }
 
-func initConsensus(ctx *cli.Context, p2pPid *actor.PID, txpoolSvr *proc.TXPoolServer, acc *account.Account) (consensus.ConsensusService, error) {
+func initConsensus(ctx *cli.Context, net p2p.P2P, txpoolSvr *proc.TXPoolServer, acc *account.Account) (consensus.ConsensusService, error) {
 	if !config.DefConfig.Consensus.EnableConsensus {
 		return nil, nil
 	}
 	pool := txpoolSvr.GetPID(tc.TxPoolActor)
 
 	consensusType := strings.ToLower(config.DefConfig.Genesis.ConsensusType)
-	consensusService, err := consensus.NewConsensusService(consensusType, acc, pool, nil, p2pPid)
+	consensusService, err := consensus.NewConsensusService(consensusType, acc, pool, nil, net)
 	if err != nil {
 		return nil, fmt.Errorf("NewConsensusService %s error: %s", consensusType, err)
 	}
@@ -413,7 +409,7 @@ func initNodeInfo(ctx *cli.Context, p2pSvr *p2pserver.P2PServer) {
 	if config.DefConfig.P2PNode.HttpInfoPort == 0 {
 		return
 	}
-	go nodeinfo.StartServer(p2pSvr.GetNetWork())
+	go nodeinfo.StartServer(p2pSvr.GetNetwork())
 
 	log.Infof("Nodeinfo init success")
 }

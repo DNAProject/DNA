@@ -36,10 +36,9 @@ import (
 
 //Link used to establish
 type Link struct {
-	id        uint64
+	id        common.PeerId
 	addr      string                 // The address of the node
 	conn      net.Conn               // Connect socket with the peer node
-	port      uint16                 // The server port of the node
 	time      time.Time              // The latest time the node activity
 	recvChan  chan *types.MsgPayload //msgpayload channel
 	reqRecord map[string]int64       //Map RequestId to Timestamp, using for rejecting duplicate request in specific time
@@ -47,18 +46,18 @@ type Link struct {
 
 func NewLink() *Link {
 	link := &Link{
-		reqRecord: make(map[string]int64, 0),
+		reqRecord: make(map[string]int64),
 	}
 	return link
 }
 
 //SetID set peer id to link
-func (this *Link) SetID(id uint64) {
+func (this *Link) SetID(id common.PeerId) {
 	this.id = id
 }
 
 //GetID return if from peer
-func (this *Link) GetID() uint64 {
+func (this *Link) GetID() common.PeerId {
 	return this.id
 }
 
@@ -80,16 +79,6 @@ func (this *Link) GetAddr() string {
 //set address
 func (this *Link) SetAddr(addr string) {
 	this.addr = addr
-}
-
-//set port number
-func (this *Link) SetPort(p uint16) {
-	this.port = p
-}
-
-//get port number
-func (this *Link) GetPort() uint16 {
-	return this.port
 }
 
 //get connection
@@ -145,21 +134,7 @@ func (this *Link) Rx() {
 
 	}
 
-	this.disconnectNotify()
-}
-
-//disconnectNotify push disconnect msg to channel
-func (this *Link) disconnectNotify() {
-	log.Debugf("[p2p]call disconnectNotify for %s", this.GetAddr())
 	this.CloseConn()
-
-	msg, _ := types.MakeEmptyMessage(common.DISCONNECT_TYPE)
-	discMsg := &types.MsgPayload{
-		Id:      this.id,
-		Addr:    this.addr,
-		Payload: msg,
-	}
-	this.recvChan <- discMsg
 }
 
 //close connection
@@ -182,7 +157,6 @@ func (this *Link) SendRaw(rawPacket []byte) error {
 	if conn == nil {
 		return errors.New("[p2p]tx link invalid")
 	}
-
 	nByteCnt := len(rawPacket)
 	log.Tracef("[p2p]TX buf length: %d\n", nByteCnt)
 
@@ -190,11 +164,11 @@ func (this *Link) SendRaw(rawPacket []byte) error {
 	if nCount == 0 {
 		nCount = 1
 	}
-	conn.SetWriteDeadline(time.Now().Add(time.Duration(nCount*common.WRITE_DEADLINE) * time.Second))
+	_ = conn.SetWriteDeadline(time.Now().Add(time.Duration(nCount*common.WRITE_DEADLINE) * time.Second))
 	_, err := conn.Write(rawPacket)
 	if err != nil {
-		log.Infof("[p2p]error sending messge to %s :%s", this.GetAddr(), err.Error())
-		this.disconnectNotify()
+		log.Infof("[p2p] error sending messge to %s :%s", this.GetAddr(), err.Error())
+		this.CloseConn()
 		return err
 	}
 

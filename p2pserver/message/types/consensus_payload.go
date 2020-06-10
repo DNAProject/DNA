@@ -28,6 +28,7 @@ import (
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/core/signature"
 	"github.com/DNAProject/DNA/errors"
+	common2 "github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/ontio/ontology-crypto/keypair"
 )
 
@@ -40,7 +41,7 @@ type ConsensusPayload struct {
 	Data            []byte
 	Owner           keypair.PublicKey
 	Signature       []byte
-	PeerId          uint64
+	PeerId          common2.PeerId
 	hash            common.Uint256
 }
 
@@ -132,10 +133,25 @@ func (this *ConsensusPayload) SerializationUnsigned(sink *common.ZeroCopySink) {
 func (this *ConsensusPayload) DeserializationUnsigned(source *common.ZeroCopySource) error {
 	var irregular, eof bool
 	this.Version, eof = source.NextUint32()
+	if eof {
+		return io.ErrUnexpectedEOF
+	}
 	this.PrevHash, eof = source.NextHash()
+	if eof {
+		return io.ErrUnexpectedEOF
+	}
 	this.Height, eof = source.NextUint32()
+	if eof {
+		return io.ErrUnexpectedEOF
+	}
 	this.BookkeeperIndex, eof = source.NextUint16()
+	if eof {
+		return io.ErrUnexpectedEOF
+	}
 	this.Timestamp, eof = source.NextUint32()
+	if eof {
+		return io.ErrUnexpectedEOF
+	}
 	this.Data, _, irregular, eof = source.NextVarBytes()
 	if eof {
 		return io.ErrUnexpectedEOF

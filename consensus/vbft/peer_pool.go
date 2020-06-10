@@ -26,7 +26,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DNAProject/DNA/consensus/vbft/config"
+	vconfig "github.com/DNAProject/DNA/consensus/vbft/config"
+	"github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/ontio/ontology-crypto/keypair"
 )
 
@@ -46,7 +47,7 @@ type PeerPool struct {
 	server  *Server
 	configs map[uint32]*vconfig.PeerConfig // peer index to peer
 	IDMap   map[string]uint32
-	P2pMap  map[uint32]uint64 //value: p2p random id
+	P2pMap  map[uint32]common.PeerId //value: p2p random id
 
 	peers                  map[uint32]*Peer
 	peerConnectionWaitings map[uint32]chan struct{}
@@ -58,7 +59,7 @@ func NewPeerPool(maxSize int, server *Server) *PeerPool {
 		server:                 server,
 		configs:                make(map[uint32]*vconfig.PeerConfig),
 		IDMap:                  make(map[string]uint32),
-		P2pMap:                 make(map[uint32]uint64),
+		P2pMap:                 make(map[uint32]common.PeerId),
 		peers:                  make(map[uint32]*Peer),
 		peerConnectionWaitings: make(map[uint32]chan struct{}),
 	}
@@ -70,7 +71,7 @@ func (pool *PeerPool) clean() {
 
 	pool.configs = make(map[uint32]*vconfig.PeerConfig)
 	pool.IDMap = make(map[string]uint32)
-	pool.P2pMap = make(map[uint32]uint64)
+	pool.P2pMap = make(map[uint32]common.PeerId)
 	pool.peers = make(map[uint32]*Peer)
 }
 
@@ -277,14 +278,14 @@ func (pool *PeerPool) getPeer(idx uint32) *Peer {
 	return nil
 }
 
-func (pool *PeerPool) addP2pId(peerIdx uint32, p2pId uint64) {
+func (pool *PeerPool) addP2pId(peerIdx uint32, p2pId common.PeerId) {
 	pool.lock.Lock()
 	defer pool.lock.Unlock()
 
 	pool.P2pMap[peerIdx] = p2pId
 }
 
-func (pool *PeerPool) getP2pId(peerIdx uint32) (uint64, bool) {
+func (pool *PeerPool) getP2pId(peerIdx uint32) (common.PeerId, bool) {
 	pool.lock.RLock()
 	defer pool.lock.RUnlock()
 

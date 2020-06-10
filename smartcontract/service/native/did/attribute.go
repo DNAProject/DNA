@@ -23,10 +23,11 @@ package did
 import (
 	"errors"
 	"fmt"
+	"io"
+
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/smartcontract/service/native"
 	"github.com/DNAProject/DNA/smartcontract/service/native/utils"
-	"io"
 )
 
 const (

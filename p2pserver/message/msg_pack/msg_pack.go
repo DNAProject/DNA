@@ -22,15 +22,11 @@
 package msgpack
 
 import (
-	"time"
-
 	"github.com/DNAProject/DNA/common"
-	"github.com/DNAProject/DNA/common/config"
 	"github.com/DNAProject/DNA/common/log"
 	ct "github.com/DNAProject/DNA/core/types"
 	msgCommon "github.com/DNAProject/DNA/p2pserver/common"
 	mt "github.com/DNAProject/DNA/p2pserver/message/types"
-	p2pnet "github.com/DNAProject/DNA/p2pserver/net/protocol"
 )
 
 //Peer address package
@@ -142,43 +138,6 @@ func NewTxn(txn *ct.Transaction) mt.Message {
 	return &trn
 }
 
-//version ack package
-func NewVerAck() mt.Message {
-	log.Trace()
-	var verAck mt.VerACK
-
-	return &verAck
-}
-
-//Version package
-func NewVersion(n p2pnet.P2P, height uint32) mt.Message {
-	log.Trace()
-	var version mt.Version
-	version.P = mt.VersionPayload{
-		Version:      n.GetVersion(),
-		Services:     n.GetServices(),
-		SyncPort:     n.GetPort(),
-		Nonce:        n.GetID(),
-		IsConsensus:  false,
-		HttpInfoPort: n.GetHttpInfoPort(),
-		StartHeight:  uint64(height),
-		TimeStamp:    time.Now().UnixNano(),
-		SoftVersion:  config.Version,
-	}
-
-	if n.GetRelay() {
-		version.P.Relay = 1
-	} else {
-		version.P.Relay = 0
-	}
-	if config.DefConfig.P2PNode.HttpInfoPort > 0 {
-		version.P.Cap[msgCommon.HTTP_INFO_FLAG] = 0x01
-	} else {
-		version.P.Cap[msgCommon.HTTP_INFO_FLAG] = 0x00
-	}
-	return &version
-}
-
 //transaction request package
 func NewTxnDataReq(hash common.Uint256) mt.Message {
 	log.Trace()
@@ -207,4 +166,12 @@ func NewConsensusDataReq(hash common.Uint256) mt.Message {
 	dataReq.Hash = hash
 
 	return &dataReq
+}
+
+func NewFindNodeReq(id msgCommon.PeerId) mt.Message {
+	req := mt.FindNodeReq{
+		TargetID: id,
+	}
+
+	return &req
 }

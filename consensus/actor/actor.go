@@ -27,8 +27,6 @@ import (
 
 	"github.com/DNAProject/DNA/core/types"
 	ontErrors "github.com/DNAProject/DNA/errors"
-	netActor "github.com/DNAProject/DNA/p2pserver/actor/server"
-	ptypes "github.com/DNAProject/DNA/p2pserver/message/types"
 	txpool "github.com/DNAProject/DNA/txnpool/common"
 	"github.com/ontio/ontology-eventbus/actor"
 )
@@ -65,23 +63,4 @@ func (self *TxPoolActor) VerifyBlock(txs []*types.Transaction, height uint32) er
 	}
 
 	return nil
-}
-
-type P2PActor struct {
-	P2P *actor.PID
-}
-
-func (self *P2PActor) Broadcast(msg interface{}) {
-	self.P2P.Tell(msg)
-}
-
-func (self *P2PActor) Transmit(target uint64, msg ptypes.Message) {
-	self.P2P.Tell(&netActor.TransmitConsensusMsgReq{
-		Target: target,
-		Msg:    msg,
-	})
-}
-
-type LedgerActor struct {
-	Ledger *actor.PID
 }
