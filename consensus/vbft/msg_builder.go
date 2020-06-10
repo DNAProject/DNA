@@ -24,8 +24,9 @@ package vbft
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ontio/ontology-crypto/keypair"
 	"time"
+
+	"github.com/ontio/ontology-crypto/keypair"
 
 	"github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/common/log"

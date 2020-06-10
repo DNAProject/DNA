@@ -23,8 +23,9 @@ package auth
 
 import (
 	"bytes"
-	"github.com/DNAProject/DNA/common"
 	"testing"
+
+	"github.com/DNAProject/DNA/common"
 )
 
 func TestSerRoleFuncs(t *testing.T) {

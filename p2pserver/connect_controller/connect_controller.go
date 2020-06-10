@@ -22,16 +22,17 @@ package connect_controller
 
 import (
 	"fmt"
-	"github.com/DNAProject/DNA/common/log"
-	"github.com/DNAProject/DNA/p2pserver/common"
-	"github.com/DNAProject/DNA/p2pserver/handshake"
-	"github.com/DNAProject/DNA/p2pserver/peer"
-	"github.com/scylladb/go-set/strset"
 	"net"
 	"sort"
 	"strconv"
 	"sync"
 	"sync/atomic"
+
+	"github.com/DNAProject/DNA/common/log"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/handshake"
+	"github.com/DNAProject/DNA/p2pserver/peer"
+	"github.com/scylladb/go-set/strset"
 )
 
 const INBOUND_INDEX = 0

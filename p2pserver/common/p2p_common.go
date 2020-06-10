@@ -33,7 +33,7 @@ const (
 	SERVICE_NODE = 2 //peer only sync with consensus peer
 )
 
-const MIN_VERSION_FOR_DHT = "1.9.1-beta"
+const MIN_VERSION_FOR_DHT = "0.7.3-beta"
 
 //link and concurrent const
 const (

@@ -22,13 +22,14 @@ package handshake
 
 import (
 	"fmt"
+	"net"
+	"time"
+
 	common2 "github.com/DNAProject/DNA/common"
 	"github.com/DNAProject/DNA/p2pserver/common"
 	"github.com/DNAProject/DNA/p2pserver/message/types"
 	"github.com/DNAProject/DNA/p2pserver/peer"
 	"github.com/blang/semver"
-	"net"
-	"time"
 )
 
 var HANDSHAKE_DURATION = 10 * time.Second // handshake time can not exceed this duration, or will treat as attack.
