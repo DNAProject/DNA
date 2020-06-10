@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright 2019 DNA Dev team
+//
 /*
  * Copyright (C) 2018 The ontology Authors
  * This file is part of The ontology library.
@@ -22,8 +25,8 @@ import (
 	"errors"
 	"net"
 
-	"github.com/ontio/ontology/p2pserver/common"
-	"github.com/ontio/ontology/p2pserver/connect_controller"
+	"github.com/DNAProject/DNA/p2pserver/common"
+	"github.com/DNAProject/DNA/p2pserver/connect_controller"
 )
 
 type dialer struct {
